@@ -23,7 +23,7 @@ const path = require('path');
   }
   await page.route('https://fonts.googleapis.com/**', r => r.abort());
   await page.setContent(page_html);
-  await page.click('.modes .tab[data-mode="lesson"]');
+  await page.click('#home-py');  // the mode tabs are hidden on the home page
   const report = await page.evaluate(async () => {
     const { tl, TL_LESSONS, tlRetrace, tlActual, tlOpts, tlNext, tlCanAdvance, renderTL } = window.__test;
     const bad = [], done = [];
