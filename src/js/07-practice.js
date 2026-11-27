@@ -56,21 +56,145 @@ function prGo(i, fromScrub){
   if(fromScrub){ const keep = document.activeElement && document.activeElement.id==='pr-scrub'; renderDbg(); if(keep){ const s=$('#pr-scrub'); s && s.focus(); } }
   else { renderDbg(); }
 }
+/* ---------- practice sources: problems, lesson code, examples ---------- */
+const GFG = {
+  basics:'https://www.geeksforgeeks.org/python-basics-coding-practice-problems/',
+  strings:'https://www.geeksforgeeks.org/python/python-string-exercise/',
+  lists:'https://www.geeksforgeeks.org/python/python-list-exercise/',
+  dicts:'https://www.geeksforgeeks.org/python/python-dictionary-exercise/',
+  functions:'https://www.geeksforgeeks.org/python/python-functions-coding-practice-problems/',
+  data:'https://www.geeksforgeeks.org/python/python-data-structures-practice-problems-1/',
+  oop:'https://www.geeksforgeeks.org/python/python-oops-exercise-questions/',
+  all:'https://www.geeksforgeeks.org/python-exercises-practice-questions-and-solutions/'
+};
+const GFG_TOPIC = {'01':'basics','02':'basics','03':'strings','04':'basics','05':'lists','06':'basics','07':'dicts','08':'functions','09':'functions','10':'data','11':'data',
+  '12':'oop','13':'oop','14':'oop','15':'oop','16':'oop','21':'oop'};
+const gfgFor = n => GFG[GFG_TOPIC[n] || 'all'];
+const PROB_BY_ID = {}; Object.entries(PROBLEMS).forEach(([n, ps])=> ps.forEach(p=>{ PROB_BY_ID[p.id] = Object.assign({topic:n}, p); }));
+const solvedKey = id => 'cs.solved.py.' + id;
+const isSolved = id => store.get(solvedKey(id)) === '1';
+const draftKey = id => 'cs.draft.py.' + id;
+function problemCount(n){ return (PROBLEMS[n] || []).length; }
+function solvedCount(n){ return (PROBLEMS[n] || []).filter(p=>isSolved(p.id)).length; }
+const libOpen = new Set();
+
+function curSel(){ return pr.sel[lang]; }
+function curProblem(){ const s = curSel(); return s && s.kind==='problem' ? PROB_BY_ID[s.id] : null; }
+
+function renderLib(){
+  const java = lang==='java';
+  ['problems','lessons'].forEach(k=> $('#lib-'+k).setAttribute('aria-selected', pr.lib===k));
+  const C = CURRICULUM[lang], sel = curSel() || {};
+  let h = '';
+  if(pr.lib==='problems'){
+    if(java){ h = `<p class="lib-empty">Java problems arrive with the Java runner. Switch to Python to practice now.</p>`; $('#lib-sum').textContent = ''; }
+    else {
+      const total = Object.values(PROBLEMS).reduce((c,ps)=>c+ps.length,0), done = Object.values(PROBLEMS).flat().filter(p=>isSolved(p.id)).length;
+      $('#lib-sum').innerHTML = `<b>${done}</b> of ${total} solved`;
+      if(sel.kind==='problem') libOpen.add(PROB_BY_ID[sel.id].topic);
+      if(!libOpen.size && C[0]) libOpen.add(C[0].n);
+      C.forEach(t=>{
+        const ps = PROBLEMS[t.n] || []; if(!ps.length) return;
+        const open = libOpen.has(t.n), sc = solvedCount(t.n);
+        h += `<div class="lib-topic"><button class="lib-tbtn" data-ltopic="${t.n}" aria-expanded="${open}"><span class="tnum">${t.n}</span><span>${esc(t.t)}</span><span class="lib-cnt${sc===ps.length?' full':''}">${sc}/${ps.length}</span></button><ul${open?'':' hidden'}>` +
+          ps.map(p=>`<li><button class="lib-item${sel.kind==='problem' && sel.id===p.id?' active':''}" data-prob="${p.id}"><span class="lvl lvl-${p.level.toLowerCase()}">${p.level}</span><span class="lib-t">${esc(p.title)}</span>${isSolved(p.id)?'<span class="tick" aria-label="solved">✓</span>':''}</button></li>`).join('') +
+          `<li><a class="gfg" href="${gfgFor(t.n)}" target="_blank" rel="noopener">More on GeeksforGeeks ↗</a></li></ul></div>`;
+      });
+    }
+  } else {
+    $('#lib-sum').textContent = 'Open any lesson\'s code and change it.';
+    h += `<div class="lib-topic"><div class="lib-sub">Quick examples</div><ul>` + EXAMPLES[lang].map(e=>`<li><button class="lib-item${sel.kind==='example' && sel.id===e.id?' active':''}" data-ex="${e.id}"><span class="lib-t">${esc(e.t)}</span></button></li>`).join('') + `</ul></div>`;
+    C.forEach(t=>{
+      const ids = (BUILT[lang][t.n] || []).filter(id=>id!=='alias' && TL_LESSONS[id]); if(!ids.length) return;
+      const open = libOpen.has('L'+t.n);
+      h += `<div class="lib-topic"><button class="lib-tbtn" data-ltopic="L${t.n}" aria-expanded="${open}"><span class="tnum">${t.n}</span><span>${esc(t.t)}</span><span class="lib-cnt">${ids.length}</span></button><ul${open?'':' hidden'}>` +
+        ids.map(id=>`<li><button class="lib-item${sel.kind==='lesson' && sel.id===id?' active':''}" data-les="${id}"><span class="lib-t">${esc(TL_LESSONS[id].title)}</span></button></li>`).join('') + `</ul></div>`;
+    });
+  }
+  $('#lib-list').innerHTML = h;
+  $('#lib-list').querySelectorAll('[data-ltopic]').forEach(b=> b.onclick = ()=>{ const k = b.dataset.ltopic; libOpen.has(k) ? libOpen.delete(k) : libOpen.add(k); renderLib(); });
+  $('#lib-list').querySelectorAll('[data-prob]').forEach(b=> b.onclick = ()=>{ openProblem(b.dataset.prob); closeLibIfNarrow(); });
+  $('#lib-list').querySelectorAll('[data-les]').forEach(b=> b.onclick = ()=>{ prOpenCode(TL_LESSONS[b.dataset.les].code, 'Lesson: ' + TL_LESSONS[b.dataset.les].title, {kind:'lesson', id:b.dataset.les}, true); closeLibIfNarrow(); });
+  $('#lib-list').querySelectorAll('[data-ex]').forEach(b=> b.onclick = ()=>{ const e = EXAMPLES[lang].find(x=>x.id===b.dataset.ex); $('#pr-input').value = e.inp || ''; prOpenCode(e.c, e.t, {kind:'example', id:e.id}, true); closeLibIfNarrow(); });
+}
+function setLibOpen(open){ document.querySelector('.practice').classList.toggle('lib-open', open); $('#lib-toggle').setAttribute('aria-expanded', open); }
+function closeLibIfNarrow(){ if(innerWidth <= 1180) setLibOpen(false); }
+$('#lib-toggle').onclick = ()=> setLibOpen(!document.querySelector('.practice').classList.contains('lib-open'));
+$('#lib-scrim').onclick = ()=> setLibOpen(false);
+document.querySelectorAll('[data-lib]').forEach(b=> b.onclick = ()=>{ pr.lib = b.dataset.lib; renderLib(); });
+
+/* Open any code in the editor (from a lesson, an example, or the blank button). */
+function prOpenCode(code, title, sel, stay){
+  pr.sel[lang] = sel || {kind:'lesson', id:null, title};
+  if(sel) pr.sel[lang].title = title;
+  pr.code[lang] = code;
+  if(sel && sel.kind==='lesson') pr.lib = 'lessons';
+  if(stay && mode==='practice') renderPractice(); else setMode('practice');
+}
+function openProblem(id){
+  const p = PROB_BY_ID[id]; if(!p) return;
+  if(lang!=='py') setLang('py');
+  pr.sel.py = {kind:'problem', id, title:p.title};
+  pr.code.py = store.get(draftKey(id)) || p.starter;
+  pr.lib = 'problems'; pr.results = null; pr.watching = false;
+  libOpen.add(p.topic);
+  if(mode==='practice') renderPractice(); else setMode('practice');
+}
+function openTopicProblems(n){ const ps = PROBLEMS[n] || []; if(!ps.length) return; const p = ps.find(x=>!isSolved(x.id)) || ps[0]; openProblem(p.id); }
+
+function renderProblemCard(){
+  const p = curProblem(), box = $('#pr-prob');
+  if(!p){ box.hidden = true; box.innerHTML = ''; return; }
+  const t = CURRICULUM.py.find(x=>x.n===p.topic);
+  const ex = p.tests.filter(x=>!x.setup).slice(0,2);
+  box.hidden = false;
+  box.innerHTML = `<div class="prob-meta"><span class="lvl lvl-${p.level.toLowerCase()}">${p.level}</span><span>${esc(p.topic+' '+(t?t.t:''))}</span>${isSolved(p.id)?'<span class="solved-pill">✓ Solved</span>':''}</div>
+    <p class="prob-story">${esc(p.story)}</p>
+    ${ex.length ? `<div class="prob-ex">${ex.map(x=>`<code>${esc(x.call)}</code><span>→</span><code>${esc(x.expect)}</code>`).join('')}</div>` : ''}
+    <details class="prob-hint"><summary>Show a hint</summary><p>${esc(p.hint)}</p></details>`;
+}
+
 function setEditing(on){
   pr.editing = on;
   $('#pr-edit').hidden = !on; $('#pr-view').hidden = on;
   $('#pr-edit-btn').hidden = on; $('#pr-debug').hidden = !on; $('#pr-run').hidden = !on;
-  if(on){ pr.trace = null; $('#pr-canvas').innerHTML = `<div class="pv-empty">Press <b>Step through</b> to run your program one line at a time. Each name appears on the left, each object on the right, and an arrow shows which object a name refers to.</div>`; $('#pr-dbg').innerHTML = `<div class="meta"><span>Editing</span></div><h2 class="step-title">What is happening</h2><p style="margin:0;color:var(--muted)">Press <b>Step through</b>. This panel will explain every line as it runs: which names changed, which objects were created or changed, and which way each condition went.</p>`; }
+  const prob = !!curProblem();
+  $('#pr-test').hidden = !on || !prob; $('#pr-reset').hidden = !on || !prob; $('#pr-sol').hidden = !on || !prob;
+  $('#pr-solbar').hidden = !pr.watching || on;
+  if(on){ pr.watching = false; pr.trace = null; $('#pr-solbar').hidden = true; $('#pr-canvas').innerHTML = `<div class="pv-empty">Press <b>Step through</b> to watch your program run one line at a time. Each name appears on the left, each object on the right, and an arrow shows which object a name refers to.</div>`; renderSideIdle(); }
 }
-async function prStart(runAll){
+function renderSideIdle(){
+  const p = curProblem(), box = $('#pr-dbg');
+  if(p){
+    const R = pr.results;
+    let h = `<div class="meta"><span>${R ? (R.pass===R.total ? 'All tests pass' : R.pass+' of '+R.total+' tests pass') : 'Not run yet'}</span></div><h2 class="step-title">Tests</h2>`;
+    h += `<ul class="tests">` + p.tests.map((t,i)=>{
+      const r = R && R.items[i];
+      const st = !r ? 'idle' : r.ok ? 'ok' : 'bad';
+      return `<li class="t-${st}"><span class="t-ico">${st==='ok'?'✓':st==='bad'?'✗':'○'}</span><div>${t.setup ? `<pre class="t-setup">${esc(t.setup.trim())}</pre>` : ''}<code>${esc(t.call)}</code> should give <code>${esc(t.expect)}</code>${r && !r.ok ? `<div class="t-got">${r.error ? esc(r.error) : 'got <code>'+esc(r.got)+'</code>'}</div>` : ''}</div></li>`;
+    }).join('') + `</ul>`;
+    if(R && R.pass===R.total) h += `<div class="win-box"><b>Solved!</b> Press <b>Step through</b> to watch your code run on the example, or pick the next problem.</div><button class="btn primary" id="pr-next">Next problem →</button>`;
+    else h += `<p class="dbg-tip">Write your code, then press <b>Run tests</b>. <b>Step through</b> runs your code on the example below it, one line at a time.</p><pre class="t-setup">${esc(p.demo.trim())}</pre>`;
+    box.innerHTML = h;
+    const nx = $('#pr-next'); if(nx) nx.onclick = ()=>{ const all = Object.values(PROBLEMS).flat(); const i = all.findIndex(x=>x.id===p.id); const nxt = all.slice(i+1).find(x=>!isSolved(x.id)) || all[(i+1)%all.length]; openProblem(nxt.id); };
+  } else {
+    box.innerHTML = `<div class="meta"><span>Editing</span></div><h2 class="step-title">What is happening</h2><p style="margin:0;color:var(--muted)">Press <b>Step through</b>. This panel will explain every line as it runs: which names changed, which objects were created or changed, and which way each condition went.</p>`;
+  }
+}
+function codeToRun(){
+  const p = curProblem(), code = $('#pr-code').value;
+  return p ? code.replace(/\s*$/,'\n') + '\n# example\n' + p.demo : code;
+}
+async function prStart(runAll, src){
   if(pr.busy) return;
   if(lang==='java'){ return; }
   pr.busy = true; $('#pr-status').textContent = window.Sk ? 'Running…' : 'Loading the Python runner…';
-  const code = $('#pr-code').value; pr.code[lang] = code;
   const inputs = $('#pr-input').value.split(',').map(s=>s.trim()).filter(s=>s.length);
   try{
-    pr.trace = await tracePy(code, inputs);
-    setEditing(false); pr.trace = pr.trace || null;
+    const watching = !!src;
+    const t = await tracePy(src || codeToRun(), inputs);
+    setEditing(false); pr.trace = t; pr.watching = watching;
+    $('#pr-solbar').hidden = !watching;
     $('#pr-status').textContent = '';
     prGo(runAll ? pr.trace.steps.length-1 : 0);
     if(!runAll){ const s = $('#pr-step'); s && s.focus(); }
@@ -79,38 +203,58 @@ async function prStart(runAll){
   }
   pr.busy = false;
 }
-function gutter(){ const n = $('#pr-code').value.split('\n').length; $('#pr-gutter').textContent = Array.from({length:n},(_,i)=>i+1).join('\n'); }
-function renderExamples(){
-  const ex = EXAMPLES[lang];
-  $('#pr-examples').innerHTML = ex.map(e=>`<button class="chip" data-ex="${e.id}" aria-pressed="${pr.ex[lang]===e.id}">${esc(e.t)}</button>`).join('');
-  $('#pr-examples').querySelectorAll('.chip').forEach(b=> b.onclick = ()=>{
-    const e = ex.find(x=>x.id===b.dataset.ex); pr.ex[lang] = e.id;
-    $('#pr-code').value = e.c; pr.code[lang] = e.c; $('#pr-input').value = e.inp || '';
-    setEditing(true); gutter(); renderExamples(); $('#pr-out').textContent='';
-  });
+async function prRunTests(){
+  const p = curProblem(); if(!p || pr.busy) return;
+  pr.busy = true; const btn = $('#pr-test'); btn.disabled = true;
+  $('#pr-status').textContent = window.Sk ? 'Running tests…' : 'Loading the Python runner…';
+  const code = $('#pr-code').value.replace(/\s*$/,'\n');
+  const items = [];
+  try{
+    for(const t of p.tests){
+      const r = await runPy(code + '\n' + (t.setup || '') + '\nprint("@@R" + repr(' + t.call + '))\n');
+      const m = (r.out || '').match(/@@R(.*)\n?$/);
+      if(r.error) items.push({ok:false, error:r.errorType + ': ' + r.error.replace(/^\w+:\s*/,'')});
+      else if(!m) items.push({ok:false, error:'No result came back.'});
+      else items.push({ok: m[1]===t.expect, got: m[1]});
+    }
+  }catch(e){ $('#pr-status').textContent = e.message || String(e); }
+  const pass = items.filter(x=>x.ok).length;
+  pr.results = {items, pass, total:p.tests.length};
+  const wasSolved = isSolved(p.id);
+  if(pass===p.tests.length && items.length===p.tests.length){ store.set(solvedKey(p.id), '1'); if(!wasSolved){ toast('Solved: ' + p.title); if(typeof Auth!=='undefined' && Auth.save) Auth.save(); } }
+  $('#pr-status').textContent = '';
+  btn.disabled = false; pr.busy = false;
+  renderProblemCard(); renderSideIdle(); renderLib();
 }
+function gutter(){ const n = $('#pr-code').value.split('\n').length; $('#pr-gutter').textContent = Array.from({length:n},(_,i)=>i+1).join('\n'); }
 function renderPractice(){
-  $('#pr-title').textContent = L[lang].name + ' practice';
-  renderExamples();
-  const ex = EXAMPLES[lang].find(x=>x.id===pr.ex[lang]) || EXAMPLES[lang][0];
-  $('#pr-code').value = pr.code[lang] != null ? pr.code[lang] : ex.c;
-  if(pr.code[lang]==null && ex.inp) $('#pr-input').value = ex.inp;
-  gutter(); setEditing(true); $('#pr-out').textContent='';
   const java = lang==='java';
+  if(!pr.sel[lang]){ if(!java && Object.keys(PROBLEMS).length){ const first = Object.values(PROBLEMS)[0][0]; pr.sel.py = {kind:'problem', id:first.id, title:first.title}; pr.code.py = store.get(draftKey(first.id)) || first.starter; } else { const e = EXAMPLES[lang][0]; pr.sel[lang] = {kind:'example', id:e.id, title:e.t}; pr.code[lang] = e.c; } }
+  if(java && pr.lib==='problems') pr.lib = 'lessons';
+  const sel = pr.sel[lang];
+  $('#pr-title').textContent = sel.title || (L[lang].name + ' practice');
+  $('#pr-code').value = pr.code[lang] != null ? pr.code[lang] : '';
+  renderProblemCard(); renderLib();
+  gutter(); setEditing(true); $('#pr-out').textContent='';
   $('#pr-debug').disabled = java; $('#pr-run').disabled = java;
   const note = document.getElementById('pr-javanote');
   if(java && !note){ const d = document.createElement('div'); d.className='java-note'; d.id='pr-javanote'; d.innerHTML = '<b>Java runner coming next.</b> You can read and edit Java here now. Running it and stepping through it line by line needs the Java runner, which is being set up.'; $('#pr-edit').before(d); }
   if(!java && note) note.remove();
 }
-$('#pr-code').addEventListener('input', ()=>{ gutter(); pr.code[lang] = $('#pr-code').value; });
+$('#pr-code').addEventListener('input', ()=>{ gutter(); pr.code[lang] = $('#pr-code').value; const p = curProblem(); if(p){ store.set(draftKey(p.id), $('#pr-code').value); } });
 $('#pr-code').addEventListener('scroll', ()=>{ $('#pr-gutter').scrollTop = $('#pr-code').scrollTop; });
 $('#pr-code').addEventListener('keydown', e=>{
-  if(e.key==='Tab'){ e.preventDefault(); const t=e.target, s=t.selectionStart; t.setRangeText('    ', s, t.selectionEnd, 'end'); gutter(); }
-  if(e.key==='Enter' && (e.ctrlKey||e.metaKey)){ e.preventDefault(); prStart(false); }
+  if(e.key==='Tab'){ e.preventDefault(); const t=e.target, s=t.selectionStart; t.setRangeText('    ', s, t.selectionEnd, 'end'); gutter(); pr.code[lang] = t.value; }
+  if(e.key==='Enter' && (e.ctrlKey||e.metaKey)){ e.preventDefault(); curProblem() ? prRunTests() : prStart(false); }
 });
 $('#pr-debug').onclick = ()=>prStart(false);
 $('#pr-run').onclick = ()=>prStart(true);
+$('#pr-test').onclick = prRunTests;
 $('#pr-edit-btn').onclick = ()=>{ setEditing(true); $('#pr-code').focus(); };
+$('#pr-solback').onclick = ()=>{ setEditing(true); $('#pr-code').focus(); };
+$('#pr-sol').onclick = ()=>{ const p = curProblem(); if(p) prStart(false, p.solution.replace(/\s*$/,'\n') + '\n# example\n' + p.demo); };
+$('#pr-reset').onclick = ()=>{ const p = curProblem(); if(!p) return; pr.code.py = p.starter; store.set(draftKey(p.id), p.starter); pr.results = null; renderPractice(); };
+$('#pr-blank').onclick = ()=>{ prOpenCode('', 'Blank editor', {kind:'blank', id:null}, true); closeLibIfNarrow(); $('#pr-code').focus(); };
 
 function setMode(m){
   mode = m;

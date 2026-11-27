@@ -28,7 +28,7 @@ CONTENT = ROOT / "content"
 OUT = ROOT / "index.html"
 
 # The lesson data is generated and placed just before this file, which is the first one that uses it.
-DATA_BEFORE = "08-trace-lessons.js"
+DATA_BEFORE = "07-practice.js"
 LISTS_TOPIC = "05"  # its lessons are exposed as LISTS_ORDER (it also holds the hand-built "alias" lesson)
 
 
@@ -73,7 +73,17 @@ def data_js() -> str:
         f"const LISTS_ORDER = {js_value(topics.get(LISTS_TOPIC, []))};\n"
         f"const PY_TOPIC_LESSONS = {js_value(others)};\n"
         f"const CURRICULUM = {js_value(curriculum)};\n"
+        f"const PROBLEMS = {js_value(load_problems())};\n"
     )
+
+
+def load_problems() -> dict:
+    """Practice problems by topic number, from content/problems/NN.toml."""
+    out: dict[str, list[dict]] = {}
+    for path in sorted((CONTENT / "problems").glob("*.toml")):
+        data = load_toml(path)
+        out[data["topic"]] = data["problem"]
+    return out
 
 
 def firebase_js():

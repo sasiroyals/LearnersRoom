@@ -1,0 +1,84 @@
+topic = "09"
+
+[[problem]]
+id = "totalall"
+title = "Add any number of values"
+level = "Easy"
+story = "Write total_all(*nums) that adds up however many numbers it is given. total_all() is 0."
+hint = "*nums collects every argument into one tuple you can loop over."
+starter = '''
+def total_all(*nums):
+    pass
+'''
+solution = '''
+def total_all(*nums):
+    total = 0
+    for n in nums:
+        total = total + n
+    return total
+'''
+demo = '''
+print(total_all(1, 2, 3))
+'''
+[[problem.tests]]
+call = "total_all(1, 2, 3)"
+expect = "6"
+[[problem.tests]]
+call = "total_all()"
+expect = "0"
+[[problem.tests]]
+call = "total_all(10)"
+expect = "10"
+
+[[problem]]
+id = "fact"
+title = "Factorial with recursion"
+level = "Medium"
+story = "Write factorial(n) that calls itself. factorial(0) is 1 and factorial(n) is n * factorial(n - 1)."
+hint = "Every recursive function needs a base case that stops it: here, n == 0."
+starter = '''
+def factorial(n):
+    pass
+'''
+solution = '''
+def factorial(n):
+    if n == 0:
+        return 1
+    return n * factorial(n - 1)
+'''
+demo = '''
+print(factorial(4))
+'''
+[[problem.tests]]
+call = "factorial(5)"
+expect = "120"
+[[problem.tests]]
+call = "factorial(0)"
+expect = "1"
+[[problem.tests]]
+call = "factorial(1)"
+expect = "1"
+
+[[problem]]
+id = "bylen"
+title = "Sort by length"
+level = "Medium"
+story = "Write by_length(words) that returns the words sorted from shortest to longest, using sorted() with a lambda."
+hint = "sorted(words, key=...) sorts by whatever the key function returns."
+starter = '''
+def by_length(words):
+    pass
+'''
+solution = '''
+def by_length(words):
+    return sorted(words, key=lambda w: len(w))
+'''
+demo = '''
+print(by_length(['pear', 'fig', 'banana']))
+'''
+[[problem.tests]]
+call = "by_length(['pear', 'fig', 'banana'])"
+expect = "['fig', 'pear', 'banana']"
+[[problem.tests]]
+call = "by_length([])"
+expect = "[]"

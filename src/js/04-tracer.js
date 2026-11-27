@@ -16,7 +16,7 @@ const EXAMPLES = {
     {id:'total', t:'Running total', c:"public class Main {\n    public static void main(String[] args) {\n        int[] numbers = {4, 1, 5};\n        int total = 0;\n        for (int n : numbers) {\n            total = total + n;\n        }\n        System.out.println(total);\n    }\n}\n"}
   ]
 };
-const pr = { trace:null, i:0, editing:true, ex:{py:'alias', java:'alias'}, code:{}, busy:false, loaded:null };
+const pr = { trace:null, i:0, editing:true, sel:{py:null, java:null}, code:{}, busy:false, loaded:null, lib:'problems', watching:false, results:null };
 let mode = 'lesson';
 
 function loadSkulpt(){
@@ -164,4 +164,36 @@ async function tracePy(code, inputs){
     }
   }
   return {steps, src};
+}
+
+/* Run code once at full speed (no tracing), for checking practice problems.
+   Returns {out, error, errorType, line}. A time limit stops endless loops. */
+async function runPy(code){
+  await loadSkulpt();
+  let out = '';
+  Sk.configure({
+    output: t=>{ out += t; },
+    read: f=>{ if(SHIMS[f]) return SHIMS[f]; if(Sk.builtinFiles && Sk.builtinFiles.files[f]!==undefined) return Sk.builtinFiles.files[f]; throw new Error('Module not found: '+f); },
+    __future__: Sk.python3, debugging: false, execLimit: 4000, yieldLimit: 200,
+    inputfun: ()=>'', inputfunTakesPrompt: true
+  });
+  if(!Sk.__origOpen) Sk.__origOpen = Sk.builtins.open;
+  Sk.builtins.open = Sk.__origOpen;
+  if(/\bopen\(/.test(code)){
+    try{
+      try{ Sk.sysmodules.mp$del_subscript(new Sk.builtin.str('memfs')); }catch(e){}
+      await Sk.misceval.asyncToPromise(()=>Sk.importModule('memfs', false, true));
+      Sk.builtins.open = Sk.sysmodules.mp$subscript(new Sk.builtin.str('memfs')).$d.open;
+    }catch(e){ console.warn('memfs', e); }
+  }
+  try{
+    await Sk.misceval.asyncToPromise(()=>Sk.importMainWithBody('<stdin>', false, prepCode(code), true));
+    return {out};
+  }catch(e){
+    let line = null;
+    if(e && e.traceback && e.traceback.length){ const tb = e.traceback.filter(t=>!t.filename || /^<stdin>/.test(t.filename)); if(tb.length) line = tb[tb.length-1].lineno; }
+    const tp = e && e.tp$name;
+    const msg = tp==='TimeLimitError' ? 'Took too long. A loop may never end.' : String(e && e.toString ? e.toString() : e).replace(/ on line \d+$/, '');
+    return {out, error: msg, errorType: tp || 'Error', line};
+  }
 }

@@ -10,8 +10,8 @@ const Auth = (()=>{
   const emit = ()=> subs.forEach(f=>f(user));
   const progressKeys = ()=>{
     const out = {};
-    try{ for(let i=0;i<localStorage.length;i++){ const k = localStorage.key(i); if(/^cs\.(trophy|last)\./.test(k)) out[k] = localStorage.getItem(k); } }catch(e){}
-    Object.keys(mem).forEach(k=>{ if(/^cs\.(trophy|last)\./.test(k)) out[k] = mem[k]; });
+    try{ for(let i=0;i<localStorage.length;i++){ const k = localStorage.key(i); if(/^cs\.(trophy|last|solved)\./.test(k)) out[k] = localStorage.getItem(k); } }catch(e){}
+    Object.keys(mem).forEach(k=>{ if(/^cs\.(trophy|last|solved)\./.test(k)) out[k] = mem[k]; });
     return out;
   };
 

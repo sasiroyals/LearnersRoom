@@ -1,0 +1,127 @@
+topic = "15"
+
+[[problem]]
+id = "shapes"
+title = "Total area of mixed shapes"
+level = "Easy"
+story = "Square(side) and Rect(w, h) both need an area() method. Then total_area(shapes) adds up the areas without checking which class each one is."
+hint = "Give both classes a method with the same name. The loop just calls s.area()."
+starter = '''
+class Square:
+    def __init__(self, side):
+        self.side = side
+
+
+class Rect:
+    def __init__(self, w, h):
+        self.w = w
+        self.h = h
+
+
+def total_area(shapes):
+    pass
+'''
+solution = '''
+class Square:
+    def __init__(self, side):
+        self.side = side
+
+    def area(self):
+        return self.side * self.side
+
+
+class Rect:
+    def __init__(self, w, h):
+        self.w = w
+        self.h = h
+
+    def area(self):
+        return self.w * self.h
+
+
+def total_area(shapes):
+    total = 0
+    for s in shapes:
+        total = total + s.area()
+    return total
+'''
+demo = '''
+print(total_area([Square(2), Rect(2, 3)]))
+'''
+[[problem.tests]]
+call = "total_area([Square(2), Rect(2, 3)])"
+expect = "10"
+[[problem.tests]]
+call = "total_area([])"
+expect = "0"
+
+[[problem]]
+id = "vector"
+title = "Add vectors with +"
+level = "Medium"
+story = "Write a class Vector(x, y) where v1 + v2 gives a new Vector, and v1 == v2 compares both coordinates."
+hint = "a + b calls a.__add__(b). a == b calls a.__eq__(b)."
+starter = '''
+class Vector:
+    def __init__(self, x, y):
+        self.x = x
+        self.y = y
+'''
+solution = '''
+class Vector:
+    def __init__(self, x, y):
+        self.x = x
+        self.y = y
+
+    def __add__(self, other):
+        return Vector(self.x + other.x, self.y + other.y)
+
+    def __eq__(self, other):
+        return self.x == other.x and self.y == other.y
+'''
+demo = '''
+v = Vector(1, 2) + Vector(3, 4)
+print(v.x, v.y)
+'''
+[[problem.tests]]
+setup = '''
+v = Vector(1, 2) + Vector(3, 4)
+'''
+call = "(v.x, v.y)"
+expect = "(4, 6)"
+[[problem.tests]]
+call = "Vector(1, 2) == Vector(1, 2)"
+expect = "True"
+[[problem.tests]]
+call = "Vector(1, 2) == Vector(2, 1)"
+expect = "False"
+
+[[problem]]
+id = "playlist"
+title = "len() of your own class"
+level = "Easy"
+story = "Write a class Playlist(songs) so that len(playlist) gives the number of songs."
+hint = "len(x) calls x.__len__()."
+starter = '''
+class Playlist:
+    def __init__(self, songs):
+        self.songs = songs
+'''
+solution = '''
+class Playlist:
+    def __init__(self, songs):
+        self.songs = songs
+
+    def __len__(self):
+        return len(self.songs)
+'''
+demo = '''
+p = Playlist(['a', 'b', 'c'])
+print(len(p))
+'''
+[[problem.tests]]
+call = "len(Playlist(['a', 'b']))"
+expect = "2"
+[[problem.tests]]
+call = "len(Playlist([]))"
+expect = "0"

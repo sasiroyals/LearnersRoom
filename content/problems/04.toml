@@ -1,0 +1,109 @@
+topic = "04"
+
+[[problem]]
+id = "grade"
+title = "Letter grade"
+level = "Easy"
+story = "Write grade(score): 90 or more is 'A', 80 or more is 'B', 70 or more is 'C', anything lower is 'F'."
+hint = "Check the highest boundary first. Use >= so that 80 itself is a B."
+starter = '''
+def grade(score):
+    pass
+'''
+solution = '''
+def grade(score):
+    if score >= 90:
+        return 'A'
+    elif score >= 80:
+        return 'B'
+    elif score >= 70:
+        return 'C'
+    else:
+        return 'F'
+'''
+demo = '''
+print(grade(85))
+'''
+[[problem.tests]]
+call = "grade(95)"
+expect = "'A'"
+[[problem.tests]]
+call = "grade(80)"
+expect = "'B'"
+[[problem.tests]]
+call = "grade(79)"
+expect = "'C'"
+[[problem.tests]]
+call = "grade(12)"
+expect = "'F'"
+
+[[problem]]
+id = "fizz"
+title = "FizzBuzz for one number"
+level = "Easy"
+story = "Write fizzbuzz(n): return 'FizzBuzz' if n divides by 3 and 5, 'Fizz' if only by 3, 'Buzz' if only by 5, otherwise the number as text."
+hint = "Test the both-at-once case first, or Fizz will win too early."
+starter = '''
+def fizzbuzz(n):
+    pass
+'''
+solution = '''
+def fizzbuzz(n):
+    if n % 15 == 0:
+        return 'FizzBuzz'
+    elif n % 3 == 0:
+        return 'Fizz'
+    elif n % 5 == 0:
+        return 'Buzz'
+    return str(n)
+'''
+demo = '''
+print(fizzbuzz(15))
+print(fizzbuzz(7))
+'''
+[[problem.tests]]
+call = "fizzbuzz(15)"
+expect = "'FizzBuzz'"
+[[problem.tests]]
+call = "fizzbuzz(9)"
+expect = "'Fizz'"
+[[problem.tests]]
+call = "fizzbuzz(10)"
+expect = "'Buzz'"
+[[problem.tests]]
+call = "fizzbuzz(7)"
+expect = "'7'"
+
+[[problem]]
+id = "leap"
+title = "Leap year"
+level = "Medium"
+story = "A year is a leap year if it divides by 4, except years that divide by 100, unless they also divide by 400. Write is_leap(year)."
+hint = "Check the rarest rule (400) first, then 100, then 4."
+starter = '''
+def is_leap(year):
+    pass
+'''
+solution = '''
+def is_leap(year):
+    if year % 400 == 0:
+        return True
+    if year % 100 == 0:
+        return False
+    return year % 4 == 0
+'''
+demo = '''
+print(is_leap(1900))
+'''
+[[problem.tests]]
+call = "is_leap(2024)"
+expect = "True"
+[[problem.tests]]
+call = "is_leap(1900)"
+expect = "False"
+[[problem.tests]]
+call = "is_leap(2000)"
+expect = "True"
+[[problem.tests]]
+call = "is_leap(2023)"
+expect = "False"

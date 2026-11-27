@@ -1,0 +1,84 @@
+topic = "05"
+
+[[problem]]
+id = "largest"
+title = "Find the largest"
+level = "Easy"
+story = "Write largest(nums) that returns the biggest number in a non-empty list, without using max()."
+hint = "Start with the first item as the best so far, then compare each item to it."
+starter = '''
+def largest(nums):
+    pass
+'''
+solution = '''
+def largest(nums):
+    best = nums[0]
+    for n in nums:
+        if n > best:
+            best = n
+    return best
+'''
+demo = '''
+print(largest([3, 9, 2]))
+'''
+[[problem.tests]]
+call = "largest([3, 9, 2])"
+expect = "9"
+[[problem.tests]]
+call = "largest([-5, -2, -8])"
+expect = "-2"
+[[problem.tests]]
+call = "largest([4])"
+expect = "4"
+
+[[problem]]
+id = "ends"
+title = "First and last"
+level = "Easy"
+story = "Write ends(items) that returns a new list holding just the first and the last item."
+hint = "items[-1] is the last item, whatever the length."
+starter = '''
+def ends(items):
+    pass
+'''
+solution = '''
+def ends(items):
+    return [items[0], items[-1]]
+'''
+demo = '''
+print(ends(['a', 'b', 'c']))
+'''
+[[problem.tests]]
+call = "ends(['a', 'b', 'c'])"
+expect = "['a', 'c']"
+[[problem.tests]]
+call = "ends([7])"
+expect = "[7, 7]"
+
+[[problem]]
+id = "rotate"
+title = "Rotate a list"
+level = "Medium"
+story = "Write rotate(items, k) that moves the first k items to the end. rotate([1, 2, 3, 4], 1) is [2, 3, 4, 1]."
+hint = "Two slices glued with +. Use k % len(items) so k can be bigger than the list."
+starter = '''
+def rotate(items, k):
+    pass
+'''
+solution = '''
+def rotate(items, k):
+    k = k % len(items)
+    return items[k:] + items[:k]
+'''
+demo = '''
+print(rotate([1, 2, 3, 4], 1))
+'''
+[[problem.tests]]
+call = "rotate([1, 2, 3, 4], 1)"
+expect = "[2, 3, 4, 1]"
+[[problem.tests]]
+call = "rotate([1, 2, 3], 3)"
+expect = "[1, 2, 3]"
+[[problem.tests]]
+call = "rotate([1, 2, 3], 5)"
+expect = "[3, 1, 2]"

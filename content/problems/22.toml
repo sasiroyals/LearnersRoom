@@ -1,0 +1,149 @@
+topic = "22"
+
+[[problem]]
+id = "recorder"
+title = "Your own with-block"
+level = "Medium"
+story = "Write a class Recorder with a log list. Entering a with-block appends 'start', leaving it appends 'end'."
+hint = "with calls __enter__ first and __exit__ last, even if the block fails."
+starter = '''
+class Recorder:
+    def __init__(self):
+        self.log = []
+
+    def __enter__(self):
+        pass
+
+    def __exit__(self, exc_type, exc, tb):
+        pass
+'''
+solution = '''
+class Recorder:
+    def __init__(self):
+        self.log = []
+
+    def __enter__(self):
+        self.log.append('start')
+        return self
+
+    def __exit__(self, exc_type, exc, tb):
+        self.log.append('end')
+        return False
+'''
+demo = '''
+r = Recorder()
+with r:
+    r.log.append('work')
+print(r.log)
+'''
+[[problem.tests]]
+setup = '''
+r = Recorder()
+with r:
+    r.log.append('work')
+'''
+call = "r.log"
+expect = "['start', 'work', 'end']"
+
+[[problem]]
+id = "ignore"
+title = "Ignore one kind of error"
+level = "Hard"
+story = "Write a context manager Ignore(error_type) that swallows that kind of error and lets every other kind through."
+hint = "If __exit__ returns True, Python treats the error as handled."
+starter = '''
+class Ignore:
+    def __init__(self, error_type):
+        self.error_type = error_type
+
+    def __enter__(self):
+        return self
+
+    def __exit__(self, exc_type, exc, tb):
+        pass
+'''
+solution = '''
+class Ignore:
+    def __init__(self, error_type):
+        self.error_type = error_type
+
+    def __enter__(self):
+        return self
+
+    def __exit__(self, exc_type, exc, tb):
+        return exc_type is not None and issubclass(exc_type, self.error_type)
+'''
+demo = '''
+with Ignore(ValueError):
+    int('x')
+print('still running')
+'''
+[[problem.tests]]
+setup = '''
+with Ignore(ValueError):
+    int('x')
+r = 'survived'
+'''
+call = "r"
+expect = "'survived'"
+[[problem.tests]]
+setup = '''
+try:
+    with Ignore(ValueError):
+        [][1]
+    r = 'swallowed'
+except IndexError:
+    r = 'passed through'
+'''
+call = "r"
+expect = "'passed through'"
+
+[[problem]]
+id = "setting"
+title = "Change a setting for a while"
+level = "Medium"
+story = "Write a context manager Temporarily(config, key, value) that sets config[key] to value inside the block and puts the old value back afterwards."
+hint = "Remember the old value in __enter__, and restore it in __exit__."
+starter = '''
+class Temporarily:
+    def __init__(self, config, key, value):
+        self.config = config
+        self.key = key
+        self.value = value
+
+    def __enter__(self):
+        pass
+
+    def __exit__(self, exc_type, exc, tb):
+        pass
+'''
+solution = '''
+class Temporarily:
+    def __init__(self, config, key, value):
+        self.config = config
+        self.key = key
+        self.value = value
+
+    def __enter__(self):
+        self.old = self.config[self.key]
+        self.config[self.key] = self.value
+        return self.config
+
+    def __exit__(self, exc_type, exc, tb):
+        self.config[self.key] = self.old
+        return False
+'''
+demo = '''
+config = {'mode': 'normal'}
+with Temporarily(config, 'mode', 'debug'):
+    print(config['mode'])
+print(config['mode'])
+'''
+[[problem.tests]]
+setup = '''
+config = {'mode': 'normal'}
+with Temporarily(config, 'mode', 'debug'):
+    inside = config['mode']
+'''
+call = "(inside, config['mode'])"
+expect = "('debug', 'normal')"

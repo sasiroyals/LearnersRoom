@@ -1,0 +1,79 @@
+topic = "07"
+
+[[problem]]
+id = "wc"
+title = "Count each word"
+level = "Easy"
+story = "Write word_counts(text) that returns a dict mapping each word to how many times it appears."
+hint = "counts.get(word, 0) gives 0 the first time a word is seen."
+starter = '''
+def word_counts(text):
+    pass
+'''
+solution = '''
+def word_counts(text):
+    counts = {}
+    for word in text.split():
+        counts[word] = counts.get(word, 0) + 1
+    return counts
+'''
+demo = '''
+print(word_counts('to be or not to be'))
+'''
+[[problem.tests]]
+call = "word_counts('a b a')"
+expect = "{'a': 2, 'b': 1}"
+[[problem.tests]]
+call = "word_counts('')"
+expect = "{}"
+
+[[problem]]
+id = "uniq"
+title = "Unique and sorted"
+level = "Easy"
+story = "Write unique_sorted(items) that drops duplicates and returns the rest in ascending order."
+hint = "A set drops duplicates. sorted() turns it back into an ordered list."
+starter = '''
+def unique_sorted(items):
+    pass
+'''
+solution = '''
+def unique_sorted(items):
+    return sorted(set(items))
+'''
+demo = '''
+print(unique_sorted([3, 1, 3, 2, 1]))
+'''
+[[problem.tests]]
+call = "unique_sorted([3, 1, 3, 2, 1])"
+expect = "[1, 2, 3]"
+[[problem.tests]]
+call = "unique_sorted([])"
+expect = "[]"
+
+[[problem]]
+id = "invert"
+title = "Swap keys and values"
+level = "Medium"
+story = "Write invert(d) that returns a new dict where every value becomes a key and every key becomes its value."
+hint = "Loop with for key, value in d.items() and store result[value] = key."
+starter = '''
+def invert(d):
+    pass
+'''
+solution = '''
+def invert(d):
+    result = {}
+    for key, value in d.items():
+        result[value] = key
+    return result
+'''
+demo = '''
+print(invert({'a': 1, 'b': 2}))
+'''
+[[problem.tests]]
+call = "invert({'a': 1, 'b': 2})"
+expect = "{1: 'a', 2: 'b'}"
+[[problem.tests]]
+call = "invert({})"
+expect = "{}"

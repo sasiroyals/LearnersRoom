@@ -1,0 +1,78 @@
+topic = "01"
+
+[[problem]]
+id = "swap"
+title = "Swap two values"
+level = "Easy"
+story = "Write swap(a, b) so it returns the two values in the opposite order, as a tuple."
+hint = "A tuple is written with a comma: (b, a)."
+starter = '''
+def swap(a, b):
+    # return the two values swapped
+    pass
+'''
+solution = '''
+def swap(a, b):
+    return (b, a)
+'''
+demo = '''
+x, y = swap(1, 2)
+print(x, y)
+'''
+[[problem.tests]]
+call = "swap(1, 2)"
+expect = "(2, 1)"
+[[problem.tests]]
+call = "swap('left', 'right')"
+expect = "('right', 'left')"
+
+[[problem]]
+id = "greet"
+title = "Build a greeting"
+level = "Easy"
+story = "Write greet(name) that returns 'Hello, ' followed by the name and an exclamation mark."
+hint = "Join strings with +. Do not forget the comma and space after Hello."
+starter = '''
+def greet(name):
+    pass
+'''
+solution = '''
+def greet(name):
+    message = 'Hello, ' + name + '!'
+    return message
+'''
+demo = '''
+print(greet('Ana'))
+'''
+[[problem.tests]]
+call = "greet('Ana')"
+expect = "'Hello, Ana!'"
+[[problem.tests]]
+call = "greet('Sam')"
+expect = "'Hello, Sam!'"
+
+[[problem]]
+id = "addtext"
+title = "Add numbers typed as text"
+level = "Easy"
+story = "Input always arrives as text. Write add_text(a, b) that takes two strings like '7' and '5' and returns their sum as a number."
+hint = "'7' + '5' glues text into '75'. Convert each with int() first."
+starter = '''
+def add_text(a, b):
+    pass
+'''
+solution = '''
+def add_text(a, b):
+    first = int(a)
+    second = int(b)
+    return first + second
+'''
+demo = '''
+print(add_text('7', '5'))
+'''
+[[problem.tests]]
+call = "add_text('7', '5')"
+expect = "12"
+[[problem.tests]]
+call = "add_text('10', '0')"
+expect = "10"

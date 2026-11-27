@@ -1,0 +1,108 @@
+topic = "19"
+
+[[problem]]
+id = "mult"
+title = "A function that makes functions"
+level = "Easy"
+story = "Write make_multiplier(n) that returns a new function. That function multiplies its argument by n."
+hint = "Define a function inside, and return it without calling it. It remembers n."
+starter = '''
+def make_multiplier(n):
+    pass
+'''
+solution = '''
+def make_multiplier(n):
+    def times(x):
+        return x * n
+    return times
+'''
+demo = '''
+triple = make_multiplier(3)
+print(triple(5))
+'''
+[[problem.tests]]
+call = "make_multiplier(3)(5)"
+expect = "15"
+[[problem.tests]]
+setup = '''
+double = make_multiplier(2)
+'''
+call = "double(10)"
+expect = "20"
+
+[[problem]]
+id = "shout"
+title = "A decorator that shouts"
+level = "Medium"
+story = "Write a decorator shout(func) whose wrapper calls func and returns its result in capital letters."
+hint = "The decorator returns a new function, wrapper, that calls the original inside."
+starter = '''
+def shout(func):
+    pass
+
+
+@shout
+def hello(name):
+    return 'hello ' + name
+'''
+solution = '''
+def shout(func):
+    def wrapper(*args):
+        result = func(*args)
+        return result.upper()
+    return wrapper
+
+
+@shout
+def hello(name):
+    return 'hello ' + name
+'''
+demo = '''
+print(hello('ana'))
+'''
+[[problem.tests]]
+call = "hello('ana')"
+expect = "'HELLO ANA'"
+
+[[problem]]
+id = "memo"
+title = "Remember earlier answers"
+level = "Hard"
+story = "Write a decorator memo(func) that keeps a dict of answers it has already worked out, so each argument is only computed once."
+hint = "The cache dict lives in memo's frame. The wrapper can change it without nonlocal, because it changes the dict rather than the name."
+starter = '''
+def memo(func):
+    pass
+
+
+@memo
+def fib(n):
+    if n < 2:
+        return n
+    return fib(n - 1) + fib(n - 2)
+'''
+solution = '''
+def memo(func):
+    cache = {}
+    def wrapper(n):
+        if n not in cache:
+            cache[n] = func(n)
+        return cache[n]
+    return wrapper
+
+
+@memo
+def fib(n):
+    if n < 2:
+        return n
+    return fib(n - 1) + fib(n - 2)
+'''
+demo = '''
+print(fib(6))
+'''
+[[problem.tests]]
+call = "fib(10)"
+expect = "55"
+[[problem.tests]]
+call = "fib(30)"
+expect = "832040"

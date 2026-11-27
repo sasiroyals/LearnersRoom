@@ -1,0 +1,88 @@
+topic = "23"
+
+[[problem]]
+id = "sorted"
+title = "Is it sorted?"
+level = "Easy"
+story = "Write is_sorted(items: list) -> bool that says whether each item is no bigger than the next one."
+hint = "Compare each item with the one after it. One wrong pair is enough to answer False."
+starter = '''
+def is_sorted(items: list) -> bool:
+    pass
+'''
+solution = '''
+def is_sorted(items: list) -> bool:
+    for i in range(len(items) - 1):
+        if items[i] > items[i + 1]:
+            return False
+    return True
+'''
+demo = '''
+print(is_sorted([1, 2, 2, 5]))
+'''
+[[problem.tests]]
+call = "is_sorted([1, 2, 2, 5])"
+expect = "True"
+[[problem.tests]]
+call = "is_sorted([3, 1])"
+expect = "False"
+[[problem.tests]]
+call = "is_sorted([])"
+expect = "True"
+
+[[problem]]
+id = "safeint"
+title = "Convert with a fallback"
+level = "Easy"
+story = "Write safe_int(text: str, default: int = 0) -> int that returns int(text), or default if the text is not a whole number."
+hint = "Type hints document what goes in and out. They do not check anything by themselves."
+starter = '''
+def safe_int(text: str, default: int = 0) -> int:
+    pass
+'''
+solution = '''
+def safe_int(text: str, default: int = 0) -> int:
+    try:
+        return int(text)
+    except ValueError:
+        return default
+'''
+demo = '''
+print(safe_int('42'))
+print(safe_int('abc', -1))
+'''
+[[problem.tests]]
+call = "safe_int('42')"
+expect = "42"
+[[problem.tests]]
+call = "safe_int('abc', -1)"
+expect = "-1"
+[[problem.tests]]
+call = "safe_int('x')"
+expect = "0"
+
+[[problem]]
+id = "asserts"
+title = "Make the asserts pass"
+level = "Medium"
+story = "Write middle(items) that returns the middle item of a list with an odd length. The asserts in the demo are your tests: when they all pass, nothing is printed except 'all good'."
+hint = "len(items) // 2 is the index of the middle item."
+starter = '''
+def middle(items):
+    pass
+'''
+solution = '''
+def middle(items):
+    return items[len(items) // 2]
+'''
+demo = '''
+assert middle([1, 2, 3]) == 2
+assert middle(['a']) == 'a'
+print('all good')
+'''
+[[problem.tests]]
+call = "middle([1, 2, 3])"
+expect = "2"
+[[problem.tests]]
+call = "middle(['a', 'b', 'c', 'd', 'e'])"
+expect = "'c'"
