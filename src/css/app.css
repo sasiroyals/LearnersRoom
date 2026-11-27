@@ -522,7 +522,8 @@ button:focus-visible,a:focus-visible,[tabindex]:focus-visible{outline:2px solid 
 .happen code,.nextline code,.dbg p code{font:600 .92em var(--f-mono);background:var(--code-bg);padding:1px 5px;border-radius:4px}
 .nextline{font-size:13.5px;border:1px dashed var(--line);border-radius:8px;padding:8px 10px}
 .nextline b{color:var(--ref)}
-.errbox{font-size:13.5px;background:var(--bad-soft);border-left:3px solid var(--bad);border-radius:8px;padding:8px 10px}
+.errbox{font-size:13.5px;background:var(--bad-soft);border-left:3px solid var(--bad);border-radius:8px;padding:8px 10px;line-height:1.5}
+.errbox.warn{background:var(--ref-soft);border-left-color:var(--ref);margin-bottom:8px}
 .scrub{width:100%;accent-color:var(--ref)}
 .dctl{display:flex;gap:6px;flex-wrap:wrap}
 .dctl .btn{flex:1;min-width:84px;padding:7px 8px;font-size:13px}
@@ -651,6 +652,7 @@ button:focus-visible,a:focus-visible,[tabindex]:focus-visible{outline:2px solid 
 .tests .t-bad{border-color:color-mix(in srgb,var(--bad) 40%,var(--line));background:color-mix(in srgb,var(--bad-soft) 60%,transparent)}
 .tests .t-bad .t-ico{color:var(--bad)}
 .t-got{color:var(--bad);font-size:12.5px;margin-top:2px}
+.t-help{font-size:12.5px;margin-top:4px;color:var(--ink);background:var(--ref-soft);border-radius:6px;padding:5px 8px;line-height:1.45}
 .t-setup{margin:0 0 4px;font:500 12px/1.5 var(--f-mono);background:var(--code-bg);padding:6px 8px;border-radius:6px;white-space:pre-wrap}
 .win-box{padding:10px 12px;border-radius:10px;background:var(--good-soft);color:var(--good);font-size:13.5px}
 .win-box b{font-weight:700}
@@ -661,8 +663,8 @@ button:focus-visible,a:focus-visible,[tabindex]:focus-visible{outline:2px solid 
 .ht-prac:hover{background:var(--accent);color:#fff}
 .ht-prac.full{border-color:var(--good);color:var(--good)}
 .lib-scrim{display:none}
-@media (max-width:1180px){
-  .practice{grid-template-columns:minmax(0,1.1fr) minmax(0,1fr) 320px}
+@media (max-width:1360px){
+  .practice{grid-template-columns:minmax(0,1.1fr) minmax(0,1fr) 330px}
   .lib{position:fixed;z-index:15;top:0;bottom:0;left:0;width:300px;border-radius:0;box-shadow:4px 0 30px rgba(0,0,0,.25);transform:translateX(-105%);transition:transform .2s;padding-top:env(safe-area-inset-top,0px)}
   .practice.lib-open .lib{transform:none}
   .practice.lib-open .lib-scrim{display:block;position:fixed;inset:0;z-index:14;background:rgba(0,0,0,.35)}
@@ -672,3 +674,16 @@ button:focus-visible,a:focus-visible,[tabindex]:focus-visible{outline:2px solid 
 @media (max-width:760px){.prob-ex{grid-template-columns:auto auto minmax(0,1fr)}}
 .ed-body,.ed-view{min-height:200px}
 @media (max-width:1100px) and (min-width:761px){.ed{min-height:600px}}
+
+/* header: tidy at tablet and phone widths */
+@media (max-width:900px){.brand-name{display:none}.top{gap:10px}}
+@media (max-width:600px){
+  .top{row-gap:8px;padding-block:8px}
+  .brand{padding:6px;margin:-6px 0 -6px -6px}
+  .brand-mark{width:28px;height:28px;font-size:13px}
+  .tabs,.modes{order:5;flex:1 1 45%}
+  .tabs .tab,.modes .tab{flex:1;min-height:40px;padding:6px 8px}
+  #acct .link-btn{display:none}
+  #acct .btn-primary.sm,.trophies,#toggle-outline{min-height:40px}
+  #auth-switch button{padding:10px 4px;margin:-10px 0}
+}

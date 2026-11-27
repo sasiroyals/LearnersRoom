@@ -2,7 +2,9 @@
 /* ---------------- outline ---------------- */
 function trophyKey(lg, id){ return 'cs.trophy.'+lg+'.'+((id && id!=='alias') ? id : LESSON_ID); }
 function hasTrophy(lg, id){ return store.get(trophyKey(lg, id))==='1'; }
-const ALL_LESSONS = { get py(){ return [].concat(...Object.values(BUILT.py)); }, get java(){ return [].concat(...Object.values(BUILT.java)); } };
+/* Topic keys like "10" are integer-like, so plain object order would put them before "01": always sort. */
+const inTopicOrder = o => Object.keys(o).sort().map(k=>o[k]);
+const ALL_LESSONS = { get py(){ return [].concat(...inTopicOrder(BUILT.py)); }, get java(){ return [].concat(...inTopicOrder(BUILT.java)); } };
 function lessonTitle(id){ return id==='alias' ? 'Why did both lists change?' : TL_LESSONS[id].title; }
 const openTopics = {py:new Set(), java:new Set()};
 function renderOutline(){

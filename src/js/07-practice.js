@@ -16,10 +16,13 @@ function renderDbg(){
   const cur = T.steps[pr.i], n = T.steps.length;
   const ex = explainStep(T, pr.i);
   let h = `<div class="meta"><span>Step ${pr.i+1} of ${n}</span><span class="phase">${cur.frames.length>1 ? 'inside '+esc(cur.frames[cur.frames.length-1].name) : 'top level'}</span></div>`;
-  h += `<h2 class="step-title">${pr.i===0 ? 'Ready to run' : 'Line '+ex.ran+' ran'}</h2>`;
+  const noStart = cur.error && n===1;
+  h += `<h2 class="step-title">${noStart ? 'Python could not run this code' : pr.i===0 ? 'Ready to run' : 'Line '+ex.ran+' ran'}</h2>`;
   if(pr.i>0) h += `<div class="nextline" style="border-style:solid">${code$(ex.ranTxt)}</div>`;
-  h += `<ul class="happen">` + ex.items.map(it=>`<li class="k-${it.k}"><span>${it.h}</span></li>`).join('') + `</ul>`;
-  if(cur.error) h += `<div class="errbox"><b>${esc(cur.errorType||'Error')}</b> on line ${cur.line}. Read the highlighted line: the error happened while Python was running it.</div>`;
+  if(!noStart) h += `<ul class="happen">` + ex.items.filter(it=>it.k!=='err').map(it=>`<li class="k-${it.k}"><span>${it.h}</span></li>`).join('') + `</ul>`;
+  const todo = unfinishedFns(T.src.join('\n'));
+  if(todo.length && !cur.error) h += `<div class="errbox warn"><b>Not written yet.</b> ${esc(todo[0])}() still has only pass inside, so it gives back None. Write its body, then step through again.</div>`;
+  if(cur.error){ const help = explainError(cur.errorType, cur.error, T.src.join('\n')); h += `<div class="errbox"><b>${esc(cur.errorType||'Error')}</b> on line ${cur.line}. ${help ? esc(help) : 'Read the highlighted line: the error happened while Python was running it.'}</div>`; }
   else if(cur.done) h += `<div class="nextline"><b>Finished.</b> The program reached the end. Step back to review any line, or edit the code and run it again.</div>`;
   else h += `<div class="nextline"><b>Next:</b> line ${cur.line} ${code$(T.src[cur.line-1]||'')}</div>`;
   h += `<input type="range" class="scrub" id="pr-scrub" min="0" max="${n-1}" value="${pr.i}" aria-label="Jump to step">`;
@@ -70,6 +73,7 @@ const GFG = {
 const GFG_TOPIC = {'01':'basics','02':'basics','03':'strings','04':'basics','05':'lists','06':'basics','07':'dicts','08':'functions','09':'functions','10':'data','11':'data',
   '12':'oop','13':'oop','14':'oop','15':'oop','16':'oop','21':'oop'};
 const gfgFor = n => GFG[GFG_TOPIC[n] || 'all'];
+const ALL_PROBLEMS = [].concat(...inTopicOrder(PROBLEMS));
 const PROB_BY_ID = {}; Object.entries(PROBLEMS).forEach(([n, ps])=> ps.forEach(p=>{ PROB_BY_ID[p.id] = Object.assign({topic:n}, p); }));
 const solvedKey = id => 'cs.solved.py.' + id;
 const isSolved = id => store.get(solvedKey(id)) === '1';
@@ -118,7 +122,7 @@ function renderLib(){
   $('#lib-list').querySelectorAll('[data-ex]').forEach(b=> b.onclick = ()=>{ const e = EXAMPLES[lang].find(x=>x.id===b.dataset.ex); $('#pr-input').value = e.inp || ''; prOpenCode(e.c, e.t, {kind:'example', id:e.id}, true); closeLibIfNarrow(); });
 }
 function setLibOpen(open){ document.querySelector('.practice').classList.toggle('lib-open', open); $('#lib-toggle').setAttribute('aria-expanded', open); }
-function closeLibIfNarrow(){ if(innerWidth <= 1180) setLibOpen(false); }
+function closeLibIfNarrow(){ if(innerWidth <= 1360) setLibOpen(false); }
 $('#lib-toggle').onclick = ()=> setLibOpen(!document.querySelector('.practice').classList.contains('lib-open'));
 $('#lib-scrim').onclick = ()=> setLibOpen(false);
 document.querySelectorAll('[data-lib]').forEach(b=> b.onclick = ()=>{ pr.lib = b.dataset.lib; renderLib(); });
@@ -171,12 +175,12 @@ function renderSideIdle(){
     h += `<ul class="tests">` + p.tests.map((t,i)=>{
       const r = R && R.items[i];
       const st = !r ? 'idle' : r.ok ? 'ok' : 'bad';
-      return `<li class="t-${st}"><span class="t-ico">${st==='ok'?'✓':st==='bad'?'✗':'○'}</span><div>${t.setup ? `<pre class="t-setup">${esc(t.setup.trim())}</pre>` : ''}<code>${esc(t.call)}</code> should give <code>${esc(t.expect)}</code>${r && !r.ok ? `<div class="t-got">${r.error ? esc(r.error) : 'got <code>'+esc(r.got)+'</code>'}</div>` : ''}</div></li>`;
+      return `<li class="t-${st}"><span class="t-ico">${st==='ok'?'✓':st==='bad'?'✗':'○'}</span><div>${t.setup ? `<pre class="t-setup">${esc(t.setup.trim())}</pre>` : ''}<code>${esc(t.call)}</code> should give <code>${esc(t.expect)}</code>${r && !r.ok ? `<div class="t-got">${r.error ? esc(r.error) : 'got <code>'+esc(r.got)+'</code>'}</div>${r.help ? `<div class="t-help">${esc(r.help)}</div>` : ''}` : ''}</div></li>`;
     }).join('') + `</ul>`;
     if(R && R.pass===R.total) h += `<div class="win-box"><b>Solved!</b> Press <b>Step through</b> to watch your code run on the example, or pick the next problem.</div><button class="btn primary" id="pr-next">Next problem →</button>`;
     else h += `<p class="dbg-tip">Write your code, then press <b>Run tests</b>. <b>Step through</b> runs your code on the example below it, one line at a time.</p><pre class="t-setup">${esc(p.demo.trim())}</pre>`;
     box.innerHTML = h;
-    const nx = $('#pr-next'); if(nx) nx.onclick = ()=>{ const all = Object.values(PROBLEMS).flat(); const i = all.findIndex(x=>x.id===p.id); const nxt = all.slice(i+1).find(x=>!isSolved(x.id)) || all[(i+1)%all.length]; openProblem(nxt.id); };
+    const nx = $('#pr-next'); if(nx) nx.onclick = ()=>{ const all = ALL_PROBLEMS; const i = all.findIndex(x=>x.id===p.id); const nxt = all.slice(i+1).find(x=>!isSolved(x.id)) || all[(i+1)%all.length]; openProblem(nxt.id); };
   } else {
     box.innerHTML = `<div class="meta"><span>Editing</span></div><h2 class="step-title">What is happening</h2><p style="margin:0;color:var(--muted)">Press <b>Step through</b>. This panel will explain every line as it runs: which names changed, which objects were created or changed, and which way each condition went.</p>`;
   }
@@ -203,6 +207,15 @@ async function prStart(runAll, src){
   }
   pr.busy = false;
 }
+/* Why a test gave the wrong value, in plain words, when we can tell. */
+function wrongResultHelp(got, expect, code){
+  const todo = unfinishedFns(code);
+  if(todo.length) return `${todo[0]}() still has only pass inside, so it gives back None. Replace pass with your own code.`;
+  if(/\bNone\b/.test(got) && !/\bNone\b/.test(expect)) return /\bprint\(/.test(code) && !/\breturn\b/.test(code) ? 'Your function prints the answer but does not return it. Use return so the caller gets the value.' : 'Your function gave back None. Check that every path through it ends with a return line.';
+  if(/^['"]/.test(expect) && !/^['"]/.test(got)) return 'The test expects text (a string). Your answer is a different type. Wrap it with str(), or return the text itself.';
+  if(/^-?\d/.test(expect) && /^['"]/.test(got)) return 'The test expects a number, but your answer is text in quotes. Return the number itself, or convert with int().';
+  return '';
+}
 async function prRunTests(){
   const p = curProblem(); if(!p || pr.busy) return;
   pr.busy = true; const btn = $('#pr-test'); btn.disabled = true;
@@ -213,9 +226,9 @@ async function prRunTests(){
     for(const t of p.tests){
       const r = await runPy(code + '\n' + (t.setup || '') + '\nprint("@@R" + repr(' + t.call + '))\n');
       const m = (r.out || '').match(/@@R(.*)\n?$/);
-      if(r.error) items.push({ok:false, error:r.errorType + ': ' + r.error.replace(/^\w+:\s*/,'')});
+      if(r.error) items.push({ok:false, error:r.errorType + ': ' + r.error.replace(/^\w+:\s*/,''), help: explainError(r.errorType, r.error, code)});
       else if(!m) items.push({ok:false, error:'No result came back.'});
-      else items.push({ok: m[1]===t.expect, got: m[1]});
+      else items.push({ok: m[1]===t.expect, got: m[1], help: m[1]!==t.expect ? wrongResultHelp(m[1], t.expect, code) : ''});
     }
   }catch(e){ $('#pr-status').textContent = e.message || String(e); }
   const pass = items.filter(x=>x.ok).length;
@@ -229,7 +242,7 @@ async function prRunTests(){
 function gutter(){ const n = $('#pr-code').value.split('\n').length; $('#pr-gutter').textContent = Array.from({length:n},(_,i)=>i+1).join('\n'); }
 function renderPractice(){
   const java = lang==='java';
-  if(!pr.sel[lang]){ if(!java && Object.keys(PROBLEMS).length){ const first = Object.values(PROBLEMS)[0][0]; pr.sel.py = {kind:'problem', id:first.id, title:first.title}; pr.code.py = store.get(draftKey(first.id)) || first.starter; } else { const e = EXAMPLES[lang][0]; pr.sel[lang] = {kind:'example', id:e.id, title:e.t}; pr.code[lang] = e.c; } }
+  if(!pr.sel[lang]){ if(!java && Object.keys(PROBLEMS).length){ const first = ALL_PROBLEMS[0]; pr.sel.py = {kind:'problem', id:first.id, title:first.title}; pr.code.py = store.get(draftKey(first.id)) || first.starter; } else { const e = EXAMPLES[lang][0]; pr.sel[lang] = {kind:'example', id:e.id, title:e.t}; pr.code[lang] = e.c; } }
   if(java && pr.lib==='problems') pr.lib = 'lessons';
   const sel = pr.sel[lang];
   $('#pr-title').textContent = sel.title || (L[lang].name + ' practice');

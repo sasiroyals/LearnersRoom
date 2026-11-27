@@ -197,3 +197,44 @@ async function runPy(code){
     return {out, error: msg, errorType: tp || 'Error', line};
   }
 }
+
+/* Plain-English help for the errors students hit most. Returns text, or '' when there is none.
+   `code` is the program that ran, used to spot a function whose body is still `pass`. */
+function unfinishedFns(code){
+  const out = [], lines = String(code||'').split('\n');
+  for(let i=0;i<lines.length;i++){
+    const m = lines[i].match(/^(\s*)def\s+(\w+)\s*\(/); if(!m) continue;
+    const ind = m[1].length, body = [];
+    for(let j=i+1;j<lines.length;j++){
+      const t = lines[j]; if(!t.trim() || /^\s*#/.test(t)) continue;
+      if(t.match(/^\s*/)[0].length <= ind) break;
+      body.push(t.trim());
+    }
+    if(body.length && body.every(b=>b==='pass' || /^("""|''')/.test(b))) out.push(m[2]);
+  }
+  return out;
+}
+function explainError(type, msg, code){
+  msg = String(msg||''); type = type || (msg.match(/^(\w+):/)||[])[1] || '';
+  const none = /NoneType/.test(msg), todo = unfinishedFns(code);
+  if(todo.length && (none || /^None$/.test(msg))) return `Your function ${todo[0]}() still has only pass inside, so it gives back None. Replace pass with your own code and finish with a return line.`;
+  if(none) return 'A value here is None. That usually means a function finished without a return line, so it gave back None. Check that every path through the function ends with return.';
+  if(type==='NameError'){ const n = (msg.match(/name '(\w+)'/)||[])[1]; return `Python does not know the name ${n||'used here'} yet. Check the spelling (capital letters count), and make sure it gets a value on an earlier line.`; }
+  if(type==='IndentationError' || /indent/i.test(msg)) return 'The spaces at the start of a line do not line up. Lines inside a def, if, for or while need 4 more spaces than the line that opens the block, and lines in the same block need the same spaces.';
+  if(type==='SyntaxError') return 'Python could not read this line. Look for a missing colon at the end of if, for, while or def, a bracket or quote that is never closed, or = where you meant ==.';
+  if(type==='ZeroDivisionError') return 'The program divided by zero. Check the number after / or % before dividing, for example with an if.';
+  if(type==='IndexError') return 'The program asked for a position that does not exist. A list with n items has positions 0 to n - 1, so check the loop range and empty lists.';
+  if(type==='KeyError') return 'That key is not in the dictionary. Check with "if key in d" first, or use d.get(key, default).';
+  if(type==='AttributeError') return 'That object has no attribute or method with this name. Check the spelling and what type the value really is.';
+  if(type==='RecursionError' || /recursion/i.test(msg)) return 'A function kept calling itself and never stopped. Make sure there is a base case that returns without calling the function again.';
+  if(type==='ValueError' && /int\(\)|float\(\)/.test(msg)) return 'int() and float() can only turn text that looks like a number into a number. Check the text you passed in.';
+  if(type==='TypeError'){
+    if(/positional argument|takes \d|missing \d|argument/.test(msg)) return 'The function was called with a different number of values than its def line accepts. Compare the call with the names in the brackets after def.';
+    if(/concatenate|unsupported operand|can only/.test(msg)) return 'Two values of different types were combined, such as text and a number. Convert one first with str(), int() or float().';
+    if(/not subscriptable/.test(msg)) return 'Square brackets [ ] only work on lists, strings, tuples and dictionaries. This value is not one of those.';
+    if(/not iterable/.test(msg)) return 'A for loop or unpacking needs a list, string, range or similar. This value cannot be looped over.';
+    if(/not callable/.test(msg)) return 'Something that is not a function was called with ( ). A name may have been reused for a value.';
+  }
+  if(type==='TimeLimitError' || /too long|600 steps/.test(msg)) return 'A loop may never end. Check that the loop condition eventually becomes False, for example that a counter changes each time.';
+  return '';
+}
