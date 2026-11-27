@@ -532,7 +532,8 @@ button:focus-visible,a:focus-visible,[tabindex]:focus-visible{outline:2px solid 
 .happen code,.nextline code,.dbg p code{font:600 .92em var(--f-mono);background:var(--code-bg);padding:1px 5px;border-radius:4px}
 .nextline{font-size:13.5px;border:1px dashed var(--line);border-radius:8px;padding:8px 10px}
 .nextline b{color:var(--ref)}
-.errbox{font-size:13.5px;background:var(--bad-soft);border-left:3px solid var(--bad);border-radius:8px;padding:8px 10px}
+.errbox{font-size:13.5px;background:var(--bad-soft);border-left:3px solid var(--bad);border-radius:8px;padding:8px 10px;line-height:1.5}
+.errbox.warn{background:var(--ref-soft);border-left-color:var(--ref);margin-bottom:8px}
 .scrub{width:100%;accent-color:var(--ref)}
 .dctl{display:flex;gap:6px;flex-wrap:wrap}
 .dctl .btn{flex:1;min-width:84px;padding:7px 8px;font-size:13px}
@@ -661,6 +662,7 @@ button:focus-visible,a:focus-visible,[tabindex]:focus-visible{outline:2px solid 
 .tests .t-bad{border-color:color-mix(in srgb,var(--bad) 40%,var(--line));background:color-mix(in srgb,var(--bad-soft) 60%,transparent)}
 .tests .t-bad .t-ico{color:var(--bad)}
 .t-got{color:var(--bad);font-size:12.5px;margin-top:2px}
+.t-help{font-size:12.5px;margin-top:4px;color:var(--ink);background:var(--ref-soft);border-radius:6px;padding:5px 8px;line-height:1.45}
 .t-setup{margin:0 0 4px;font:500 12px/1.5 var(--f-mono);background:var(--code-bg);padding:6px 8px;border-radius:6px;white-space:pre-wrap}
 .win-box{padding:10px 12px;border-radius:10px;background:var(--good-soft);color:var(--good);font-size:13.5px}
 .win-box b{font-weight:700}
@@ -671,8 +673,8 @@ button:focus-visible,a:focus-visible,[tabindex]:focus-visible{outline:2px solid 
 .ht-prac:hover{background:var(--accent);color:#fff}
 .ht-prac.full{border-color:var(--good);color:var(--good)}
 .lib-scrim{display:none}
-@media (max-width:1180px){
-  .practice{grid-template-columns:minmax(0,1.1fr) minmax(0,1fr) 320px}
+@media (max-width:1360px){
+  .practice{grid-template-columns:minmax(0,1.1fr) minmax(0,1fr) 330px}
   .lib{position:fixed;z-index:15;top:0;bottom:0;left:0;width:300px;border-radius:0;box-shadow:4px 0 30px rgba(0,0,0,.25);transform:translateX(-105%);transition:transform .2s;padding-top:env(safe-area-inset-top,0px)}
   .practice.lib-open .lib{transform:none}
   .practice.lib-open .lib-scrim{display:block;position:fixed;inset:0;z-index:14;background:rgba(0,0,0,.35)}
@@ -682,6 +684,19 @@ button:focus-visible,a:focus-visible,[tabindex]:focus-visible{outline:2px solid 
 @media (max-width:760px){.prob-ex{grid-template-columns:auto auto minmax(0,1fr)}}
 .ed-body,.ed-view{min-height:200px}
 @media (max-width:1100px) and (min-width:761px){.ed{min-height:600px}}
+
+/* header: tidy at tablet and phone widths */
+@media (max-width:900px){.brand-name{display:none}.top{gap:10px}}
+@media (max-width:600px){
+  .top{row-gap:8px;padding-block:8px}
+  .brand{padding:6px;margin:-6px 0 -6px -6px}
+  .brand-mark{width:28px;height:28px;font-size:13px}
+  .tabs,.modes{order:5;flex:1 1 45%}
+  .tabs .tab,.modes .tab{flex:1;min-height:40px;padding:6px 8px}
+  #acct .link-btn{display:none}
+  #acct .btn-primary.sm,.trophies,#toggle-outline{min-height:40px}
+  #auth-switch button{padding:10px 4px;margin:-10px 0}
+}
 </style>
 </head>
 <body>
@@ -1455,7 +1470,9 @@ let st_; $('#views').addEventListener('scroll', ()=>{ clearTimeout(st_); st_ = s
 /* ---------------- outline ---------------- */
 function trophyKey(lg, id){ return 'cs.trophy.'+lg+'.'+((id && id!=='alias') ? id : LESSON_ID); }
 function hasTrophy(lg, id){ return store.get(trophyKey(lg, id))==='1'; }
-const ALL_LESSONS = { get py(){ return [].concat(...Object.values(BUILT.py)); }, get java(){ return [].concat(...Object.values(BUILT.java)); } };
+/* Topic keys like "10" are integer-like, so plain object order would put them before "01": always sort. */
+const inTopicOrder = o => Object.keys(o).sort().map(k=>o[k]);
+const ALL_LESSONS = { get py(){ return [].concat(...inTopicOrder(BUILT.py)); }, get java(){ return [].concat(...inTopicOrder(BUILT.java)); } };
 function lessonTitle(id){ return id==='alias' ? 'Why did both lists change?' : TL_LESSONS[id].title; }
 const openTopics = {py:new Set(), java:new Set()};
 function renderOutline(){
@@ -1726,6 +1743,47 @@ async function runPy(code){
     const msg = tp==='TimeLimitError' ? 'Took too long. A loop may never end.' : String(e && e.toString ? e.toString() : e).replace(/ on line \d+$/, '');
     return {out, error: msg, errorType: tp || 'Error', line};
   }
+}
+
+/* Plain-English help for the errors students hit most. Returns text, or '' when there is none.
+   `code` is the program that ran, used to spot a function whose body is still `pass`. */
+function unfinishedFns(code){
+  const out = [], lines = String(code||'').split('\n');
+  for(let i=0;i<lines.length;i++){
+    const m = lines[i].match(/^(\s*)def\s+(\w+)\s*\(/); if(!m) continue;
+    const ind = m[1].length, body = [];
+    for(let j=i+1;j<lines.length;j++){
+      const t = lines[j]; if(!t.trim() || /^\s*#/.test(t)) continue;
+      if(t.match(/^\s*/)[0].length <= ind) break;
+      body.push(t.trim());
+    }
+    if(body.length && body.every(b=>b==='pass' || /^("""|''')/.test(b))) out.push(m[2]);
+  }
+  return out;
+}
+function explainError(type, msg, code){
+  msg = String(msg||''); type = type || (msg.match(/^(\w+):/)||[])[1] || '';
+  const none = /NoneType/.test(msg), todo = unfinishedFns(code);
+  if(todo.length && (none || /^None$/.test(msg))) return `Your function ${todo[0]}() still has only pass inside, so it gives back None. Replace pass with your own code and finish with a return line.`;
+  if(none) return 'A value here is None. That usually means a function finished without a return line, so it gave back None. Check that every path through the function ends with return.';
+  if(type==='NameError'){ const n = (msg.match(/name '(\w+)'/)||[])[1]; return `Python does not know the name ${n||'used here'} yet. Check the spelling (capital letters count), and make sure it gets a value on an earlier line.`; }
+  if(type==='IndentationError' || /indent/i.test(msg)) return 'The spaces at the start of a line do not line up. Lines inside a def, if, for or while need 4 more spaces than the line that opens the block, and lines in the same block need the same spaces.';
+  if(type==='SyntaxError') return 'Python could not read this line. Look for a missing colon at the end of if, for, while or def, a bracket or quote that is never closed, or = where you meant ==.';
+  if(type==='ZeroDivisionError') return 'The program divided by zero. Check the number after / or % before dividing, for example with an if.';
+  if(type==='IndexError') return 'The program asked for a position that does not exist. A list with n items has positions 0 to n - 1, so check the loop range and empty lists.';
+  if(type==='KeyError') return 'That key is not in the dictionary. Check with "if key in d" first, or use d.get(key, default).';
+  if(type==='AttributeError') return 'That object has no attribute or method with this name. Check the spelling and what type the value really is.';
+  if(type==='RecursionError' || /recursion/i.test(msg)) return 'A function kept calling itself and never stopped. Make sure there is a base case that returns without calling the function again.';
+  if(type==='ValueError' && /int\(\)|float\(\)/.test(msg)) return 'int() and float() can only turn text that looks like a number into a number. Check the text you passed in.';
+  if(type==='TypeError'){
+    if(/positional argument|takes \d|missing \d|argument/.test(msg)) return 'The function was called with a different number of values than its def line accepts. Compare the call with the names in the brackets after def.';
+    if(/concatenate|unsupported operand|can only/.test(msg)) return 'Two values of different types were combined, such as text and a number. Convert one first with str(), int() or float().';
+    if(/not subscriptable/.test(msg)) return 'Square brackets [ ] only work on lists, strings, tuples and dictionaries. This value is not one of those.';
+    if(/not iterable/.test(msg)) return 'A for loop or unpacking needs a list, string, range or similar. This value cannot be looped over.';
+    if(/not callable/.test(msg)) return 'Something that is not a function was called with ( ). A name may have been reused for a value.';
+  }
+  if(type==='TimeLimitError' || /too long|600 steps/.test(msg)) return 'A loop may never end. Check that the loop condition eventually becomes False, for example that a counter changes each time.';
+  return '';
 }
 
 /* 05-explain.js: Turns two snapshots into plain-English "What Python did" items. */
@@ -2074,10 +2132,13 @@ function renderDbg(){
   const cur = T.steps[pr.i], n = T.steps.length;
   const ex = explainStep(T, pr.i);
   let h = `<div class="meta"><span>Step ${pr.i+1} of ${n}</span><span class="phase">${cur.frames.length>1 ? 'inside '+esc(cur.frames[cur.frames.length-1].name) : 'top level'}</span></div>`;
-  h += `<h2 class="step-title">${pr.i===0 ? 'Ready to run' : 'Line '+ex.ran+' ran'}</h2>`;
+  const noStart = cur.error && n===1;
+  h += `<h2 class="step-title">${noStart ? 'Python could not run this code' : pr.i===0 ? 'Ready to run' : 'Line '+ex.ran+' ran'}</h2>`;
   if(pr.i>0) h += `<div class="nextline" style="border-style:solid">${code$(ex.ranTxt)}</div>`;
-  h += `<ul class="happen">` + ex.items.map(it=>`<li class="k-${it.k}"><span>${it.h}</span></li>`).join('') + `</ul>`;
-  if(cur.error) h += `<div class="errbox"><b>${esc(cur.errorType||'Error')}</b> on line ${cur.line}. Read the highlighted line: the error happened while Python was running it.</div>`;
+  if(!noStart) h += `<ul class="happen">` + ex.items.filter(it=>it.k!=='err').map(it=>`<li class="k-${it.k}"><span>${it.h}</span></li>`).join('') + `</ul>`;
+  const todo = unfinishedFns(T.src.join('\n'));
+  if(todo.length && !cur.error) h += `<div class="errbox warn"><b>Not written yet.</b> ${esc(todo[0])}() still has only pass inside, so it gives back None. Write its body, then step through again.</div>`;
+  if(cur.error){ const help = explainError(cur.errorType, cur.error, T.src.join('\n')); h += `<div class="errbox"><b>${esc(cur.errorType||'Error')}</b> on line ${cur.line}. ${help ? esc(help) : 'Read the highlighted line: the error happened while Python was running it.'}</div>`; }
   else if(cur.done) h += `<div class="nextline"><b>Finished.</b> The program reached the end. Step back to review any line, or edit the code and run it again.</div>`;
   else h += `<div class="nextline"><b>Next:</b> line ${cur.line} ${code$(T.src[cur.line-1]||'')}</div>`;
   h += `<input type="range" class="scrub" id="pr-scrub" min="0" max="${n-1}" value="${pr.i}" aria-label="Jump to step">`;
@@ -2128,6 +2189,7 @@ const GFG = {
 const GFG_TOPIC = {'01':'basics','02':'basics','03':'strings','04':'basics','05':'lists','06':'basics','07':'dicts','08':'functions','09':'functions','10':'data','11':'data',
   '12':'oop','13':'oop','14':'oop','15':'oop','16':'oop','21':'oop'};
 const gfgFor = n => GFG[GFG_TOPIC[n] || 'all'];
+const ALL_PROBLEMS = [].concat(...inTopicOrder(PROBLEMS));
 const PROB_BY_ID = {}; Object.entries(PROBLEMS).forEach(([n, ps])=> ps.forEach(p=>{ PROB_BY_ID[p.id] = Object.assign({topic:n}, p); }));
 const solvedKey = id => 'cs.solved.py.' + id;
 const isSolved = id => store.get(solvedKey(id)) === '1';
@@ -2176,7 +2238,7 @@ function renderLib(){
   $('#lib-list').querySelectorAll('[data-ex]').forEach(b=> b.onclick = ()=>{ const e = EXAMPLES[lang].find(x=>x.id===b.dataset.ex); $('#pr-input').value = e.inp || ''; prOpenCode(e.c, e.t, {kind:'example', id:e.id}, true); closeLibIfNarrow(); });
 }
 function setLibOpen(open){ document.querySelector('.practice').classList.toggle('lib-open', open); $('#lib-toggle').setAttribute('aria-expanded', open); }
-function closeLibIfNarrow(){ if(innerWidth <= 1180) setLibOpen(false); }
+function closeLibIfNarrow(){ if(innerWidth <= 1360) setLibOpen(false); }
 $('#lib-toggle').onclick = ()=> setLibOpen(!document.querySelector('.practice').classList.contains('lib-open'));
 $('#lib-scrim').onclick = ()=> setLibOpen(false);
 document.querySelectorAll('[data-lib]').forEach(b=> b.onclick = ()=>{ pr.lib = b.dataset.lib; renderLib(); });
@@ -2229,12 +2291,12 @@ function renderSideIdle(){
     h += `<ul class="tests">` + p.tests.map((t,i)=>{
       const r = R && R.items[i];
       const st = !r ? 'idle' : r.ok ? 'ok' : 'bad';
-      return `<li class="t-${st}"><span class="t-ico">${st==='ok'?'✓':st==='bad'?'✗':'○'}</span><div>${t.setup ? `<pre class="t-setup">${esc(t.setup.trim())}</pre>` : ''}<code>${esc(t.call)}</code> should give <code>${esc(t.expect)}</code>${r && !r.ok ? `<div class="t-got">${r.error ? esc(r.error) : 'got <code>'+esc(r.got)+'</code>'}</div>` : ''}</div></li>`;
+      return `<li class="t-${st}"><span class="t-ico">${st==='ok'?'✓':st==='bad'?'✗':'○'}</span><div>${t.setup ? `<pre class="t-setup">${esc(t.setup.trim())}</pre>` : ''}<code>${esc(t.call)}</code> should give <code>${esc(t.expect)}</code>${r && !r.ok ? `<div class="t-got">${r.error ? esc(r.error) : 'got <code>'+esc(r.got)+'</code>'}</div>${r.help ? `<div class="t-help">${esc(r.help)}</div>` : ''}` : ''}</div></li>`;
     }).join('') + `</ul>`;
     if(R && R.pass===R.total) h += `<div class="win-box"><b>Solved!</b> Press <b>Step through</b> to watch your code run on the example, or pick the next problem.</div><button class="btn primary" id="pr-next">Next problem →</button>`;
     else h += `<p class="dbg-tip">Write your code, then press <b>Run tests</b>. <b>Step through</b> runs your code on the example below it, one line at a time.</p><pre class="t-setup">${esc(p.demo.trim())}</pre>`;
     box.innerHTML = h;
-    const nx = $('#pr-next'); if(nx) nx.onclick = ()=>{ const all = Object.values(PROBLEMS).flat(); const i = all.findIndex(x=>x.id===p.id); const nxt = all.slice(i+1).find(x=>!isSolved(x.id)) || all[(i+1)%all.length]; openProblem(nxt.id); };
+    const nx = $('#pr-next'); if(nx) nx.onclick = ()=>{ const all = ALL_PROBLEMS; const i = all.findIndex(x=>x.id===p.id); const nxt = all.slice(i+1).find(x=>!isSolved(x.id)) || all[(i+1)%all.length]; openProblem(nxt.id); };
   } else {
     box.innerHTML = `<div class="meta"><span>Editing</span></div><h2 class="step-title">What is happening</h2><p style="margin:0;color:var(--muted)">Press <b>Step through</b>. This panel will explain every line as it runs: which names changed, which objects were created or changed, and which way each condition went.</p>`;
   }
@@ -2261,6 +2323,15 @@ async function prStart(runAll, src){
   }
   pr.busy = false;
 }
+/* Why a test gave the wrong value, in plain words, when we can tell. */
+function wrongResultHelp(got, expect, code){
+  const todo = unfinishedFns(code);
+  if(todo.length) return `${todo[0]}() still has only pass inside, so it gives back None. Replace pass with your own code.`;
+  if(/\bNone\b/.test(got) && !/\bNone\b/.test(expect)) return /\bprint\(/.test(code) && !/\breturn\b/.test(code) ? 'Your function prints the answer but does not return it. Use return so the caller gets the value.' : 'Your function gave back None. Check that every path through it ends with a return line.';
+  if(/^['"]/.test(expect) && !/^['"]/.test(got)) return 'The test expects text (a string). Your answer is a different type. Wrap it with str(), or return the text itself.';
+  if(/^-?\d/.test(expect) && /^['"]/.test(got)) return 'The test expects a number, but your answer is text in quotes. Return the number itself, or convert with int().';
+  return '';
+}
 async function prRunTests(){
   const p = curProblem(); if(!p || pr.busy) return;
   pr.busy = true; const btn = $('#pr-test'); btn.disabled = true;
@@ -2271,9 +2342,9 @@ async function prRunTests(){
     for(const t of p.tests){
       const r = await runPy(code + '\n' + (t.setup || '') + '\nprint("@@R" + repr(' + t.call + '))\n');
       const m = (r.out || '').match(/@@R(.*)\n?$/);
-      if(r.error) items.push({ok:false, error:r.errorType + ': ' + r.error.replace(/^\w+:\s*/,'')});
+      if(r.error) items.push({ok:false, error:r.errorType + ': ' + r.error.replace(/^\w+:\s*/,''), help: explainError(r.errorType, r.error, code)});
       else if(!m) items.push({ok:false, error:'No result came back.'});
-      else items.push({ok: m[1]===t.expect, got: m[1]});
+      else items.push({ok: m[1]===t.expect, got: m[1], help: m[1]!==t.expect ? wrongResultHelp(m[1], t.expect, code) : ''});
     }
   }catch(e){ $('#pr-status').textContent = e.message || String(e); }
   const pass = items.filter(x=>x.ok).length;
@@ -2287,7 +2358,7 @@ async function prRunTests(){
 function gutter(){ const n = $('#pr-code').value.split('\n').length; $('#pr-gutter').textContent = Array.from({length:n},(_,i)=>i+1).join('\n'); }
 function renderPractice(){
   const java = lang==='java';
-  if(!pr.sel[lang]){ if(!java && Object.keys(PROBLEMS).length){ const first = Object.values(PROBLEMS)[0][0]; pr.sel.py = {kind:'problem', id:first.id, title:first.title}; pr.code.py = store.get(draftKey(first.id)) || first.starter; } else { const e = EXAMPLES[lang][0]; pr.sel[lang] = {kind:'example', id:e.id, title:e.t}; pr.code[lang] = e.c; } }
+  if(!pr.sel[lang]){ if(!java && Object.keys(PROBLEMS).length){ const first = ALL_PROBLEMS[0]; pr.sel.py = {kind:'problem', id:first.id, title:first.title}; pr.code.py = store.get(draftKey(first.id)) || first.starter; } else { const e = EXAMPLES[lang][0]; pr.sel[lang] = {kind:'example', id:e.id, title:e.t}; pr.code[lang] = e.c; } }
   if(java && pr.lib==='problems') pr.lib = 'lessons';
   const sel = pr.sel[lang];
   $('#pr-title').textContent = sel.title || (L[lang].name + ' practice');
