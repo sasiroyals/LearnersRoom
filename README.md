@@ -37,7 +37,8 @@ The JavaScript files share one scope and are joined in number order:
 | `07-practice.js` | Practice mode and the debugger panel |
 | `08-trace-lessons.js` | lesson player: predictions, variants, code and flowchart views |
 | `09-home.js` | home page and keyboard shortcuts |
-| `10-boot.js` | language switching and start-up |
+| `10-auth.js` | log in and sign up pages, account menu, progress sync |
+| `11-boot.js` | language switching and start-up |
 
 ### Design in one paragraph
 
@@ -59,3 +60,10 @@ Commit the rebuilt `index.html` with your change; CI fails if it is out of date.
 1. Open the topic file in `content/python/`, copy an existing `[[lesson]]` block, and give it a new `id`.
 2. Write the `code`, one `pseudo` entry per code line (`"(blank)"` for blank lines), explanations under `[lesson.lines.N]`, a `[lesson.predict]` question, at least one `[[lesson.variants]]`, a `recap`, and a `[lesson.check]`.
 3. Run `python build.py`, `python -m pytest` and `npm run test:e2e`.
+
+## Accounts
+
+Log in and sign up use Firebase when `src/config/firebase.json` holds the
+project's web config (it is public by design; Firestore rules keep each
+student's `users/{uid}` document private). Without that file the pages still
+work, but accounts are kept in the visitor's browser only.

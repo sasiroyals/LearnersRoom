@@ -25,52 +25,132 @@
     </div>
     <span class="spacer"></span>
     <button class="ghost" id="toggle-outline" aria-expanded="true" aria-controls="outline"><span class="long">Choose a lesson</span><span class="short">Topics</span></button>
+    <div class="acct" id="acct"></div>
     <div class="trophies" title="Trophies earned" aria-live="polite"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 21h8M12 17v4M7 4h10v5a5 5 0 0 1-10 0V4zM17 5h3v2a3 3 0 0 1-3 3M7 5H4v2a3 3 0 0 0 3 3"/></svg><span id="trophy-count">0</span></div>
   </header>
 
 
   <section class="home" id="home" hidden aria-label="Home">
-    <div class="home-in">
-      <div class="hero">
+    <div class="hero-band">
+      <div class="aurora" aria-hidden="true"><i class="b1"></i><i class="b2"></i><i class="b3"></i></div>
+      <div class="hero-grid" aria-hidden="true"></div>
+      <div class="home-in hero">
         <div class="hero-text">
-          <p class="eyebrow">Python and Java, from first line to professional</p>
-          <h1>Watch your code run, one line at a time.</h1>
-          <p class="lede">Every lesson runs real code step by step. You see each name, list and object change, predict what happens next, and get a plain-English explanation of every line.</p>
+          <p class="pill"><span class="pill-dot"></span><span id="hero-count">96</span> interactive lessons, free to use</p>
+          <h1>Watch your code <span class="grad">come alive</span>, one line at a time.</h1>
+          <p class="lede">Learners Room runs real Python and Java step by step. You see every name, list and object change, predict what happens next, and read a plain-English explanation of each line.</p>
           <div class="hero-cta">
-            <button class="btn-primary" id="home-py">Start Python <span aria-hidden="true">→</span></button>
-            <button class="btn-secondary" id="home-java">Start Java</button>
+            <button class="btn-primary big" id="home-py">Start Python <span aria-hidden="true">→</span></button>
+            <button class="btn-glass big" id="home-java">Start Java</button>
           </div>
           <button class="continue" id="home-continue" hidden></button>
+          <ul class="hero-ticks">
+            <li>Nothing to install</li><li>Beginner to professional</li><li>Works on your phone</li>
+          </ul>
         </div>
-        <div class="hero-demo" aria-hidden="true">
-          <div class="demo-code"><div class="dl d1"><span class="n">1</span>a = [1, 2]</div><div class="dl d2"><span class="n">2</span>b = a</div><div class="dl d3"><span class="n">3</span>b.append(3)</div></div>
-          <svg class="demo-svg" viewBox="0 0 320 170">
-            <defs><marker id="dm" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto"><path d="M0,0 L10,5 L0,10 z" class="dm-head"/></marker></defs>
-            <g class="tag ta"><rect x="10" y="30" width="54" height="30" rx="8"/><text x="37" y="50">a</text></g>
-            <path class="dm-edge ea" d="M64,45 C110,45 120,78 150,82" marker-end="url(#dm)"/>
-            <g class="tag tb"><rect x="10" y="110" width="54" height="30" rx="8"/><text x="37" y="130">b</text></g>
-            <path class="dm-edge eb" d="M64,125 C110,125 120,98 150,92" marker-end="url(#dm)"/>
-            <g class="cells"><rect x="152" y="68" width="44" height="40" rx="7"/><text x="174" y="93">1</text><rect x="200" y="68" width="44" height="40" rx="7"/><text x="222" y="93">2</text></g>
-            <g class="cells newcell"><rect x="248" y="68" width="44" height="40" rx="7"/><text x="270" y="93">3</text></g>
-            <text class="demo-cap" x="160" y="160">two names, one list</text>
-          </svg>
+        <div class="hero-visual" aria-hidden="true">
+          <div class="win">
+            <div class="win-bar"><span class="wd r"></span><span class="wd y"></span><span class="wd g"></span><span class="win-file">aliasing.py</span><span class="win-step">Step <b class="st-n"></b> of 3</span></div>
+            <div class="win-body">
+              <div class="demo-code"><div class="dl d1"><span class="n">1</span><span class="kv">a</span> = [<span class="nu">1</span>, <span class="nu">2</span>]</div><div class="dl d2"><span class="n">2</span><span class="kv">b</span> = a</div><div class="dl d3"><span class="n">3</span><span class="kv">b</span>.append(<span class="nu">3</span>)</div></div>
+              <svg class="demo-svg" viewBox="0 0 320 150">
+                <defs><marker id="dm" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto"><path d="M0,0 L10,5 L0,10 z" class="dm-head"/></marker></defs>
+                <g class="tag ta"><rect x="10" y="22" width="54" height="30" rx="8"/><text x="37" y="42">a</text></g>
+                <path class="dm-edge ea" d="M64,37 C110,37 120,70 150,74" marker-end="url(#dm)"/>
+                <g class="tag tb"><rect x="10" y="102" width="54" height="30" rx="8"/><text x="37" y="122">b</text></g>
+                <path class="dm-edge eb" d="M64,117 C110,117 120,90 150,84" marker-end="url(#dm)"/>
+                <g class="cells"><rect x="152" y="60" width="44" height="40" rx="7"/><text x="174" y="85">1</text><rect x="200" y="60" width="44" height="40" rx="7"/><text x="222" y="85">2</text></g>
+                <g class="cells newcell"><rect x="248" y="60" width="44" height="40" rx="7"/><text x="270" y="85">3</text></g>
+              </svg>
+            </div>
+          </div>
+          <div class="float f-predict"><span class="f-k">Predict</span><b>What does print(a) show?</b><span class="f-opts"><i>[1, 2]</i><i class="on">[1, 2, 3]</i></span></div>
+          <div class="float f-trophy"><span class="f-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 21h8M12 17v4M7 4h10v5a5 5 0 0 1-10 0V4zM17 5h3v2a3 3 0 0 1-3 3M7 5H4v2a3 3 0 0 0 3 3"/></svg></span><span><b>Trophy earned</b><small>Two names, one list</small></span></div>
+          <div class="float f-explain"><span class="f-k">Line 2</span>b now points at the same list as a. No copy is made.</div>
         </div>
       </div>
+    </div>
 
-      <h2 class="home-h">How every lesson works</h2>
-      <div class="how">
-        <div class="how-card"><span class="how-n">1</span><h3>Watch it run</h3><p>The program runs one line at a time. Names, lists, objects and call frames are drawn as they change.</p></div>
-        <div class="how-card"><span class="how-n">2</span><h3>Predict first</h3><p>Before the key line runs, you guess the result. Then you see whether you were right, and why.</p></div>
-        <div class="how-card"><span class="how-n">3</span><h3>Read every step</h3><p>The panel on the right explains what Python did on each line, in plain English. Code, pseudocode and flowchart views sit side by side.</p></div>
-        <div class="how-card"><span class="how-n">4</span><h3>Practice here</h3><p>Write your own code in the built-in editor and step through it with a debugger. Nothing to install.</p></div>
+    <div class="stats home-in" id="home-stats"></div>
+
+    <div class="home-in">
+      <div class="sec-head"><p class="kicker">How it works</p><h2>Four habits that make code click</h2><p class="sec-sub">Every lesson follows the same rhythm, so you always know what to do next.</p></div>
+      <div class="bento">
+        <article class="bcard b-watch">
+          <div class="bart art-watch" aria-hidden="true"><span class="aw-line"></span><span class="aw-line"></span><span class="aw-line on"></span><span class="aw-line"></span><div class="aw-box"><i></i><i></i><i class="nw"></i></div></div>
+          <h3>Watch it run</h3><p>The program runs one line at a time. Names, lists, objects and call frames are drawn the moment they change.</p>
+        </article>
+        <article class="bcard b-predict">
+          <div class="bart art-predict" aria-hidden="true"><span>True</span><span class="on">False</span><span>Error</span></div>
+          <h3>Predict first</h3><p>Before the key line runs, you make a guess. Then you see whether you were right, and exactly why.</p>
+        </article>
+        <article class="bcard b-explain">
+          <div class="bart art-explain" aria-hidden="true"><span style="width:86%"></span><span style="width:64%"></span><span style="width:74%"></span></div>
+          <h3>Read every step</h3><p>A plain-English explanation of each line, next to code, pseudocode, a flowchart and a decision tree.</p>
+        </article>
+        <article class="bcard b-practice">
+          <div class="bart art-practice" aria-hidden="true"><code>for i in range(3):</code><code>&nbsp;&nbsp;&nbsp;&nbsp;print(i)</code><span class="cur"></span></div>
+          <h3>Practice right here</h3><p>Write your own code in the built-in editor and step through it with a visual debugger.</p>
+        </article>
       </div>
 
-      <div class="home-h-row"><h2 class="home-h">The course</h2><span class="home-lang" id="home-lang"></span></div>
+      <div class="sec-head"><p class="kicker">The path</p><h2>From your first variable to design patterns</h2><p class="sec-sub" id="home-lang"></p></div>
       <div class="levels" id="home-levels"></div>
 
-      <h2 class="home-h">Built on the best books</h2>
+      <div class="sec-head"><p class="kicker">Trusted sources</p><h2>Built on the best books</h2><p class="sec-sub">Each topic follows a classic text, so what you learn here lines up with what you read there.</p></div>
       <div class="books" id="home-books"></div>
-      <p class="home-foot">Learners Room. Progress and trophies are saved in this browser.</p>
+
+      <div class="cta-band">
+        <div><h2>Your first lesson takes two minutes.</h2><p>Create a free account to keep your trophies and pick up where you left off.</p></div>
+        <div class="cta-actions"><button class="btn-light big" data-go="signup">Create free account</button><button class="btn-glass big" id="home-try">Try a lesson first</button></div>
+      </div>
+    </div>
+    <footer class="foot">
+      <div class="home-in foot-in">
+        <div class="foot-brand"><span class="brand-mark">{}</span><b>Learners Room</b><p>Interactive Python and Java lessons that show what your code is really doing.</p></div>
+        <div class="foot-col"><h4>Learn</h4><button data-foot="py">Python course</button><button data-foot="java">Java course</button><button data-foot="practice">Practice editor</button></div>
+        <div class="foot-col"><h4>Account</h4><button data-go="login">Log in</button><button data-go="signup">Sign up</button></div>
+      </div>
+    </footer>
+  </section>
+
+  <section class="auth" id="auth" hidden aria-label="Account">
+    <div class="auth-side" aria-hidden="true">
+      <div class="aurora"><i class="b1"></i><i class="b2"></i><i class="b3"></i></div>
+      <div class="auth-side-in">
+        <span class="brand-mark big">{}</span>
+        <h2 id="auth-side-h">Learn to see what your code does.</h2>
+        <ul class="auth-perks">
+          <li><b>Keep every trophy.</b> Your progress follows your account.</li>
+          <li><b>Continue anywhere.</b> Jump back into the lesson you left.</li>
+          <li><b>Practice freely.</b> Run and debug your own programs.</li>
+        </ul>
+        <div class="auth-code"><div><span class="kw">def</span> <span class="fn">learn</span>(you):</div><div>&nbsp;&nbsp;&nbsp;&nbsp;<span class="kw">while</span> curious:</div><div>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;you.grow()</div></div>
+      </div>
+    </div>
+    <div class="auth-main">
+      <form class="auth-card" id="auth-form" novalidate>
+        <h1 id="auth-title">Welcome back</h1>
+        <p class="auth-sub" id="auth-sub">Log in to keep learning where you left off.</p>
+        <div class="seg" role="tablist" aria-label="Account">
+          <button type="button" role="tab" data-auth="login" id="seg-login">Log in</button>
+          <button type="button" role="tab" data-auth="signup" id="seg-signup">Sign up</button>
+        </div>
+        <button type="button" class="btn-google wide" id="au-google" hidden><svg viewBox="0 0 48 48" aria-hidden="true"><path fill="#EA4335" d="M24 9.5c3.5 0 6.6 1.2 9 3.6l6.7-6.7C35.6 2.4 30.2 0 24 0 14.6 0 6.6 5.4 2.6 13.2l7.8 6.1C12.3 13.6 17.6 9.5 24 9.5z"/><path fill="#4285F4" d="M46.5 24.5c0-1.6-.1-3.1-.4-4.5H24v9h12.7c-.6 3-2.3 5.5-4.8 7.2l7.5 5.8c4.4-4 7.1-10 7.1-17.5z"/><path fill="#FBBC05" d="M10.4 28.7A14.5 14.5 0 0 1 9.5 24c0-1.6.3-3.2.9-4.7l-7.8-6.1A24 24 0 0 0 0 24c0 3.9.9 7.5 2.6 10.8l7.8-6.1z"/><path fill="#34A853" d="M24 48c6.5 0 11.9-2.1 15.9-5.8l-7.5-5.8c-2.1 1.4-4.9 2.3-8.4 2.3-6.4 0-11.7-4.1-13.6-9.8l-7.8 6.1C6.6 42.6 14.6 48 24 48z"/></svg>Continue with Google</button>
+        <div class="or" id="au-or" hidden><span>or use email</span></div>
+        <label class="fld" id="fld-name"><span>Your name</span><input id="au-name" autocomplete="name" placeholder="Ada Lovelace"></label>
+        <label class="fld"><span>Email</span><input id="au-email" type="email" autocomplete="email" placeholder="you@example.com" required></label>
+        <label class="fld"><span>Password</span>
+          <span class="pw"><input id="au-pass" type="password" autocomplete="current-password" placeholder="At least 8 characters" required><button type="button" class="pw-eye" id="au-eye" aria-label="Show password">Show</button></span>
+        </label>
+        <div class="meter" id="au-meter" aria-live="polite"><i></i><i></i><i></i><i></i><span></span></div>
+        <button type="button" class="link-btn forgot" id="au-forgot" hidden>Forgot password?</button>
+        <p class="auth-err" id="au-err" role="alert" hidden></p>
+        <p class="auth-ok" id="au-ok" role="status" hidden></p>
+        <button class="btn-primary big wide" type="submit" id="au-submit">Log in</button>
+        <p class="auth-switch" id="auth-switch"></p>
+        <p class="auth-note" id="auth-note"></p>
+      </form>
     </div>
   </section>
 

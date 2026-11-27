@@ -63,7 +63,7 @@ function togglePause(){
 function finish(){ finishLesson('alias'); }
 function finishLesson(id){
   const had = hasTrophy(lang, id);
-  if(!had) store.set(trophyKey(lang, id),'1');
+  if(!had){ store.set(trophyKey(lang, id),'1'); if(typeof Auth!=='undefined') Auth.save(); }
   toast(had ? 'Lesson complete. You already have this trophy, so no new one this time.' : 'Trophy earned: ' + lessonTitle(id) + ' (' + L[lang].name + ')');
   renderOutline();
 }
