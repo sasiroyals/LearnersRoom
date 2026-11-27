@@ -35,7 +35,7 @@
 html,body{height:100%}
 body{background:var(--bg);color:var(--ink);font-family:var(--f-body);font-size:14px;line-height:1.5}
 *{box-sizing:border-box}
-code,pre,kbd,.code,svg text,.op,.phase,.opt,.big-tab span,.tnum,.tcount,.flabel{font-variant-ligatures:none;font-feature-settings:"calt" 0,"liga" 0}
+code,pre,kbd,.code,svg text,.op,.phase,.opt,.big-tab span,.tnum,.tcount,.flabel{font-variant-ligatures:none!important;font-feature-settings:"calt" 0,"liga" 0!important}
 button{font:inherit;color:inherit;cursor:pointer}
 button:focus-visible,a:focus-visible,[tabindex]:focus-visible{outline:2px solid var(--ref);outline-offset:2px}
 .app{height:100%;display:grid;grid-template-rows:auto minmax(0,1fr)}
@@ -2074,6 +2074,268 @@ const PY_TOPIC_LESSONS = {
   '16': ['abs_abc','abs_comp']
 };
 
+/* ---------- Beginner: 01 Values, 02 Numbers, 03 Strings, 04 Conditions ---------- */
+Object.assign(TL_LESSONS, {
+  val_assign: {
+    topic:'Values and names', title:'What does = do?',
+    code:"score = 10\nscore = score + 5\nprint(score)\n",
+    pseudo:['Make the value 10 and tie the name score to it.','Work out score + 5 first, then move the name score to the result.','Show score.'],
+    lines:{
+      1:{t:'Make a value, then a name', b:'Python makes the value 10 first. Then = ties the name score to it. = is not "equals" from maths. It means "let this name refer to this value".', look:'score appears in the global frame.'},
+      2:{t:'Right side first', b:'Python always works out the right side first: score + 5 uses the old score, 10, and gives 15. Only then is the name score moved to 15.', look:'The value next to score changes.'},
+      3:{t:'Show it', b:'print shows the value the name refers to now.', look:'The output box.'}
+    },
+    predict:{line:2, q:'What will score hold after score = score + 5?', target:{v:'score'}, opts:['15','10','An error'],
+      fb:{'10':'Not quite. The right side gives 15, and = then moves score to that new value.','An error':'Not quite. Using a name on both sides is fine. The right side is worked out first, with the old value.'}},
+    variants:[{label:'score + 5'},{label:'score * 2', from:'score + 5', to:'score * 2', q:'What will score hold after score = score * 2?', opts:['20','10','An error']}],
+    recap:'= does two things in order: work out the value on the right, then tie the name on the left to it. score = score + 5 is not a contradiction; it reads the old value, makes a new one, and moves the name.',
+    check:{code:"n = 3\nn = n - 1\nn = n * 10", q:'What is n at the end?', opts:['20','30','2'], right:0, fb:['Right. 3 becomes 2, then 2 becomes 20.','Not quite. n was already 2 when the last line ran.','Not quite. The last line ran too: 2 * 10 is 20.']},
+    dec:'There are no branches. At each = ask: what is the value on the right right now?'
+  },
+  val_keep: {
+    topic:'Values and names', title:'Why did total keep its old value?',
+    code:"price = 4\nqty = 3\ntotal = price * qty\nprice = 10\nprint(total)\n",
+    pseudo:['price is 4.','qty is 3.','Work out 4 * 3 now and call it total.','Move price to 10.','Show total.'],
+    lines:{
+      3:{t:'Work it out once', b:'Python multiplies right now: 4 * 3 is 12. total refers to the value 12. It does not remember the formula.', look:'total holds 12.'},
+      4:{t:'Move one name', b:'price now refers to 10. Nothing else changes, because total holds a finished number, not a link to price.', look:'Only price changes.'},
+      5:{t:'Show total', b:'total still refers to 12.', look:'The output box.'}
+    },
+    predict:{line:5, q:'What will print(total) show?', target:{out:true}, opts:['12','30','An error'],
+      fb:{'30':'Not quite. total was worked out on line 3, when price was 4. A spreadsheet would update; Python does not.'}},
+    variants:[{label:'price = 10'}],
+    recap:'total = price * qty worked the answer out once, on line 3. Changing price afterwards did not touch total. To get a new total you run the calculation again.',
+    check:{code:"a = 1\nb = a + 1\na = 100", q:'What is b?', opts:['2','101'], right:0, fb:['Right. b was worked out when a was 1.','Not quite. b holds the number 2. It does not follow a.']}
+  },
+  val_strnum: {
+    topic:'Values and names', title:'Why is "7" different from 7?',
+    code:"a = \"7\"\nb = 7\nprint(a * 3)\nprint(b * 3)\n",
+    pseudo:['a is the text "7".','b is the number 7.','Repeat the text three times.','Multiply the number by three.'],
+    lines:{
+      1:{t:'A string', b:'Quotes make a string: text made of characters. "7" is one character that happens to look like a digit.', look:'a shows \'7\' with quotes.'},
+      2:{t:'A number', b:'No quotes, so 7 is an int, a whole number you can do maths with.', look:'b shows 7 with no quotes.'},
+      3:{t:'* on a string', b:'For strings, * means repeat. "7" * 3 is "777".', look:'The output box.'},
+      4:{t:'* on a number', b:'For numbers, * means multiply. 7 * 3 is 21.', look:'The output box.'}
+    },
+    predict:{line:3, q:'What will print(a * 3) show?', target:{out:true}, opts:['777','21','An error'],
+      fb:{'21':'Not quite. a is the string "7", so * repeats it.'}},
+    variants:[{label:'a * 3'},{label:'a + 3', from:'print(a * 3)', to:'print(a + 3)', q:'What will print(a + 3) show?', opts:['73','10','An error']}],
+    recap:'The same symbol does different things depending on the type. * repeats a string and multiplies a number. + joins two strings or adds two numbers, but cannot mix a string with a number: that is a TypeError.',
+    check:{code:"x = \"2\" + \"2\"", q:'What is x?', opts:["'22'",'4','An error'], right:0, fb:['Right. + joins two strings.','Not quite. Both are strings, so + joins them.','Not quite. Two strings can be joined with +.']}
+  },
+  val_int: {
+    topic:'Values and names', title:'How does int() turn text into a number?',
+    code:"text = \"42\"\nn = int(text)\nprint(n + 1)\n",
+    pseudo:['text is the string "42".','Read it as a whole number and call it n.','Show n + 1.'],
+    lines:{
+      2:{t:'Convert', b:'int() reads the characters and builds a brand new int. text is unchanged: it is still a string.', look:'n holds 42 with no quotes.'},
+      3:{t:'Now maths works', b:'n is a number, so n + 1 is 43.', look:'The output box.'}
+    },
+    predict:{line:2, q:'What will n hold?', target:{v:'n'}, opts:['42',"'42'",'An error'],
+      fb:{"'42'":'Not quite. int() returns a number, so there are no quotes.'}},
+    variants:[{label:'"42"'},{label:'"4.5"', from:'"42"', to:'"4.5"', opts:['4','4.5','An error']},{label:'"  7 "', from:'"42"', to:'"  7 "', opts:['7','An error',"' 7 '"]}],
+    recap:'int() builds a new number from text. It ignores spaces around the digits, but text like "4.5" is not a whole number, so it raises ValueError. Use float() for decimals.',
+    check:{code:"x = int(\"12\") + int(\"3\")", q:'What is x?', opts:['15','123'], right:0, fb:['Right. Both strings became numbers first.','Not quite. That would be joining strings. Here both were converted to numbers.']}
+  },
+
+  num_floordiv: {
+    topic:'Numbers and operators', title:'What does 7 // 2 give?',
+    code:"a = 7 / 2\nb = 7 // 2\nc = -7 // 2\nprint(a, b, c)\n",
+    pseudo:['Divide exactly.','Divide, then round down to a whole number.','Same with a negative number.','Show all three.'],
+    lines:{
+      1:{t:'True division', b:'/ always gives a float, even when the answer is whole.', look:'a is 3.5.'},
+      2:{t:'Floor division', b:'// divides and then rounds down, toward minus infinity.', look:'b is 3.'},
+      3:{t:'Down, not toward zero', b:'-3.5 rounded down is -4, not -3. // floors; it does not simply cut off the decimals.', look:'The value of c.'}
+    },
+    predict:{line:3, q:'What will c = -7 // 2 hold?', target:{v:'c'}, opts:['-4','-3','-3.5'],
+      fb:{'-3':'Not quite. // rounds down. Below -3.5, the next whole number is -4.','-3.5':'Not quite. // always gives a whole number.'}},
+    variants:[{label:'-7 // 2'},{label:'-8 // 3', from:'-7 // 2', to:'-8 // 3', q:'What will c = -8 // 3 hold?', opts:['-3','-2','-2.67']}],
+    recap:'/ gives the exact answer as a float. // gives the floor: the nearest whole number at or below the exact answer. For negative numbers that is further from zero.',
+    check:{code:"x = 9 // 4", q:'What is x?', opts:['2','2.25','3'], right:0, fb:['Right. 2.25 rounded down is 2.','Not quite. // drops to a whole number.','Not quite. // rounds down, not to the nearest.']}
+  },
+  num_mod: {
+    topic:'Numbers and operators', title:'What does % keep?',
+    code:"minutes = 135\nhours = minutes // 60\nleft = minutes % 60\nprint(hours, left)\n",
+    pseudo:['135 minutes.','How many full hours fit?','How many minutes are left over?','Show both.'],
+    lines:{
+      2:{t:'Full groups', b:'135 // 60 is 2: two full hours fit.', look:'hours is 2.'},
+      3:{t:'The remainder', b:'% gives what is left after taking out the full groups: 135 - 120 is 15.', look:'left is 15.'}
+    },
+    predict:{line:3, q:'What will left = minutes % 60 hold?', target:{v:'left'}, opts:['15','2','2.25'],
+      fb:{'2':'Not quite. That is the number of full hours, from //. % gives the leftover minutes.','2.25':'Not quite. % gives a remainder, not a division.'}},
+    variants:[{label:'135'},{label:'59', from:'= 135', to:'= 59', opts:['59','0','1']},{label:'120', from:'= 135', to:'= 120', opts:['0','2','60']}],
+    recap:'// and % are a pair: // counts the full groups and % keeps the remainder. n % 2 is 0 for even numbers and 1 for odd ones, which is why % appears in so many checks.',
+    check:{code:"r = 17 % 5", q:'What is r?', opts:['2','3','3.4'], right:0, fb:['Right. 5 fits 3 times (15), leaving 2.','Not quite. 3 is how many times 5 fits; % gives what is left.','Not quite. % gives a whole remainder.']}
+  },
+  num_float: {
+    topic:'Numbers and operators', title:'Why is 0.1 + 0.2 not 0.3?',
+    code:"x = 0.1 + 0.2\nprint(x - 0.3)\nprint(x == 0.3)\nprint(round(x, 2) == 0.3)\n",
+    pseudo:['Add two decimals.','Show how far x is from 0.3.','Compare it with 0.3.','Compare after rounding to 2 places.'],
+    lines:{
+      1:{t:'Floats are approximate', b:'Floats are stored in binary. 0.1 and 0.2 cannot be stored exactly, so their sum is very slightly off. Python may still display it rounded.', look:'x looks like 0.3.'},
+      2:{t:'Measure the error', b:'Subtracting 0.3 shows the tiny leftover: about 0.00000000000000005. Not zero.', look:'The output box. e-17 means "times 10 to the power -17".'},
+      3:{t:'Exact comparison', b:'== compares the stored values exactly. The tiny error is enough to make them different.', look:'The output box.'},
+      4:{t:'Compare safely', b:'Rounding first (or checking that the difference is tiny) is how you compare floats.', look:'The output box.'}
+    },
+    predict:{line:3, q:'What will print(x == 0.3) show?', target:{out:true}, opts:['False','True','An error'],
+      fb:{'True':'Not quite. Line 2 showed that x - 0.3 is not zero, so x is not exactly 0.3.'}},
+    variants:[{label:'0.1 + 0.2'}],
+    recap:'0.1 + 0.2 is really 0.30000000000000004 (standard Python prints exactly that) because floats are binary approximations. Never compare floats with == directly; round them or check that the difference is very small. For money, count whole cents.',
+    check:{code:"ok = 0.5 + 0.25 == 0.75", q:'What is ok?', opts:['True','False'], right:0, fb:['Right. 0.5 and 0.25 are exact in binary (halves and quarters), so this one works.','Not quite. Halves and quarters are stored exactly, so there is no error here.']}
+  },
+  num_order: {
+    topic:'Numbers and operators', title:'Which operator goes first?',
+    code:"a = 2 + 3 * 4\nb = (2 + 3) * 4\nc = 2 ** 3 ** 2\nprint(a, b, c)\n",
+    pseudo:['* before +.','Brackets first.','** groups from the right.','Show all three.'],
+    lines:{
+      1:{t:'* before +', b:'Multiplication binds tighter than addition: 3 * 4 is 12, then 2 + 12 is 14.', look:'a is 14.'},
+      2:{t:'Brackets win', b:'Brackets are worked out first: 5 * 4 is 20.', look:'b is 20.'},
+      3:{t:'** goes right to left', b:'2 ** 3 ** 2 means 2 ** (3 ** 2), which is 2 ** 9, 512. Most operators group left to right; ** is the exception.', look:'c is 512.'}
+    },
+    predict:{line:1, q:'What will a = 2 + 3 * 4 hold?', target:{v:'a'}, opts:['14','20','24'],
+      fb:{'20':'Not quite. That would need brackets: (2 + 3) * 4. * goes before +.'}},
+    variants:[{label:'2 + 3 * 4'},{label:'10 - 4 - 3', from:'2 + 3 * 4', to:'10 - 4 - 3', q:'What will a = 10 - 4 - 3 hold?', opts:['3','9','An error']}],
+    recap:'Python follows a fixed order: brackets, then **, then * / // %, then + and -. Equal operators go left to right, except ** which goes right to left. When in doubt, add brackets.',
+    check:{code:"x = 1 + 2 * 3 - 4", q:'What is x?', opts:['3','5','-3'], right:0, fb:['Right. 2 * 3 is 6, then 1 + 6 - 4 is 3.','Not quite. Do 2 * 3 first.','Not quite. Only the * goes first; then work left to right.']}
+  },
+
+  str_index: {
+    topic:'Strings', title:'Why is the first letter at index 0?',
+    code:"word = \"python\"\nfirst = word[0]\nlast = word[-1]\nprint(first, last)\n",
+    pseudo:['word is "python".','Take the character in slot 0.','Take the last character.','Show both.'],
+    lines:{
+      2:{t:'Slot 0', b:'An index counts how far from the start you move. The first character is 0 steps away.', look:'first holds \'p\'.'},
+      3:{t:'Counting from the end', b:'-1 means one step back from the end: the last character.', look:'last holds \'n\'.'}
+    },
+    predict:{line:2, q:'What will first = word[0] hold?', target:{v:'first'}, opts:["'p'","'y'","'python'"],
+      fb:{"'y'":'Not quite. That is slot 1. Counting starts at 0.'}},
+    variants:[{label:'word[0]'},{label:'word[1]', from:'word[0]', to:'word[1]', q:'What will first = word[1] hold?', opts:["'y'","'p'","'t'"]},{label:'word[6]', from:'word[0]', to:'word[6]', q:'What will first = word[6] hold?', opts:["'n'",'An error',"''"]}],
+    recap:'Strings are indexed like lists: slots 0 to len - 1 from the front, and -1, -2 ... from the back. "python" has 6 characters, so slot 6 does not exist and raises IndexError.',
+    check:{code:"s = \"cat\"\nc = s[-2]", q:'What is c?', opts:["'a'","'t'","'c'"], right:0, fb:['Right. -1 is t, so -2 is a.','Not quite. -1 is the last one, t.','Not quite. -3 would be c.']}
+  },
+  str_slice: {
+    topic:'Strings', title:'Which characters does a slice keep?',
+    code:"word = \"python\"\npart = word[1:4]\nprint(part)\n",
+    pseudo:['word is "python".','Take slots 1 up to, but not including, 4.','Show it.'],
+    lines:{
+      2:{t:'Start is in, stop is out', b:'word[1:4] keeps slots 1, 2 and 3. The stop index marks where to stop, and is left out.', look:'part is a new string.'}
+    },
+    predict:{line:2, q:'What will part = word[1:4] hold?', target:{v:'part'}, opts:["'yth'","'ytho'","'pyt'"],
+      fb:{"'ytho'":'Not quite. Slot 4 is the stop, and the stop is left out.',"'pyt'":'Not quite. Slot 1 is y, not p.'}},
+    variants:[{label:'[1:4]'},{label:'[:2]', from:'[1:4]', to:'[:2]', q:'What will part = word[:2] hold?', opts:["'py'","'pyt'","'y'"]},{label:'[3:]', from:'[1:4]', to:'[3:]', q:'What will part = word[3:] hold?', opts:["'hon'","'thon'","'h'"]}],
+    recap:'A slice [start:stop] keeps from start up to stop - 1. Leaving start out means "from the beginning"; leaving stop out means "to the end". The length of the slice is stop - start.',
+    check:{code:"s = \"hello\"\nt = s[1:3]", q:'What is t?', opts:["'el'","'ell'","'he'"], right:0, fb:['Right. Slots 1 and 2.','Not quite. Slot 3 is the stop, so it is left out.','Not quite. Slot 0 is not included; the slice starts at 1.']}
+  },
+  str_immut: {
+    topic:'Strings', title:'Why can\u2019t I change a letter?',
+    code:"name = \"cat\"\nname[0] = \"b\"\nprint(name)\n",
+    pseudo:['name is "cat".','Try to replace the first letter.','Show name.'],
+    lines:{
+      2:{t:'Strings are immutable', b:'A string cannot be changed after it is made. Assigning to one slot is not allowed.', look:'Watch for an error.'}
+    },
+    predict:{line:2, q:'What happens on name[0] = "b"?', target:{out:true}, ok:"name becomes 'bat'", opts:["name becomes 'bat'",'An error'],
+      fb:{"name becomes 'bat'":'Not quite. Lists allow that, but strings are immutable.'}},
+    variants:[{label:'name[0] = "b"'},{label:'build a new string', from:'name[0] = "b"', to:'name = "b" + name[1:]', q:'What happens on name = "b" + name[1:]?', opts:["name becomes 'bat'",'An error']}],
+    recap:'Strings are immutable: no operation changes a string in place. To "change" one, build a new string (with +, slicing, or replace()) and move the name to it.',
+    check:{code:"s = \"hi\"\nt = s.upper()", q:'What is s after this?', opts:["'hi'","'HI'"], right:0, fb:['Right. upper() returns a new string. s is unchanged.','Not quite. String methods never change the original; t holds the new one.']}
+  },
+  str_find: {
+    topic:'Strings', title:'What does find give when the text is missing?',
+    code:"s = \"banana\"\na = s.find(\"n\")\nb = s.find(\"z\")\nprint(a, b)\n",
+    pseudo:['s is "banana".','Where is the first n?','Where is z?','Show both.'],
+    lines:{
+      2:{t:'First match', b:'find returns the index of the first match. The first n is in slot 2.', look:'a is 2.'},
+      3:{t:'No match', b:'When there is no match, find returns -1 instead of raising an error.', look:'b holds the "not found" value.'}
+    },
+    predict:{line:3, q:'What will b = s.find("z") hold?', target:{v:'b'}, opts:['-1','None','An error'],
+      fb:{'None':'Not quite. find always returns a number. -1 means "not found".','An error':'Not quite. find does not raise an error. index() does.'}},
+    variants:[{label:'find'},{label:'index', from:'s.find("z")', to:'s.index("z")', q:'What will b = s.index("z") hold?', opts:['-1','None','An error']}],
+    recap:'find and index both search, but they differ when nothing matches: find returns -1, index raises ValueError. Careful: -1 is also a valid index (the last character), so always check for it before using the result.',
+    check:{code:"x = \"abc\".find(\"c\")", q:'What is x?', opts:['2','3','-1'], right:0, fb:['Right. c is in slot 2.','Not quite. Counting starts at 0.','Not quite. c is in the string.']}
+  },
+  str_fstring: {
+    topic:'Strings', title:'How does an f-string fill in values?',
+    code:"name = \"Ana\"\nage = 9\nmsg = f\"{name} is {age + 1}\"\nprint(msg)\n",
+    pseudo:['name is "Ana".','age is 9.','Build a string, filling in each {...}.','Show it.'],
+    lines:{
+      3:{t:'Fill in the braces', b:'An f-string runs the code inside each pair of braces and puts the result into the text. It even works with expressions like age + 1.', look:'msg is one finished string.'}
+    },
+    predict:{line:3, q:'What will msg hold?', target:{v:'msg'}, opts:["'Ana is 10'","'Ana is age + 1'","'{name} is 10'"],
+      fb:{"'Ana is age + 1'":'Not quite. The code inside braces is run, so age + 1 becomes 10.',"'{name} is 10'":'Not quite. Every pair of braces is filled in.'}},
+    variants:[{label:'f-string'}],
+    recap:'An f-string is built once, when its line runs: every {expression} is worked out and turned into text. Changing name later does not change msg.',
+    check:{code:"x = 3\ns = f\"{x * 2}!\"", q:'What is s?', opts:["'6!'","'x * 2!'","'3!'"], right:0, fb:['Right. x * 2 is worked out.','Not quite. The braces are filled in with the result.','Not quite. The braces contain x * 2, not x.']}
+  },
+
+  cond_branch: {
+    topic:'Conditions and logic', title:'Which branch runs?',
+    code:"temp = 30\nif temp > 25:\n    label = \"hot\"\nelse:\n    label = \"mild\"\nprint(label)\n",
+    pseudo:['temp is 30.','Is temp above 25?','Yes: label is "hot".','Otherwise:','label is "mild".','Show label.'],
+    lines:{
+      2:{t:'Ask the question', b:'The condition temp > 25 is worked out to True or False. Exactly one branch will run.', look:'The next highlighted line tells you which branch was chosen.'},
+      3:{t:'The if branch', b:'The condition was True, so the indented block under if runs. The else block is skipped.', look:'label appears.'},
+      5:{t:'The else branch', b:'The condition was False, so Python skipped the if block and ran the else block.', look:'label appears.'},
+      6:{t:'Back to the main path', b:'Both branches lead here. The program continues after the if statement.', look:'The output box.'}
+    },
+    predict:{line:6, q:'What will print(label) show?', target:{out:true}, opts:['hot','mild','hot mild'],
+      fb:{'hot mild':'Not quite. Only one branch of an if / else runs.'}},
+    variants:[{label:'temp = 30'},{label:'temp = 25', from:'temp = 30', to:'temp = 25'},{label:'temp = 12', from:'temp = 30', to:'temp = 12'}],
+    recap:'if checks its condition once. True runs the if block, False runs the else block, never both. 25 > 25 is False, so 25 went to the else branch.',
+    check:{code:"x = 0\nif x:\n    r = 'yes'\nelse:\n    r = 'no'", q:'What is r?', opts:["'no'","'yes'"], right:0, fb:['Right. 0 counts as False.','Not quite. The number 0 is treated as False in a condition.']},
+    dec:'One question decides the path: is temp > 25? Yes leads to "hot", no leads to "mild". Both paths then meet at print.'
+  },
+  cond_boundary: {
+    topic:'Conditions and logic', title:'Does >= include the boundary?',
+    code:"age = 18\nif age >= 18:\n    status = \"adult\"\nelse:\n    status = \"minor\"\nprint(status)\n",
+    pseudo:['age is 18.','Is age 18 or more?','Yes: adult.','Otherwise:','minor.','Show status.'],
+    lines:{
+      2:{t:'Check the boundary', b:'>= means "greater than or equal to", so 18 itself passes.', look:'Which line runs next.'}
+    },
+    predict:{line:6, q:'What will print(status) show?', target:{out:true}, opts:['adult','minor'],
+      fb:{'minor':'Not quite. >= includes 18 itself.'}},
+    variants:[{label:'>='},{label:'>', from:'age >= 18', to:'age > 18', q:'With age > 18, what will print(status) show?'}],
+    recap:'The boundary value is where bugs hide. >= and <= include the boundary; > and < leave it out. Always test the exact boundary value, like 18 here.',
+    check:{code:"n = 10\nok = n < 10", q:'What is ok?', opts:['False','True'], right:0, fb:['Right. 10 is not less than 10.','Not quite. < leaves out the boundary.']},
+    dec:'Is age >= 18? The boundary case, 18, goes down the "yes" path. Change it to > and 18 goes down the "no" path.'
+  },
+  cond_and: {
+    topic:'Conditions and logic', title:'When does and stop early?',
+    code:"items = []\nok = len(items) > 0 and items[0] == \"x\"\nprint(ok)\n",
+    pseudo:['items is an empty list.','Is the list non-empty AND is its first item "x"?','Show the answer.'],
+    lines:{
+      2:{t:'Short-circuit', b:'and checks the left side first. If it is False, the whole answer is False, so Python never looks at the right side. That is why items[0] is never read here.', look:'No error, even though items is empty.'}
+    },
+    predict:{line:2, q:'What will ok hold?', target:{v:'ok'}, opts:['False','An error','True'],
+      fb:{'An error':'Not quite. and stops as soon as the left side is False, so items[0] never runs.'}},
+    variants:[{label:'length check first'},{label:'items[0] first', from:'len(items) > 0 and items[0] == "x"', to:'items[0] == "x" and len(items) > 0'}],
+    recap:'and stops at the first False; or stops at the first True. Putting the safe check first (is the list non-empty?) protects the risky one (items[0]). Swap them and the risky part runs first and crashes.',
+    check:{code:"d = None\nok = d is not None and d > 3", q:'What is ok?', opts:['False','An error'], right:0, fb:['Right. The first part is False, so d > 3 never runs.','Not quite. and stops early here.']},
+    dec:'First question: is the list non-empty? If no, stop: the answer is False. Only if yes, ask the second question: is the first item "x"?'
+  },
+  cond_elif: {
+    topic:'Conditions and logic', title:'Which elif wins?',
+    code:"score = 72\nif score >= 90:\n    grade = \"A\"\nelif score >= 70:\n    grade = \"B\"\nelif score >= 50:\n    grade = \"C\"\nelse:\n    grade = \"F\"\nprint(grade)\n",
+    pseudo:['score is 72.','90 or more?','A.','Otherwise, 70 or more?','B.','Otherwise, 50 or more?','C.','None of those:','F.','Show grade.'],
+    lines:{
+      2:{t:'First test', b:'Python checks the conditions top to bottom.', look:'Which line runs next.'},
+      4:{t:'Next test', b:'The first test failed, so Python tries the elif.', look:'Which line runs next.'},
+      5:{t:'First match wins', b:'This condition is True. Its block runs and every later elif and else is skipped, even though 72 >= 50 is also True.', look:'grade appears.'}
+    },
+    predict:{line:10, q:'What will print(grade) show?', target:{out:true}, opts:['B','C','B C'],
+      fb:{'C':'Not quite. 72 >= 50 is True, but Python stops at the first True condition, which is 70.','B C':'Not quite. Only one block of an if / elif chain runs.'}},
+    variants:[{label:'72'},{label:'95', from:'score = 72', to:'score = 95', opts:['A','B','A B']},{label:'40', from:'score = 72', to:'score = 40', opts:['F','C','An error']}],
+    recap:'An if / elif / else chain runs at most one block: the first one whose condition is True. That is why the order matters: put the strictest test first.',
+    check:{code:"x = 5\nif x > 1:\n    r = 'a'\nelif x > 3:\n    r = 'b'", q:'What is r?', opts:["'a'","'b'"], right:0, fb:['Right. x > 1 is checked first and is True.','Not quite. x > 3 is True too, but the chain stopped at the first match.']},
+    dec:'90 or more? No. 70 or more? Yes: grade B, and the chain stops. The remaining questions are never asked.'
+  }
+});
+Object.assign(PY_TOPIC_LESSONS, {
+  '01': ['val_assign','val_keep','val_strnum','val_int'],
+  '02': ['num_floordiv','num_mod','num_float','num_order'],
+  '03': ['str_index','str_slice','str_immut','str_find','str_fstring'],
+  '04': ['cond_branch','cond_boundary','cond_and','cond_elif']
+});
+
 const CURRICULUM = {"py": [{"n": "01", "t": "Values and names", "level": "Level 1: Beginner", "subs": ["What does = do?", "Why did x keep its old value?", "\"7\" vs 7", "Converting with int()"], "book": "Crash Course ch. 2; Lutz Part II"}, {"n": "02", "t": "Numbers and operators", "level": "Level 1: Beginner", "subs": ["7 // 2", "What % keeps", "0.1 + 0.2", "Operator order"], "book": "Crash Course ch. 2; Lutz ch. 5"}, {"n": "03", "t": "Strings", "level": "Level 1: Beginner", "subs": ["Index 0", "Slicing", "Why can't I change a letter?", "find on a miss", "f-strings"], "book": "Crash Course ch. 2; Lutz ch. 7"}, {"n": "04", "t": "Conditions and logic", "level": "Level 1: Beginner", "subs": ["Which branch runs?", "Boundaries with >=", "When and stops early", "elif chains"], "book": "Crash Course ch. 5; Lutz ch. 12"}, {"n": "05", "t": "Lists", "level": "Level 1: Beginner", "subs": ["Index -1", "Slices", "append vs insert", "in", "Out of range", "Why did both lists change?"], "book": "Crash Course ch. 3 and 4"}, {"n": "06", "t": "Loops", "level": "Level 1: Beginner", "subs": ["How for takes each item", "Running total", "Counting matches", "Filtering", "while and its exit", "break and continue"], "book": "Crash Course ch. 4 and 7; Lutz ch. 13"}, {"n": "07", "t": "Dicts, tuples and sets", "level": "Level 1: Beginner", "subs": ["Key lookup", "Missing key: [] vs .get", "Counting with a dict", "Tuple unpacking", "Sets drop duplicates"], "book": "Crash Course ch. 6; Lutz ch. 8 and 9"}, {"n": "08", "t": "Functions: the basics", "level": "Level 1: Beginner", "subs": ["Arguments enter a call frame", "return vs print", "Parameters vs arguments", "No return gives None"], "book": "Crash Course ch. 8; Lutz ch. 16"}, {"n": "09", "t": "Functions in depth", "level": "Level 2: Intermediate", "subs": ["Scope and the LEGB rule", "The shared default list trap", "*args and **kwargs", "Keyword-only arguments", "lambda", "Recursion and the call stack"], "book": "Lutz ch. 17 to 19"}, {"n": "10", "t": "Mutability and copying", "level": "Level 2: Intermediate", "subs": ["Mutable vs immutable", "copy() is shallow", "deepcopy", "Passing a list into a function"], "book": "Ramalho ch. 6"}, {"n": "11", "t": "Comprehensions", "level": "Level 2: Intermediate", "subs": ["A comprehension is a loop", "Filtering inside it", "Dict and set comprehensions"], "book": "Lutz ch. 14 and 20"}, {"n": "12", "t": "Classes and objects", "level": "Level 2: Intermediate", "subs": ["Class vs object", "__init__ and self", "Instance vs class attributes", "Methods change state", "__repr__ and __str__"], "book": "Crash Course ch. 9; Lutz ch. 26 to 28"}, {"n": "13", "t": "Encapsulation", "level": "Level 2: Intermediate", "subs": ["The _private convention", "Name mangling with __", "@property getters and setters with validation"], "book": "Lutz ch. 38; Ramalho ch. 11"}, {"n": "14", "t": "Inheritance", "level": "Level 2: Intermediate", "subs": ["A subclass reuses code", "Overriding a method", "super().__init__", "isinstance and issubclass"], "book": "Crash Course ch. 9; Lutz ch. 29; Ramalho ch. 14"}, {"n": "15", "t": "Polymorphism", "level": "Level 2: Intermediate", "subs": ["One call, different classes", "Duck typing", "Operator overloading with __add__, __eq__, __len__"], "book": "Lutz ch. 30; Ramalho ch. 13 and 16"}, {"n": "16", "t": "Abstraction and composition", "level": "Level 2: Intermediate", "subs": ["Abstract base classes with @abstractmethod", "Composition: has-a vs is-a", "Choosing between them"], "book": "Lutz ch. 31; Ramalho ch. 13"}, {"n": "17", "t": "Exceptions", "level": "Level 2: Intermediate", "subs": ["Reading a traceback", "try / except path", "finally", "Writing your own exception class"], "book": "Crash Course ch. 10; Lutz Part VII"}, {"n": "18", "t": "Modules and files", "level": "Level 2: Intermediate", "subs": ["How import works", "if __name__ == \"__main__\"", "Reading and writing files with with"], "book": "Crash Course ch. 10; Lutz Part V"}, {"n": "19", "t": "Closures and decorators", "level": "Level 3: Professional", "subs": ["A closure keeps a variable alive", "nonlocal", "A decorator wraps a function", "functools.wraps"], "book": "Ramalho ch. 9; Lutz ch. 39"}, {"n": "20", "t": "Iterators and generators", "level": "Level 3: Professional", "subs": ["The iter / next protocol", "A generator pauses at yield", "A used-up generator", "Generator pipelines"], "book": "Ramalho ch. 17; Lutz ch. 20"}, {"n": "21", "t": "Advanced OOP", "level": "Level 3: Professional", "subs": ["@classmethod and @staticmethod", "Multiple inheritance and the MRO", "Mixins", "@dataclass", "How @property works (descriptors)"], "book": "Ramalho ch. 5, 14 and 23; Lutz ch. 32 and 38"}, {"n": "22", "t": "Context managers", "level": "Level 3: Professional", "subs": ["The with protocol: __enter__ and __exit__", "contextlib.contextmanager"], "book": "Ramalho ch. 18"}, {"n": "23", "t": "Typing and testing", "level": "Level 3: Professional", "subs": ["Type hints", "Protocols", "Writing a test with assert"], "book": "Ramalho ch. 8 and 13"}, {"n": "24", "t": "Design", "level": "Level 3: Professional", "subs": ["SOLID in Python", "Strategy pattern", "Factory pattern"], "book": "Ramalho ch. 10"}], "java": [{"n": "01", "t": "Primitives and references", "level": "Level 1: Beginner", "subs": ["Why does int copy but an array share?", "What new creates", "null", "Stack vs heap"], "book": "Head First ch. 3; Core Java ch. 3"}, {"n": "02", "t": "Operators and casting", "level": "Level 1: Beginner", "subs": ["7 / 2 is 3", "% with negatives", "Widening vs narrowing casts", "int overflow"], "book": "Core Java ch. 3"}, {"n": "03", "t": "Strings", "level": "Level 1: Beginner", "subs": ["Why a String is immutable", "== vs .equals", "substring end index", "StringBuilder"], "book": "Head First ch. 10; Core Java ch. 3"}, {"n": "04", "t": "Conditions and loops", "level": "Level 1: Beginner", "subs": ["if / else path", "switch", "for vs enhanced for", "while exit", "Off-by-one in i <= n"], "book": "Head First ch. 5; Core Java ch. 3"}, {"n": "05", "t": "Arrays", "level": "Level 1: Beginner", "subs": ["Fixed length", "Index out of bounds", "Arrays.copyOf", "Two variables, one array"], "book": "Head First ch. 3; Core Java ch. 3"}, {"n": "06", "t": "Methods", "level": "Level 1: Beginner", "subs": ["Arguments are copied into the frame", "Why a method can change my array but not my int", "Return values", "Recursion"], "book": "Head First ch. 4; Core Java ch. 4"}, {"n": "07", "t": "Classes and objects", "level": "Level 2: Intermediate, the OOP core", "subs": ["Fields per object", "Constructors and constructor overloading", "this", "static vs instance members", "toString"], "book": "Head First ch. 2 and 9; Core Java ch. 4"}, {"n": "08", "t": "Encapsulation", "level": "Level 2: Intermediate, the OOP core", "subs": ["Private fields with getters and setters", "Validation in a setter", "Access modifiers: public, protected, package, private"], "book": "Head First ch. 4; Core Java ch. 4"}, {"n": "09", "t": "Inheritance", "level": "Level 2: Intermediate, the OOP core", "subs": ["extends", "super() in constructors", "Overriding with @Override", "final classes and methods"], "book": "Head First ch. 7; Core Java ch. 5"}, {"n": "10", "t": "Polymorphism", "level": "Level 2: Intermediate, the OOP core", "subs": ["Superclass variable, subclass object", "Dynamic dispatch: which method runs?", "Overloading vs overriding", "Casting and instanceof"], "book": "Head First ch. 7 and 8; Core Java ch. 5"}, {"n": "11", "t": "Abstraction", "level": "Level 2: Intermediate, the OOP core", "subs": ["Abstract classes", "Interfaces", "Default methods", "Abstract class or interface?"], "book": "Head First ch. 8; Core Java ch. 6; Effective Java item 20"}, {"n": "12", "t": "The Object contract", "level": "Level 2: Intermediate, the OOP core", "subs": ["equals and hashCode together", "== vs equals on objects", "Comparable and Comparator"], "book": "Core Java ch. 5; Effective Java items 10 to 14"}, {"n": "13", "t": "Collections", "level": "Level 2: Intermediate, the OOP core", "subs": ["Why did both lists change?", "ArrayList growth", "HashMap lookups", "HashSet duplicates", "Removing while looping"], "book": "Head First ch. 11; Core Java ch. 9"}, {"n": "14", "t": "Generics", "level": "Level 2: Intermediate, the OOP core", "subs": ["Why List<Integer> and not List<int>", "Autoboxing", "Generic methods and bounded types"], "book": "Core Java ch. 8; Effective Java ch. 5"}, {"n": "15", "t": "Exceptions", "level": "Level 2: Intermediate, the OOP core", "subs": ["Reading a stack trace", "try / catch / finally", "Checked vs unchecked", "Custom exceptions"], "book": "Head First ch. 13; Core Java ch. 7"}, {"n": "16", "t": "Immutability and records", "level": "Level 3: Professional", "subs": ["final fields", "Defensive copies", "Records"], "book": "Effective Java items 17 and 50"}, {"n": "17", "t": "Enums and nested classes", "level": "Level 3: Professional", "subs": ["Enums with fields and methods", "Inner vs static nested classes", "Anonymous classes"], "book": "Core Java ch. 5 and 6"}, {"n": "18", "t": "Lambdas and streams", "level": "Level 3: Professional", "subs": ["Functional interfaces", "Lambdas", "Method references", "filter / map / collect", "Optional"], "book": "Head First ch. 12; Core Java ch. 6 and Volume II ch. 1"}, {"n": "19", "t": "Composition and design", "level": "Level 3: Professional", "subs": ["Composition over inheritance", "SOLID", "Strategy pattern", "Builder pattern"], "book": "Effective Java items 2 and 18"}, {"n": "20", "t": "Files and concurrency", "level": "Level 3: Professional", "subs": ["try-with-resources", "Reading a file", "Threads and a race on shared state"], "book": "Head First ch. 16 and 17; Core Java ch. 12"}]};
 
 const BUILT = { py: Object.assign({'05': LISTS_ORDER}, PY_TOPIC_LESSONS), java: {'13': ['alias']} };
@@ -2239,7 +2501,8 @@ function renderTLCode(ranLine, isRecap){
   }).join('') + `</pre><p class="vnote">Blue: the line that just ran. Outlined: the line that runs next.</p>`;
   $('#v-pseudo').innerHTML = `<ol class="pseudo">` + L0.pseudo.map((t,i)=>`<li class="${ranLine && i+1===tlOrigLine(ranLine)?'active':''}">${esc(t)}</li>`).join('') + `</ol>`;
   const straight = T.steps.every((st,i)=> st.frames.length===1 && (i===0 || st.line>=T.steps[i-1].line || st.done || st.error));
-  if(straight){
+  const ranSet = new Set(T.steps.map(st=>st.line)); const straightAll = straight && T.src.every((t,i)=> !t.trim() || ranSet.has(i+1) || (T.steps[T.steps.length-1].error));
+  if(straight && straightAll){
   const lines = T.src.map((t,i)=>({t:t.trim(), n:i+1})).filter(x=>x.t);
   const H = 60 + lines.length*56 + 40;
   let f = `<svg class="diagram" viewBox="0 0 340 ${H}" role="img" aria-label="Flowchart"><defs><marker id="fa2" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto"><path class="fmark" d="M0,0 L10,5 L0,10 z"/></marker></defs>`;
@@ -2272,7 +2535,7 @@ function renderTLCode(ranLine, isRecap){
   }
   $('#v-dec').innerHTML = L0.dec
     ? `<p class="vnote" style="font-size:14px;color:var(--ink)">${esc(L0.dec)}</p>`
-    : `<p class="vnote" style="font-size:14px;color:var(--ink)">This lesson has no decisions: each line runs once, top to bottom.</p><p class="vnote">The question to ask at each line is "which slot?". Read the index, count from 0 (or back from the end for a negative index), and check that the slot exists.</p>`;
+    : `<p class="vnote" style="font-size:14px;color:var(--ink)">This lesson has no decisions: each line runs once, top to bottom.</p>${L0.topic ? '' : '<p class="vnote">The question to ask at each line is "which slot?". Read the index, count from 0 (or back from the end for a negative index), and check that the slot exists.</p>'}`;
 }
 
 function setLang(lg, animate=true){
