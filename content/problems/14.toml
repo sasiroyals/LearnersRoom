@@ -1,53 +1,92 @@
 topic = "14"
+# One problem per lesson sub-topic. Generated test answers come from the solution.
 
 [[problem]]
-id = "dog"
-title = "Override a method"
+id = "dog_speak"
+lesson = "inh_reuse"
+title = "A Dog is an Animal"
 level = "Easy"
-story = "Animal.speak() returns '... makes a sound'. Write Dog(Animal) whose speak() returns '<name> says woof'."
-hint = "Define speak again inside Dog. Python looks in Dog before Animal."
+kind = "function"
+story = "Animal is given. Write a class Dog that inherits from Animal and adds speak(), which returns \"Rex says woof\" for a dog named Rex."
+hints = ["class Dog(Animal): gives Dog everything Animal has, including name.", "return f\"{self.name} says woof\""]
+approach = "Dog reuses Animal's __init__, so it only needs to add the new method."
+gfg = "python inheritance"
 starter = '''
 class Animal:
     def __init__(self, name):
         self.name = name
 
-    def speak(self):
-        return self.name + ' makes a sound'
 
-
-class Dog(Animal):
-    pass
+# Write class Dog here
 '''
 solution = '''
 class Animal:
     def __init__(self, name):
         self.name = name
 
-    def speak(self):
-        return self.name + ' makes a sound'
-
 
 class Dog(Animal):
     def speak(self):
-        return self.name + ' says woof'
-'''
-demo = '''
-print(Animal('Cat').speak())
-print(Dog('Rex').speak())
+        return f"{self.name} says woof"
 '''
 [[problem.tests]]
-call = "Dog('Rex').speak()"
+call = "Dog(\"Rex\").speak()"
 expect = "'Rex says woof'"
 [[problem.tests]]
-call = "Animal('Cat').speak()"
-expect = "'Cat makes a sound'"
+call = "Dog(\"Bo\").name"
+expect = "'Bo'"
 
 [[problem]]
-id = "emp"
+id = "square_area"
+lesson = "inh_override"
+title = "Override area"
+level = "Easy"
+kind = "function"
+story = "Shape is given and its area() returns 0. Write Square(Shape), made with Square(side), whose area() returns side * side."
+hints = ["Define area in Square with the same name to replace the parent's version.", "Store side in __init__."]
+approach = "Python looks in Square first, so its area() wins over Shape's."
+gfg = "python method overriding"
+starter = '''
+class Shape:
+    def area(self):
+        return 0
+
+
+# Write class Square here
+'''
+solution = '''
+class Shape:
+    def area(self):
+        return 0
+
+
+class Square(Shape):
+    def __init__(self, side):
+        self.side = side
+
+    def area(self):
+        return self.side * self.side
+'''
+[[problem.tests]]
+call = "Square(3).area()"
+expect = "9"
+[[problem.tests]]
+call = "Shape().area()"
+expect = "0"
+[[problem.tests]]
+call = "Square(0).area()"
+expect = "0"
+
+[[problem]]
+id = "employee_super"
+lesson = "inh_super"
 title = "Call the parent's __init__"
 level = "Medium"
-story = "Employee(name, salary) extends Person(name). Use super().__init__ to set the name, store the salary, and write describe() returning '<name> earns <salary>'."
-hint = "super().__init__(name) runs Person's __init__ on this same object."
+kind = "function"
+story = "Person is given. Employee(name, salary) should inherit from Person, set name through Person's __init__ using super(), and have describe() return \"Ann earns 500\"."
+hints = ["super().__init__(name) runs Person's setup on this object.", "Then store self.salary = salary."]
+approach = "Calling super().__init__ keeps the parent's setup in one place instead of copying it."
+gfg = "python super function"
 starter = '''
 class Person:
     def __init__(self, name):
@@ -56,10 +95,10 @@ class Person:
 
 class Employee(Person):
     def __init__(self, name, salary):
-        pass
+        self.salary = salary
 
     def describe(self):
-        pass
+        return f"{self.name} earns {self.salary}"
 '''
 solution = '''
 class Person:
@@ -73,69 +112,60 @@ class Employee(Person):
         self.salary = salary
 
     def describe(self):
-        return self.name + ' earns ' + str(self.salary)
-'''
-demo = '''
-e = Employee('Ann', 100)
-print(e.describe())
+        return f"{self.name} earns {self.salary}"
 '''
 [[problem.tests]]
-call = "Employee('Ann', 100).describe()"
-expect = "'Ann earns 100'"
+call = "Employee(\"Ann\", 500).describe()"
+expect = "'Ann earns 500'"
 [[problem.tests]]
-call = "isinstance(Employee('Bo', 5), Person)"
-expect = "True"
+call = "Employee(\"Bo\", 0).name"
+expect = "'Bo'"
 
 [[problem]]
-id = "countdogs"
-title = "Count with isinstance"
-level = "Medium"
-story = "Write count_dogs(animals) that counts how many items in the list are Dogs (including subclasses of Dog)."
-hint = "isinstance(a, Dog) is also True for a Puppy, because Puppy is a Dog."
+id = "count_vehicles"
+lesson = "inh_isinstance"
+title = "Count the vehicles"
+level = "Easy"
+kind = "function"
+story = "Vehicle, Bike(Vehicle) and Rock are given. Write count_vehicles(items) that returns how many items are vehicles, counting subclasses too."
+hints = ["isinstance(x, Vehicle) is True for a Bike as well.", "Count with a loop or sum(1 for x in items if ...)."]
+approach = "isinstance follows the inheritance chain, while type(x) == Vehicle would miss the Bike."
+gfg = "python isinstance"
 starter = '''
-class Animal:
+class Vehicle:
     pass
 
-class Dog(Animal):
+class Bike(Vehicle):
     pass
 
-class Puppy(Dog):
-    pass
-
-class Cat(Animal):
+class Rock:
     pass
 
 
-def count_dogs(animals):
+def count_vehicles(items):
+    # Write your code here
     pass
 '''
 solution = '''
-class Animal:
+class Vehicle:
     pass
 
-class Dog(Animal):
+class Bike(Vehicle):
     pass
 
-class Puppy(Dog):
-    pass
-
-class Cat(Animal):
+class Rock:
     pass
 
 
-def count_dogs(animals):
-    count = 0
-    for a in animals:
-        if isinstance(a, Dog):
-            count = count + 1
-    return count
-'''
-demo = '''
-print(count_dogs([Dog(), Cat(), Puppy()]))
+def count_vehicles(items):
+    return sum(1 for x in items if isinstance(x, Vehicle))
 '''
 [[problem.tests]]
-call = "count_dogs([Dog(), Cat(), Puppy()])"
+call = "count_vehicles([Vehicle(), Bike(), Rock()])"
 expect = "2"
 [[problem.tests]]
-call = "count_dogs([Cat()])"
+call = "count_vehicles([])"
+expect = "0"
+[[problem.tests]]
+call = "count_vehicles([Rock()])"
 expect = "0"

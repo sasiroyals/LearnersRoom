@@ -1,120 +1,202 @@
 topic = "21"
+# One problem per lesson sub-topic. Generated test answers come from the solution.
 
 [[problem]]
-id = "point"
-title = "Build from text with a classmethod"
+id = "date_from_string"
+lesson = "adv_classmethod"
+title = "A second constructor"
 level = "Medium"
-story = "Write Point(x, y) with a classmethod from_string(text) that turns '3,4' into Point(3, 4)."
-hint = "A classmethod gets the class as cls, so it can call cls(...) to build an object."
+kind = "function"
+story = "Date(year, month, day) is given. Add a @classmethod from_string(text) that builds a Date from text like \"2024-05-01\"."
+hints = ["A classmethod receives the class as cls.", "Split on \"-\", convert to int, then return cls(y, m, d)."]
+approach = "A classmethod is an alternative constructor: it works on the class and returns a new object."
+gfg = "python classmethod"
 starter = '''
-class Point:
-    def __init__(self, x, y):
-        self.x = x
-        self.y = y
+class Date:
+    def __init__(self, year, month, day):
+        self.year = year
+        self.month = month
+        self.day = day
 
-    # add a classmethod from_string
+    def as_tuple(self):
+        return (self.year, self.month, self.day)
 '''
 solution = '''
-class Point:
-    def __init__(self, x, y):
-        self.x = x
-        self.y = y
+class Date:
+    def __init__(self, year, month, day):
+        self.year = year
+        self.month = month
+        self.day = day
+
+    def as_tuple(self):
+        return (self.year, self.month, self.day)
 
     @classmethod
     def from_string(cls, text):
-        parts = text.split(',')
-        return cls(int(parts[0]), int(parts[1]))
-'''
-demo = '''
-p = Point.from_string('3,4')
-print(p.x, p.y)
+        y, m, d = text.split("-")
+        return cls(int(y), int(m), int(d))
 '''
 [[problem.tests]]
-setup = '''
-p = Point.from_string('3,4')
-'''
-call = "(p.x, p.y)"
-expect = "(3, 4)"
+call = "Date.from_string(\"2024-05-01\").as_tuple()"
+expect = "(2024, 5, 1)"
 [[problem.tests]]
-setup = '''
-p = Point.from_string('10,0')
-'''
-call = "(p.x, p.y)"
-expect = "(10, 0)"
+call = "Date.from_string(\"1999-12-31\").as_tuple()"
+expect = "(1999, 12, 31)"
 
 [[problem]]
-id = "static"
-title = "A helper with staticmethod"
-level = "Easy"
-story = "Add a staticmethod is_valid(code) to Coupon that returns True when code has exactly 6 characters, all digits."
-hint = "A staticmethod has no self and no cls. Call it on the class itself."
+id = "duck_mro"
+lesson = "adv_mro"
+title = "Which parent wins?"
+level = "Medium"
+kind = "function"
+story = "Duck inherits from Flyer and Swimmer, which both define move(). Ducks should swim first, so Duck().move() must return \"swim\". Change only the class line of Duck."
+hints = ["Python searches parents from left to right (the MRO).", "Put Swimmer before Flyer."]
+approach = "The method resolution order lists Duck, then its parents in the order written."
+gfg = "python method resolution order"
 starter = '''
-class Coupon:
-    # add a staticmethod is_valid
+class Flyer:
+    def move(self):
+        return "fly"
+
+
+class Swimmer:
+    def move(self):
+        return "swim"
+
+
+class Duck(Flyer, Swimmer):
     pass
 '''
 solution = '''
-class Coupon:
-    @staticmethod
-    def is_valid(code):
-        return len(code) == 6 and code.isdigit()
-'''
-demo = '''
-print(Coupon.is_valid('123456'))
-print(Coupon.is_valid('12ab56'))
-'''
-[[problem.tests]]
-call = "Coupon.is_valid('123456')"
-expect = "True"
-[[problem.tests]]
-call = "Coupon.is_valid('12ab56')"
-expect = "False"
-[[problem.tests]]
-call = "Coupon.is_valid('123')"
-expect = "False"
-
-[[problem]]
-id = "mro"
-title = "Which method wins?"
-level = "Medium"
-story = "Duck inherits from Flyer and then Swimmer, and both define move(). Write Duck so that duck.move() returns both results joined with ' and ', using the MRO order."
-hint = "Call each parent's method by naming the class: Flyer.move(self)."
-starter = '''
 class Flyer:
     def move(self):
-        return 'fly'
+        return "fly"
 
 
 class Swimmer:
     def move(self):
-        return 'swim'
+        return "swim"
 
 
-class Duck(Flyer, Swimmer):
-    def move(self):
-        pass
-'''
-solution = '''
-class Flyer:
-    def move(self):
-        return 'fly'
-
-
-class Swimmer:
-    def move(self):
-        return 'swim'
-
-
-class Duck(Flyer, Swimmer):
-    def move(self):
-        return Flyer.move(self) + ' and ' + Swimmer.move(self)
-'''
-demo = '''
-print(Duck().move())
+class Duck(Swimmer, Flyer):
+    pass
 '''
 [[problem.tests]]
 call = "Duck().move()"
-expect = "'fly and swim'"
+expect = "'swim'"
 [[problem.tests]]
 call = "[c.__name__ for c in Duck.__mro__]"
-expect = "['Duck', 'Flyer', 'Swimmer', 'object']"
+expect = "['Duck', 'Swimmer', 'Flyer', 'object']"
+
+[[problem]]
+id = "pairs_mixin"
+lesson = "adv_mixin"
+title = "A reusable mixin"
+level = "Medium"
+kind = "function"
+story = "Write a mixin PairsMixin with a method to_pairs() that returns sorted(self.__dict__.items()). Then User(name, age) should use it by inheriting from it."
+hints = ["A mixin is a small class that only adds methods.", "class User(PairsMixin):"]
+approach = "Any class can mix in to_pairs by listing PairsMixin as a parent."
+gfg = "python mixin"
+starter = '''
+# Write class PairsMixin here
+
+
+class User:
+    def __init__(self, name, age):
+        self.name = name
+        self.age = age
+'''
+solution = '''
+class PairsMixin:
+    def to_pairs(self):
+        return sorted(self.__dict__.items())
+
+
+class User(PairsMixin):
+    def __init__(self, name, age):
+        self.name = name
+        self.age = age
+'''
+[[problem.tests]]
+call = "User(\"ann\", 3).to_pairs()"
+expect = "[('age', 3), ('name', 'ann')]"
+
+[[problem]]
+id = "item_dataclass"
+lesson = "adv_dataclass"
+title = "Let @dataclass write __init__"
+level = "Medium"
+kind = "function"
+story = "Write Item as a @dataclass with fields name, price and qty (default 1), plus a method total() that returns price * qty."
+hints = ["from dataclasses import dataclass", "Fields are written as name: str, price: float, qty: int = 1."]
+approach = "@dataclass reads the annotated fields and writes __init__ (and __repr__, __eq__) for you."
+gfg = "python dataclasses"
+starter = '''
+from dataclasses import dataclass
+
+
+class Item:
+    pass
+'''
+solution = '''
+from dataclasses import dataclass
+
+
+@dataclass
+class Item:
+    name: str
+    price: float
+    qty: int = 1
+
+    def total(self):
+        return self.price * self.qty
+'''
+[[problem.tests]]
+call = "Item(\"pen\", 2, 3).total()"
+expect = "6"
+[[problem.tests]]
+call = "Item(\"cup\", 5).total()"
+expect = "5"
+[[problem.tests]]
+call = "Item(\"a\", 1).name"
+expect = "'a'"
+
+[[problem]]
+id = "fahrenheit_prop"
+lesson = "adv_descriptor"
+title = "A two-way property"
+level = "Hard"
+kind = "function"
+story = "Temp(celsius) is given. Add a fahrenheit property: reading it converts from celsius, and setting it converts back and updates celsius."
+hints = ["F = C * 9 / 5 + 32, and C = (F - 32) * 5 / 9.", "Use @property for the getter and @fahrenheit.setter for the setter."]
+approach = "Only celsius is stored. The property computes fahrenheit on demand, so the two never disagree."
+gfg = "python property setter"
+starter = '''
+class Temp:
+    def __init__(self, celsius):
+        self.celsius = celsius
+'''
+solution = '''
+class Temp:
+    def __init__(self, celsius):
+        self.celsius = celsius
+
+    @property
+    def fahrenheit(self):
+        return self.celsius * 9 / 5 + 32
+
+    @fahrenheit.setter
+    def fahrenheit(self, value):
+        self.celsius = (value - 32) * 5 / 9
+'''
+[[problem.tests]]
+call = "Temp(100).fahrenheit"
+expect = "212.0"
+[[problem.tests]]
+setup = '''
+t = Temp(0)
+t.fahrenheit = 212
+'''
+call = "t.celsius"
+expect = "100.0"

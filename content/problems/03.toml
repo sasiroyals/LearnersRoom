@@ -1,152 +1,205 @@
 topic = "03"
+# One problem per lesson sub-topic. Generated test answers come from the solution.
 
-# Beginner problems: change the program so it prints the right output.
 [[problem]]
-id = "shout_word"
-title = "Shout it"
+id = "first_last"
+lesson = "str_index"
+title = "First and last letter"
 level = "Easy"
 kind = "output"
-story = "Make the program print the word in capital letters with an exclamation mark: HELLO!"
-hint = "word.upper() gives the capital-letter version. + joins two pieces of text."
+story = "word holds a word. Print its first letter on one line and its last letter on the next."
+hints = ["The first letter is at index 0.", "Index -1 is always the last one."]
+approach = "word[0] counts from the start and word[-1] counts from the end."
+gfg = "python string indexing"
 starter = '''
+# The input is already in: word
+# Write your code below and print the answer.
+'''
+solution = '''
+print(word[0])
+print(word[-1])
+'''
+[[problem.tests]]
+before = '''
+word = "python"
+'''
+output = '''
+p
+n
+'''
+[[problem.tests]]
+before = '''
+word = "a"
+'''
+output = '''
+a
+a
+'''
+[[problem.tests]]
+before = '''
+word = "level"
+'''
+output = '''
+l
+l
+'''
+
+[[problem]]
+id = "middle"
+lesson = "str_slice"
+title = "Drop the ends"
+level = "Easy"
+kind = "output"
+story = "word has at least 2 letters. Print it without its first and last letter."
+hints = ["A slice word[start:end] stops just before end.", "word[1:-1] starts after the first letter and stops before the last."]
+approach = "Slicing from 1 to -1 skips one letter at each end."
+gfg = "python string slicing"
+starter = '''
+# The input is already in: word
+# Write your code below and print the answer.
+'''
+solution = '''
+print(word[1:-1])
+'''
+[[problem.tests]]
+before = '''
+word = "python"
+'''
+output = '''
+ytho
+'''
+[[problem.tests]]
+before = '''
+word = "ab"
+'''
+output = '''
+
+'''
+[[problem.tests]]
+before = '''
 word = "hello"
-print(word)
 '''
-solution = '''
-word = "hello"
-print(word.upper() + "!")
-'''
-[[problem.tests]]
 output = '''
-HELLO!
+ell
 '''
 
 [[problem]]
-id = "first_letters"
-title = "First letters"
+id = "capitalize"
+lesson = "str_immut"
+title = "Capital first letter"
 level = "Easy"
 kind = "output"
-story = "Print the first letter of each name, joined together: GH"
-hint = "first[0] is the first letter of first."
+story = "word is a lowercase word. Print it with its first letter changed to a capital."
+hints = ["Strings cannot be changed in place, so word[0] = ... fails. Build a new string.", "word[0].upper() + word[1:]"]
+approach = "You build a new string from a capital first letter plus the rest of the word."
+gfg = "python string capitalize"
 starter = '''
-first = "Grace"
-last = "Hopper"
-print(first, last)
+# The input is already in: word
+# Write your code below and print the answer.
 '''
 solution = '''
-first = "Grace"
-last = "Hopper"
-print(first[0] + last[0])
+print(word[0].upper() + word[1:])
 '''
 [[problem.tests]]
+before = '''
+word = "python"
+'''
 output = '''
-GH
+Python
+'''
+[[problem.tests]]
+before = '''
+word = "a"
+'''
+output = '''
+A
+'''
+[[problem.tests]]
+before = '''
+word = "london"
+'''
+output = '''
+London
 '''
 
 [[problem]]
-id = "name_card"
-title = "Name card"
+id = "email_domain"
+lesson = "str_find"
+title = "Email domain"
 level = "Easy"
 kind = "output"
-story = "Use an f-string so the program prints Lin is 14 years old."
-hint = "Put f before the quotes, and the names inside curly brackets: f\"{name} is ...\"."
+story = "email holds an email address. Print the part after the @."
+hints = ["email.find(\"@\") gives the position of the @.", "Slice from one past that position to the end."]
+approach = "find tells you where the @ is, and a slice takes everything after it."
+gfg = "python string find"
 starter = '''
-name = "Lin"
-age = 14
-print("name is age years old")
+# The input is already in: email
+# Write your code below and print the answer.
 '''
 solution = '''
-name = "Lin"
-age = 14
-print(f"{name} is {age} years old")
+at = email.find("@")
+print(email[at + 1:])
 '''
 [[problem.tests]]
+before = '''
+email = "sam@mail.com"
+'''
 output = '''
-Lin is 14 years old
+mail.com
+'''
+[[problem.tests]]
+before = '''
+email = "a@b.org"
+'''
+output = '''
+b.org
+'''
+[[problem.tests]]
+before = '''
+email = "first.last@school.edu"
+'''
+output = '''
+school.edu
 '''
 
 [[problem]]
-id = "pal"
-title = "Palindrome check"
+id = "receipt_line"
+lesson = "str_fstring"
+title = "Receipt line"
 level = "Easy"
-story = "Write is_palindrome(word) that returns True when the word reads the same backwards, ignoring capital letters."
-hint = "word[::-1] is the word reversed. Lower-case it first."
+kind = "output"
+story = "item is a name and price is a number. Print a receipt line like apple: $1.50, always with 2 digits after the point."
+hints = ["An f-string puts values in with {item}.", "{price:.2f} shows a number with 2 decimals."]
+approach = "Inside an f-string, the part after the colon controls how the number is shown."
+gfg = "python f-string format"
 starter = '''
-def is_palindrome(word):
-    pass
+# The input is already in: item, price
+# Write your code below and print the answer.
 '''
 solution = '''
-def is_palindrome(word):
-    word = word.lower()
-    return word == word[::-1]
-'''
-demo = '''
-print(is_palindrome('Level'))
+print(f"{item}: ${price:.2f}")
 '''
 [[problem.tests]]
-call = "is_palindrome('Level')"
-expect = "True"
-[[problem.tests]]
-call = "is_palindrome('python')"
-expect = "False"
-[[problem.tests]]
-call = "is_palindrome('a')"
-expect = "True"
-
-[[problem]]
-id = "vowels"
-title = "Count the vowels"
-level = "Easy"
-story = "Write count_vowels(text) that counts how many of the letters a, e, i, o, u appear, in either case."
-hint = "Loop over text.lower() and test each letter with in 'aeiou'."
-starter = '''
-def count_vowels(text):
-    pass
+before = '''
+item = "apple"
+price = 1.5
 '''
-solution = '''
-def count_vowels(text):
-    count = 0
-    for ch in text.lower():
-        if ch in 'aeiou':
-            count = count + 1
-    return count
-'''
-demo = '''
-print(count_vowels('Banana'))
+output = '''
+apple: $1.50
 '''
 [[problem.tests]]
-call = "count_vowels('Banana')"
-expect = "3"
-[[problem.tests]]
-call = "count_vowels('sky')"
-expect = "0"
-[[problem.tests]]
-call = "count_vowels('AEIOU')"
-expect = "5"
-
-[[problem]]
-id = "initials"
-title = "Make initials"
-level = "Medium"
-story = "Write initials(name) that returns the first letter of each word, in capitals, each followed by a dot. 'ada lovelace' becomes 'A.L.'."
-hint = "name.split() gives a list of words. word[0] is the first letter."
-starter = '''
-def initials(name):
-    pass
+before = '''
+item = "pen"
+price = 2
 '''
-solution = '''
-def initials(name):
-    result = ''
-    for word in name.split():
-        result = result + word[0].upper() + '.'
-    return result
-'''
-demo = '''
-print(initials('ada lovelace'))
+output = '''
+pen: $2.00
 '''
 [[problem.tests]]
-call = "initials('ada lovelace')"
-expect = "'A.L.'"
-[[problem.tests]]
-call = "initials('Guido van Rossum')"
-expect = "'G.V.R.'"
+before = '''
+item = "tea"
+price = 0.75
+'''
+output = '''
+tea: $0.75
+'''

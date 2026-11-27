@@ -1,24 +1,62 @@
 topic = "20"
+# One problem per lesson sub-topic. Generated test answers come from the solution.
 
 [[problem]]
-id = "countgen"
-title = "A countdown generator"
+id = "first_n"
+lesson = "gen_iter"
+title = "Take the first n"
+level = "Medium"
+kind = "function"
+story = "Write first_n(iterable, n) that returns a list of the first n items, using iter() and next(). If there are fewer than n items, return all of them."
+hints = ["it = iter(iterable), then next(it) gives one item at a time.", "next raises StopIteration when it runs out: catch it and stop."]
+approach = "This is what a for loop does for you: call next until StopIteration."
+gfg = "python iter and next"
+starter = '''
+def first_n(iterable, n):
+    # Write your code here
+    pass
+'''
+solution = '''
+def first_n(iterable, n):
+    it = iter(iterable)
+    out = []
+    for _ in range(n):
+        try:
+            out.append(next(it))
+        except StopIteration:
+            break
+    return out
+'''
+[[problem.tests]]
+call = "first_n(\"hello\", 3)"
+expect = "['h', 'e', 'l']"
+[[problem.tests]]
+call = "first_n([1, 2], 5)"
+expect = "[1, 2]"
+[[problem.tests]]
+call = "first_n(range(100), 0)"
+expect = "[]"
+
+[[problem]]
+id = "countdown_gen"
+lesson = "gen_yield"
+title = "Countdown generator"
 level = "Easy"
-story = "Write a generator countdown(n) that yields n, n-1, ..., 1."
-hint = "yield hands back one value and pauses. The loop picks up where it left off."
+kind = "function"
+story = "Write a generator countdown(n) that yields n, n - 1, ..., 1."
+hints = ["Use yield inside a loop instead of building a list.", "while n > 0: yield n; n -= 1"]
+approach = "Each yield pauses the function and hands out one value; the next request resumes it."
+gfg = "python generators"
 starter = '''
 def countdown(n):
+    # Write your code here
     pass
 '''
 solution = '''
 def countdown(n):
     while n > 0:
         yield n
-        n = n - 1
-'''
-demo = '''
-for x in countdown(3):
-    print(x)
+        n -= 1
 '''
 [[problem.tests]]
 call = "list(countdown(3))"
@@ -28,58 +66,61 @@ call = "list(countdown(0))"
 expect = "[]"
 
 [[problem]]
-id = "evens"
-title = "Filter with a generator"
-level = "Easy"
-story = "Write a generator evens(nums) that yields only the even numbers, one at a time."
-hint = "Use yield inside the if, instead of building a list."
+id = "stats_once"
+lesson = "gen_usedup"
+title = "Use an iterator once"
+level = "Medium"
+kind = "function"
+story = "Write stats(numbers) that returns (total, count). numbers may be a generator, which can only be read once. The current version reads it twice and gets the count wrong."
+hints = ["After sum() reads a generator, it is empty.", "Turn it into a list first: nums = list(numbers)."]
+approach = "A list can be read as often as you like; a generator is used up after one pass."
+gfg = "python generator exhausted"
 starter = '''
-def evens(nums):
-    pass
+def stats(numbers):
+    return (sum(numbers), len(list(numbers)))
 '''
 solution = '''
-def evens(nums):
-    for n in nums:
-        if n % 2 == 0:
-            yield n
-'''
-demo = '''
-print(list(evens([1, 2, 3, 4])))
+def stats(numbers):
+    nums = list(numbers)
+    return (sum(nums), len(nums))
 '''
 [[problem.tests]]
-call = "list(evens([1, 2, 3, 4]))"
-expect = "[2, 4]"
+call = "stats(x for x in [1, 2, 3])"
+expect = "(6, 3)"
 [[problem.tests]]
-call = "list(evens([]))"
-expect = "[]"
+call = "stats([4, 5])"
+expect = "(9, 2)"
+[[problem.tests]]
+call = "stats(iter([]))"
+expect = "(0, 0)"
 
 [[problem]]
-id = "take"
-title = "Take the first few"
+id = "even_squares"
+lesson = "gen_pipeline"
+title = "A generator pipeline"
 level = "Medium"
-story = "Write take(n, items) that uses iter() and next() to return the first n items as a list. Assume there are at least n."
-hint = "iter(items) gives an iterator. Each next(it) moves it forward by one."
+kind = "function"
+story = "Write even_squares(nums), a generator that yields the square of each even number, using two small generator steps chained together."
+hints = ["evens = (n for n in nums if n % 2 == 0)", "Then yield from (n * n for n in evens), or loop and yield."]
+approach = "Each step pulls one value at a time from the step before, so nothing builds a full list in between."
+gfg = "python generator pipeline"
 starter = '''
-def take(n, items):
+def even_squares(nums):
+    # Write your code here
     pass
 '''
 solution = '''
-def take(n, items):
-    it = iter(items)
-    result = []
-    for _ in range(n):
-        result.append(next(it))
-    return result
-'''
-demo = '''
-print(take(2, 'abc'))
+def even_squares(nums):
+    evens = (n for n in nums if n % 2 == 0)
+    for n in evens:
+        yield n * n
 '''
 [[problem.tests]]
-call = "take(2, 'abc')"
-expect = "['a', 'b']"
+call = "list(even_squares([1, 2, 3, 4]))"
+expect = "[4, 16]"
 [[problem.tests]]
-call = "take(0, [1])"
+call = "list(even_squares([]))"
 expect = "[]"
 [[problem.tests]]
-call = "take(3, [9, 8, 7, 6])"
-expect = "[9, 8, 7]"
+call = "list(even_squares([5, 7]))"
+expect = "[]"

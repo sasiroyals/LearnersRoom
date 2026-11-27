@@ -1,58 +1,109 @@
 topic = "00"
+# One problem per lesson sub-topic. Generated test answers come from the solution.
 
-# Beginner problems: change the program so it prints the right output.
 [[problem]]
-id = "hello_world"
-title = "Say hello"
+id = "banner"
+lesson = "start_print"
+title = "Print a banner"
 level = "Easy"
 kind = "output"
-story = "Change the program so it prints exactly: Hello, world!"
-hint = "The text inside the quotes is what gets printed. Add the comma, the space and world!"
+story = "Print this banner exactly, one line at a time:\n\n*****\nHi!\n*****"
+hints = ["Each print(...) shows one line.", "Text goes in quotes: print(\"*****\")."]
+approach = "Three print lines, each with its text in quotes, in the order the banner shows."
+gfg = "python print function"
 starter = '''
-print("Hello")
+# Print the banner below.
 '''
 solution = '''
-print("Hello, world!")
+print("*****")
+print("Hi!")
+print("*****")
 '''
 [[problem.tests]]
 output = '''
-Hello, world!
+*****
+Hi!
+*****
 '''
 
 [[problem]]
-id = "two_lines"
-title = "Two lines"
+id = "greet_name"
+lesson = "start_names"
+title = "Greet by name"
 level = "Easy"
 kind = "output"
-story = "Make the program print Python on the first line and is fun on the second line."
-hint = "Each print(...) makes one line. You need two of them."
+story = "A name is stored in name. Print Hello followed by the name, with a space between them."
+hints = ["The name is already in name, so do not put it in quotes.", "print(\"Hello\", name) puts a space between the two parts."]
+approach = "print can show several things separated by commas. Text in quotes is shown as it is; name without quotes is looked up."
+gfg = "python variables"
 starter = '''
-print("Python is fun")
+# The input is already in: name
+# Write your code below and print the answer.
 '''
 solution = '''
-print("Python")
-print("is fun")
+print("Hello", name)
 '''
 [[problem.tests]]
+before = '''
+name = "Sam"
+'''
 output = '''
-Python
-is fun
+Hello Sam
+'''
+[[problem.tests]]
+before = '''
+name = "Ava"
+'''
+output = '''
+Hello Ava
+'''
+[[problem.tests]]
+before = '''
+name = "Lee"
+'''
+output = '''
+Hello Lee
 '''
 
 [[problem]]
-id = "fix_print"
-title = "Fix the typo"
+id = "fix_total"
+lesson = "start_errors"
+title = "Fix the crash"
 level = "Easy"
 kind = "output"
-story = "This program stops with an error. Fix it so it prints Ready."
-hint = "Python cares about capital letters. Is it Print or print?"
+story = "price and qty are given. The program should print the total cost, price times qty, but it stops with an error. Find the mistake and fix it."
+hints = ["Run it and read the error. Which line does it name?", "Names are case sensitive: Total and total are different names."]
+approach = "The program created total with a small t, then asked for Total with a capital T. Using the same spelling fixes it."
+gfg = "python nameerror"
 starter = '''
-Print("Ready")
+total = price * qty
+print(Total)
 '''
 solution = '''
-print("Ready")
+total = price * qty
+print(total)
 '''
 [[problem.tests]]
+before = '''
+price = 3
+qty = 4
+'''
 output = '''
-Ready
+12
+'''
+[[problem.tests]]
+before = '''
+price = 10
+qty = 0
+'''
+output = '''
+0
+'''
+[[problem.tests]]
+before = '''
+price = 7
+qty = 5
+'''
+output = '''
+35
 '''

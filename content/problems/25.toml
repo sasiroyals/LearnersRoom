@@ -1,13 +1,51 @@
 topic = "25"
+# One problem per lesson sub-topic. Generated test answers come from the solution.
+
+[[problem]]
+id = "linear_search"
+lesson = "big_linear"
+title = "Linear search"
+level = "Easy"
+kind = "function"
+story = "Write find_index(nums, target) that returns the index of the first target in nums, or -1. Do not use .index()."
+hints = ["Check each position in turn.", "for i in range(len(nums)): if nums[i] == target: return i"]
+approach = "Worst case it checks every item once: O(n) time, O(1) extra space."
+gfg = "linear search python"
+starter = '''
+def find_index(nums, target):
+    # Write your code here
+    pass
+'''
+solution = '''
+def find_index(nums, target):
+    for i in range(len(nums)):
+        if nums[i] == target:
+            return i
+    return -1
+'''
+[[problem.tests]]
+call = "find_index([4, 2, 7], 7)"
+expect = "2"
+[[problem.tests]]
+call = "find_index([4, 2, 7], 5)"
+expect = "-1"
+[[problem.tests]]
+call = "find_index([], 1)"
+expect = "-1"
 
 [[problem]]
 id = "binary_search"
+lesson = "big_binary"
 title = "Binary search"
 level = "Medium"
-story = "Write binary_search(nums, target) for a sorted list. Return the index of target, or -1 if it is missing. Do not use .index() or in: halve the search window each time."
-hint = "Keep lo and hi. Check mid = (lo + hi) // 2, then move lo or hi past mid."
+kind = "function"
+story = "Write binary_search(nums, target) for a sorted list. Return the index of target or -1, halving the search range every step."
+hints = ["Keep lo and hi. Look at mid = (lo + hi) // 2.", "If nums[mid] < target, the answer is right of mid: lo = mid + 1."]
+approach = "Each step throws away half of what is left: O(log n) time, O(1) space."
+gfg = "binary search python"
 starter = '''
 def binary_search(nums, target):
+    # Write your code here
     pass
 '''
 solution = '''
@@ -23,94 +61,83 @@ def binary_search(nums, target):
             hi = mid - 1
     return -1
 '''
-demo = '''
-print(binary_search([2, 5, 8, 12, 16], 12))
-'''
-
 [[problem.tests]]
 call = "binary_search([2, 5, 8, 12, 16], 12)"
 expect = "3"
-
 [[problem.tests]]
 call = "binary_search([2, 5, 8, 12, 16], 2)"
 expect = "0"
-
 [[problem.tests]]
 call = "binary_search([2, 5, 8, 12, 16], 7)"
 expect = "-1"
-
 [[problem.tests]]
 call = "binary_search([], 1)"
 expect = "-1"
 
 [[problem]]
-id = "has_duplicates"
-title = "Any duplicates?"
-level = "Easy"
-story = "Write has_duplicates(items) that returns True if any value appears twice. It should run in O(n): one pass with a set, not two nested loops."
-hint = "Keep a set of values seen so far. If the current value is already in it, you found a duplicate."
-starter = '''
-def has_duplicates(items):
-    pass
-'''
-solution = '''
-def has_duplicates(items):
-    seen = set()
-    for x in items:
-        if x in seen:
-            return True
-        seen.add(x)
-    return False
-'''
-demo = '''
-print(has_duplicates([3, 1, 4, 1]))
-'''
-
-[[problem.tests]]
-call = "has_duplicates([3, 1, 4, 1])"
-expect = "True"
-
-[[problem.tests]]
-call = "has_duplicates([3, 1, 4])"
-expect = "False"
-
-[[problem.tests]]
-call = "has_duplicates([])"
-expect = "False"
-
-[[problem]]
-id = "pair_sum"
-title = "Pair that adds up"
+id = "two_sum"
+lesson = "big_nested"
+title = "Two sum"
 level = "Medium"
-story = "Write pair_sum(nums, target) that returns the indexes (i, j), with i < j, of the first two numbers that add up to target, or None. Aim for O(n) with a dict instead of checking every pair."
-hint = "For each number, the partner you need is target - n. Store each number's index in a dict as you go."
+kind = "function"
+story = "Write two_sum(nums, target) that returns the indexes (i, j), i < j, of two numbers that add up to target, or None. Aim for one pass, not two nested loops."
+hints = ["For each number n, the partner you need is target - n.", "Store each number's index in a dict as you go, and check it before storing."]
+approach = "The dict turns the inner search into one O(1) lookup: O(n) time instead of O(n^2), using O(n) space."
+gfg = "two sum problem"
 starter = '''
-def pair_sum(nums, target):
+def two_sum(nums, target):
+    # Write your code here
     pass
 '''
 solution = '''
-def pair_sum(nums, target):
-    where = {}
+def two_sum(nums, target):
+    seen = {}
     for j, n in enumerate(nums):
-        need = target - n
-        if need in where:
-            return (where[need], j)
-        if n not in where:
-            where[n] = j
+        if target - n in seen:
+            return (seen[target - n], j)
+        seen[n] = j
     return None
 '''
-demo = '''
-print(pair_sum([4, 7, 1, 5], 6))
-'''
-
 [[problem.tests]]
-call = "pair_sum([4, 7, 1, 5], 6)"
-expect = "(2, 3)"
-
-[[problem.tests]]
-call = "pair_sum([3, 3], 6)"
+call = "two_sum([2, 7, 11, 15], 9)"
 expect = "(0, 1)"
-
 [[problem.tests]]
-call = "pair_sum([1, 2], 9)"
+call = "two_sum([3, 2, 4], 6)"
+expect = "(1, 2)"
+[[problem.tests]]
+call = "two_sum([1, 2], 7)"
+expect = "None"
+
+[[problem]]
+id = "first_repeat"
+lesson = "big_set"
+title = "First repeated value"
+level = "Medium"
+kind = "function"
+story = "Write first_repeat(nums) that returns the first value that appears for a second time while reading left to right, or None."
+hints = ["A set answers \"have I seen this?\" in O(1).", "Check before you add."]
+approach = "Checking a list would make this O(n^2). A set keeps it O(n)."
+gfg = "find first repeating element"
+starter = '''
+def first_repeat(nums):
+    # Write your code here
+    pass
+'''
+solution = '''
+def first_repeat(nums):
+    seen = set()
+    for n in nums:
+        if n in seen:
+            return n
+        seen.add(n)
+    return None
+'''
+[[problem.tests]]
+call = "first_repeat([3, 1, 4, 1, 3])"
+expect = "1"
+[[problem.tests]]
+call = "first_repeat([1, 2, 3])"
+expect = "None"
+[[problem.tests]]
+call = "first_repeat([])"
 expect = "None"

@@ -1,13 +1,44 @@
 topic = "24"
+# One problem per lesson sub-topic. Generated test answers come from the solution.
 
 [[problem]]
-id = "strategy"
-title = "Swap discounts with a strategy"
+id = "parse_csv_line"
+lesson = "des_srp"
+title = "One job: parse a line"
 level = "Medium"
-story = "apply_discount(price, rule) calls whichever rule function it is given. Write half_price(price) and ten_off(price) (never below 0)."
-hint = "Functions are values: pass half_price itself, without brackets."
+kind = "function"
+story = "Write parse_line(line) that turns a line like \" ann , 30 , paris \" into [\"ann\", \"30\", \"paris\"]. It only parses: no printing, no file reading."
+hints = ["line.split(\",\") splits on commas.", "strip() removes spaces at both ends of each part."]
+approach = "A function with one job is easy to test and reuse. Reading files and printing belong elsewhere."
+gfg = "python split string by comma"
 starter = '''
-def half_price(price):
+def parse_line(line):
+    # Write your code here
+    pass
+'''
+solution = '''
+def parse_line(line):
+    return [part.strip() for part in line.split(",")]
+'''
+[[problem.tests]]
+call = "parse_line(\" ann , 30 , paris \")"
+expect = "['ann', '30', 'paris']"
+[[problem.tests]]
+call = "parse_line(\"a,b\")"
+expect = "['a', 'b']"
+
+[[problem]]
+id = "checkout_strategy"
+lesson = "des_strategy"
+title = "Swap the discount"
+level = "Medium"
+kind = "function"
+story = "Write two discount functions, half_off(price) and ten_off(price) (10 off, never below 0), and checkout(price, discount) that applies whichever discount function it is given."
+hints = ["Functions can be passed around like any value.", "checkout just returns discount(price)."]
+approach = "checkout does not know which discount it has; you can add new strategies without changing it."
+gfg = "python strategy pattern"
+starter = '''
+def half_off(price):
     pass
 
 
@@ -15,130 +46,100 @@ def ten_off(price):
     pass
 
 
-def apply_discount(price, rule):
-    return rule(price)
+def checkout(price, discount):
+    pass
 '''
 solution = '''
-def half_price(price):
-    return price // 2
+def half_off(price):
+    return price / 2
 
 
 def ten_off(price):
     return max(price - 10, 0)
 
 
-def apply_discount(price, rule):
-    return rule(price)
-'''
-demo = '''
-print(apply_discount(40, half_price))
-print(apply_discount(40, ten_off))
+def checkout(price, discount):
+    return discount(price)
 '''
 [[problem.tests]]
-call = "apply_discount(40, half_price)"
-expect = "20"
+call = "checkout(100, half_off)"
+expect = "50.0"
 [[problem.tests]]
-call = "apply_discount(40, ten_off)"
-expect = "30"
+call = "checkout(100, ten_off)"
+expect = "90"
 [[problem.tests]]
-call = "apply_discount(4, ten_off)"
+call = "checkout(4, ten_off)"
 expect = "0"
 
 [[problem]]
-id = "factory"
+id = "shape_factory"
+lesson = "des_factory"
 title = "A shape factory"
 level = "Medium"
-story = "Write make_shape(kind) that returns a Square for 'square', a Triangle for 'triangle', and raises ValueError for anything else."
-hint = "A dict from names to classes keeps the choice in one place."
+kind = "function"
+story = "Square and Circle are given. Write make_shape(kind, size) that returns a Square for \"square\", a Circle for \"circle\", and raises ValueError for anything else."
+hints = ["A dict from names to classes keeps the choice in one place.", "Look the class up, then call it with size."]
+approach = "The factory is the one place that decides which class to build; callers only name what they want."
+gfg = "python factory method"
 starter = '''
 class Square:
-    sides = 4
+    def __init__(self, size):
+        self.size = size
+
+    def area(self):
+        return self.size * self.size
 
 
-class Triangle:
-    sides = 3
+class Circle:
+    def __init__(self, size):
+        self.size = size
+
+    def area(self):
+        return round(3.14159 * self.size * self.size, 2)
 
 
-def make_shape(kind):
+def make_shape(kind, size):
+    # Write your code here
     pass
 '''
 solution = '''
 class Square:
-    sides = 4
+    def __init__(self, size):
+        self.size = size
+
+    def area(self):
+        return self.size * self.size
 
 
-class Triangle:
-    sides = 3
+class Circle:
+    def __init__(self, size):
+        self.size = size
+
+    def area(self):
+        return round(3.14159 * self.size * self.size, 2)
 
 
-def make_shape(kind):
-    shapes = {'square': Square, 'triangle': Triangle}
-    if kind not in shapes:
-        raise ValueError('unknown shape: ' + kind)
-    return shapes[kind]()
-'''
-demo = '''
-print(make_shape('square').sides)
+SHAPES = {"square": Square, "circle": Circle}
+
+
+def make_shape(kind, size):
+    if kind not in SHAPES:
+        raise ValueError(f"unknown shape: {kind}")
+    return SHAPES[kind](size)
 '''
 [[problem.tests]]
-call = "make_shape('square').sides"
-expect = "4"
+call = "make_shape(\"square\", 3).area()"
+expect = "9"
 [[problem.tests]]
-call = "make_shape('triangle').sides"
-expect = "3"
+call = "make_shape(\"circle\", 1).area()"
+expect = "3.14"
 [[problem.tests]]
 setup = '''
 try:
-    make_shape('hexagon')
-    r = 'made'
+    make_shape("blob", 1)
+    result = "made"
 except ValueError:
-    r = 'refused'
+    result = "refused"
 '''
-call = "r"
+call = "result"
 expect = "'refused'"
-
-[[problem]]
-id = "events"
-title = "An event bus (observer)"
-level = "Hard"
-story = "Write EventBus with subscribe(fn) and emit(value). emit calls every subscribed function with the value and returns their results in order."
-hint = "Store the functions in a list. emit loops over it and calls each one."
-starter = '''
-class EventBus:
-    def __init__(self):
-        pass
-
-    def subscribe(self, fn):
-        pass
-
-    def emit(self, value):
-        pass
-'''
-solution = '''
-class EventBus:
-    def __init__(self):
-        self.listeners = []
-
-    def subscribe(self, fn):
-        self.listeners.append(fn)
-
-    def emit(self, value):
-        return [fn(value) for fn in self.listeners]
-'''
-demo = '''
-bus = EventBus()
-bus.subscribe(lambda x: x + 1)
-bus.subscribe(lambda x: x * 10)
-print(bus.emit(2))
-'''
-[[problem.tests]]
-setup = '''
-bus = EventBus()
-bus.subscribe(lambda x: x + 1)
-bus.subscribe(lambda x: x * 10)
-'''
-call = "bus.emit(2)"
-expect = "[3, 20]"
-[[problem.tests]]
-call = "EventBus().emit(5)"
-expect = "[]"

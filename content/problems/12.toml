@@ -1,18 +1,55 @@
 topic = "12"
+# One problem per lesson sub-topic. Generated test answers come from the solution.
 
 [[problem]]
-id = "counter"
+id = "point_class"
+lesson = "cls_blueprint"
+title = "A Point class"
+level = "Easy"
+kind = "function"
+story = "Write a class Point made with Point(x, y). Give it a method distance() that returns how far the point is from (0, 0)."
+hints = ["__init__ stores x and y on self.", "The distance is (x*x + y*y) ** 0.5."]
+approach = "The class is the blueprint; each Point(...) call makes an object with its own x and y."
+gfg = "python classes and objects"
+starter = '''
+class Point:
+    def __init__(self, x, y):
+        # Write your code here
+        pass
+'''
+solution = '''
+class Point:
+    def __init__(self, x, y):
+        self.x = x
+        self.y = y
+
+    def distance(self):
+        return (self.x ** 2 + self.y ** 2) ** 0.5
+'''
+[[problem.tests]]
+call = "Point(3, 4).distance()"
+expect = "5.0"
+[[problem.tests]]
+call = "Point(0, 0).distance()"
+expect = "0.0"
+[[problem.tests]]
+call = "(Point(1, 2).x, Point(1, 2).y)"
+expect = "(1, 2)"
+
+[[problem]]
+id = "counter_class"
+lesson = "cls_self"
 title = "A click counter"
 level = "Easy"
-story = "Write a class Counter. Each new counter starts at value 0, and increment() adds 1 to value."
-hint = "Store the number on self in __init__, so each object has its own."
+kind = "function"
+story = "Write a class Counter. A new Counter has value 0. increment() adds 1 to value, and reset() sets it back to 0."
+hints = ["Store the value on self in __init__.", "Methods change self.value, the value of this particular object."]
+approach = "self is the object the method was called on, so each counter keeps its own value."
+gfg = "python self in class"
 starter = '''
 class Counter:
-    def __init__(self):
-        pass
-
-    def increment(self):
-        pass
+    # Write your code here
+    pass
 '''
 solution = '''
 class Counter:
@@ -20,13 +57,10 @@ class Counter:
         self.value = 0
 
     def increment(self):
-        self.value = self.value + 1
-'''
-demo = '''
-c = Counter()
-c.increment()
-c.increment()
-print(c.value)
+        self.value += 1
+
+    def reset(self):
+        self.value = 0
 '''
 [[problem.tests]]
 setup = '''
@@ -44,97 +78,120 @@ a.increment()
 '''
 call = "(a.value, b.value)"
 expect = "(1, 0)"
+[[problem.tests]]
+setup = '''
+c = Counter()
+c.increment()
+c.reset()
+'''
+call = "c.value"
+expect = "0"
 
 [[problem]]
-id = "rect"
-title = "Rectangle with area"
-level = "Easy"
-story = "Write a class Rectangle(width, height) with an area() method and a __str__ that gives 'Rectangle(3 x 4)'."
-hint = "__str__ must return text. print(r) and str(r) both call it."
+id = "dog_tricks"
+lesson = "cls_attr"
+title = "Each dog's own tricks"
+level = "Medium"
+kind = "function"
+story = "Every Dog should have its own list of tricks. Right now, teaching one dog a trick teaches every dog. Fix the class."
+hints = ["tricks = [] in the class body makes one list shared by all dogs.", "Create the list in __init__ with self.tricks = []."]
+approach = "An attribute set on self in __init__ belongs to one object; one set in the class body is shared."
+gfg = "python class vs instance attributes"
 starter = '''
-class Rectangle:
-    def __init__(self, width, height):
-        pass
+class Dog:
+    tricks = []
 
-    def area(self):
-        pass
-
-    def __str__(self):
-        pass
+    def add_trick(self, trick):
+        self.tricks.append(trick)
 '''
 solution = '''
-class Rectangle:
-    def __init__(self, width, height):
-        self.width = width
-        self.height = height
+class Dog:
+    def __init__(self):
+        self.tricks = []
 
-    def area(self):
-        return self.width * self.height
-
-    def __str__(self):
-        return 'Rectangle(' + str(self.width) + ' x ' + str(self.height) + ')'
-'''
-demo = '''
-r = Rectangle(3, 4)
-print(r.area())
-print(r)
+    def add_trick(self, trick):
+        self.tricks.append(trick)
 '''
 [[problem.tests]]
-call = "Rectangle(3, 4).area()"
-expect = "12"
-[[problem.tests]]
-call = "str(Rectangle(3, 4))"
-expect = "'Rectangle(3 x 4)'"
+setup = '''
+a = Dog()
+b = Dog()
+a.add_trick("sit")
+'''
+call = "(a.tricks, b.tricks)"
+expect = "(['sit'], [])"
 
 [[problem]]
-id = "bank"
+id = "bank_account"
+lesson = "cls_state"
 title = "Bank account"
 level = "Medium"
-story = "Write a class Account with a balance that starts at 0. deposit(amount) adds money. withdraw(amount) takes money out and returns True, or returns False and changes nothing if there is not enough."
-hint = "Check the balance before you subtract, and return early if it is too small."
+kind = "function"
+story = "Write a class BankAccount with a balance starting at 0 (or a given amount). deposit(amount) adds money. withdraw(amount) takes money out and returns True, but if there is not enough it changes nothing and returns False."
+hints = ["__init__(self, balance=0) sets self.balance.", "In withdraw, check amount > self.balance before changing anything."]
+approach = "The object's state (balance) only changes through its methods, which can protect it from going negative."
+gfg = "python bank account class"
 starter = '''
-class Account:
-    def __init__(self):
-        pass
-
-    def deposit(self, amount):
-        pass
-
-    def withdraw(self, amount):
-        pass
+class BankAccount:
+    # Write your code here
+    pass
 '''
 solution = '''
-class Account:
-    def __init__(self):
-        self.balance = 0
+class BankAccount:
+    def __init__(self, balance=0):
+        self.balance = balance
 
     def deposit(self, amount):
-        self.balance = self.balance + amount
+        self.balance += amount
 
     def withdraw(self, amount):
         if amount > self.balance:
             return False
-        self.balance = self.balance - amount
+        self.balance -= amount
         return True
 '''
-demo = '''
-acct = Account()
-acct.deposit(50)
-print(acct.withdraw(80))
-print(acct.withdraw(20))
-print(acct.balance)
-'''
 [[problem.tests]]
 setup = '''
-a = Account()
-a.deposit(50)
-'''
-call = "(a.withdraw(80), a.balance)"
-expect = "(False, 50)"
-[[problem.tests]]
-setup = '''
-a = Account()
+a = BankAccount()
 a.deposit(50)
 '''
 call = "(a.withdraw(20), a.balance)"
 expect = "(True, 30)"
+[[problem.tests]]
+setup = '''
+a = BankAccount(10)
+'''
+call = "(a.withdraw(30), a.balance)"
+expect = "(False, 10)"
+
+[[problem]]
+id = "book_repr"
+lesson = "cls_repr"
+title = "Show a Book clearly"
+level = "Easy"
+kind = "function"
+story = "Book(title, author) objects print as <__main__.Book object at ...>. Add a __repr__ so they show as Book('Dune', 'Herbert')."
+hints = ["__repr__ returns the text Python shows for the object.", "Use !r in an f-string to put quotes round strings: f\"Book({self.title!r}, {self.author!r})\""]
+approach = "Python calls __repr__ whenever it shows the object, including inside lists."
+gfg = "python repr method"
+starter = '''
+class Book:
+    def __init__(self, title, author):
+        self.title = title
+        self.author = author
+'''
+solution = '''
+class Book:
+    def __init__(self, title, author):
+        self.title = title
+        self.author = author
+
+    def __repr__(self):
+        return f"Book({self.title!r}, {self.author!r})"
+'''
+[[problem.tests]]
+call = "[Book(\"Dune\", \"Herbert\")]"
+expect = "[Book('Dune', 'Herbert')]"
+[[problem.tests]]
+call = "repr(Book(\"Emma\", \"Austen\"))"
+expect = "\"Book('Emma', 'Austen')\""

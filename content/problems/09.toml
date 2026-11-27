@@ -1,84 +1,179 @@
 topic = "09"
+# One problem per lesson sub-topic. Generated test answers come from the solution.
 
 [[problem]]
-id = "totalall"
-title = "Add any number of values"
+id = "with_tax"
+lesson = "fd_legb"
+title = "Add the tax"
 level = "Easy"
-story = "Write total_all(*nums) that adds up however many numbers it is given. total_all() is 0."
-hint = "*nums collects every argument into one tuple you can loop over."
+kind = "function"
+story = "TAX_RATE is a global set to 0.2. Write with_tax(price) that returns the price plus tax, rounded to 2 decimal places."
+hints = ["Reading a global inside a function works without any extra keyword.", "round(price * (1 + TAX_RATE), 2)"]
+approach = "Python looks for TAX_RATE locally, does not find it, then finds it in the global scope."
+gfg = "python scope legb rule"
 starter = '''
-def total_all(*nums):
+TAX_RATE = 0.2
+
+def with_tax(price):
+    # Write your code here
     pass
 '''
 solution = '''
-def total_all(*nums):
-    total = 0
-    for n in nums:
-        total = total + n
-    return total
-'''
-demo = '''
-print(total_all(1, 2, 3))
+TAX_RATE = 0.2
+
+def with_tax(price):
+    return round(price * (1 + TAX_RATE), 2)
 '''
 [[problem.tests]]
-call = "total_all(1, 2, 3)"
+call = "with_tax(10)"
+expect = "12.0"
+[[problem.tests]]
+call = "with_tax(0)"
+expect = "0.0"
+[[problem.tests]]
+call = "with_tax(2.5)"
+expect = "3.0"
+
+[[problem]]
+id = "add_item_fresh"
+lesson = "fd_default"
+title = "A fresh list each call"
+level = "Medium"
+kind = "function"
+story = "add_item(item, basket=None) should add item to basket and return it. When no basket is passed, each call must start with a new empty list. The current version shares one list between calls. Fix it."
+hints = ["A default like basket=[] is made once, when def runs, and then shared.", "Use None as the default and make the list inside: if basket is None: basket = []"]
+approach = "Creating the list inside the function gives every call its own list."
+gfg = "python mutable default arguments"
+starter = '''
+def add_item(item, basket=[]):
+    basket.append(item)
+    return basket
+'''
+solution = '''
+def add_item(item, basket=None):
+    if basket is None:
+        basket = []
+    basket.append(item)
+    return basket
+'''
+[[problem.tests]]
+call = "(add_item(\"a\"), add_item(\"b\"))"
+expect = "(['a'], ['b'])"
+[[problem.tests]]
+call = "add_item(\"c\", [\"x\"])"
+expect = "['x', 'c']"
+
+[[problem]]
+id = "total_any"
+lesson = "fd_args"
+title = "Add any amount of numbers"
+level = "Easy"
+kind = "function"
+story = "Write total(*nums) that returns the sum of however many numbers are passed. total() with nothing returns 0."
+hints = ["*nums collects all the arguments into a tuple.", "sum(nums) works on that tuple."]
+approach = "*nums packs every positional argument into one tuple, even when there are none."
+gfg = "python args and kwargs"
+starter = '''
+def total(*nums):
+    # Write your code here
+    pass
+'''
+solution = '''
+def total(*nums):
+    return sum(nums)
+'''
+[[problem.tests]]
+call = "total(1, 2, 3)"
 expect = "6"
 [[problem.tests]]
-call = "total_all()"
+call = "total()"
 expect = "0"
 [[problem.tests]]
-call = "total_all(10)"
-expect = "10"
+call = "total(5)"
+expect = "5"
 
 [[problem]]
-id = "fact"
-title = "Factorial with recursion"
+id = "make_user"
+lesson = "fd_kwonly"
+title = "Keyword-only flag"
 level = "Medium"
-story = "Write factorial(n) that calls itself. factorial(0) is 1 and factorial(n) is n * factorial(n - 1)."
-hint = "Every recursive function needs a base case that stops it: here, n == 0."
+kind = "function"
+story = "Write make_user(name, *, admin=False) that returns a dict {\"name\": name, \"admin\": admin}. admin must only be settable by keyword, so make_user(\"Sam\", True) is an error."
+hints = ["A bare * in the parameters means everything after it is keyword-only.", "Return a dict literal with the two keys."]
+approach = "The bare * stops extra positional arguments, so admin can only be set by name."
+gfg = "python keyword only arguments"
 starter = '''
-def factorial(n):
+def make_user(name, *, admin=False):
+    # Write your code here
     pass
 '''
 solution = '''
-def factorial(n):
-    if n == 0:
-        return 1
-    return n * factorial(n - 1)
-'''
-demo = '''
-print(factorial(4))
+def make_user(name, *, admin=False):
+    return {"name": name, "admin": admin}
 '''
 [[problem.tests]]
-call = "factorial(5)"
-expect = "120"
+call = "make_user(\"Sam\")"
+expect = "{'name': 'Sam', 'admin': False}"
 [[problem.tests]]
-call = "factorial(0)"
-expect = "1"
-[[problem.tests]]
-call = "factorial(1)"
-expect = "1"
+call = "make_user(\"Ava\", admin=True)"
+expect = "{'name': 'Ava', 'admin': True}"
 
 [[problem]]
-id = "bylen"
+id = "by_length"
+lesson = "fd_lambda"
 title = "Sort by length"
-level = "Medium"
-story = "Write by_length(words) that returns the words sorted from shortest to longest, using sorted() with a lambda."
-hint = "sorted(words, key=...) sorts by whatever the key function returns."
+level = "Easy"
+kind = "function"
+story = "Write sort_by_length(words) that returns the words sorted from shortest to longest. Words of the same length keep their order."
+hints = ["sorted takes a key function that says what to compare.", "key=lambda w: len(w), or simply key=len"]
+approach = "The lambda turns each word into its length, and sorted compares those. Python's sort is stable, so ties keep their order."
+gfg = "python lambda sorted key"
 starter = '''
-def by_length(words):
+def sort_by_length(words):
+    # Write your code here
     pass
 '''
 solution = '''
-def by_length(words):
+def sort_by_length(words):
     return sorted(words, key=lambda w: len(w))
 '''
-demo = '''
-print(by_length(['pear', 'fig', 'banana']))
+[[problem.tests]]
+call = "sort_by_length([\"ccc\", \"a\", \"bb\"])"
+expect = "['a', 'bb', 'ccc']"
+[[problem.tests]]
+call = "sort_by_length([])"
+expect = "[]"
+[[problem.tests]]
+call = "sort_by_length([\"to\", \"be\", \"or\"])"
+expect = "['to', 'be', 'or']"
+
+[[problem]]
+id = "sum_digits"
+lesson = "fd_recursion"
+title = "Sum of digits"
+level = "Medium"
+kind = "function"
+story = "Write sum_digits(n) that returns the sum of the digits of a whole number n of 0 or more, using recursion (the function calls itself)."
+hints = ["Base case: a number under 10 is its own digit sum.", "Otherwise: n % 10 + sum_digits(n // 10)"]
+approach = "Each call peels off the last digit and asks a smaller call for the rest, until one digit is left."
+gfg = "python program to find sum of digits using recursion"
+starter = '''
+def sum_digits(n):
+    # Write your code here
+    pass
+'''
+solution = '''
+def sum_digits(n):
+    if n < 10:
+        return n
+    return n % 10 + sum_digits(n // 10)
 '''
 [[problem.tests]]
-call = "by_length(['pear', 'fig', 'banana'])"
-expect = "['fig', 'pear', 'banana']"
+call = "sum_digits(1234)"
+expect = "10"
 [[problem.tests]]
-call = "by_length([])"
-expect = "[]"
+call = "sum_digits(0)"
+expect = "0"
+[[problem.tests]]
+call = "sum_digits(909)"
+expect = "18"

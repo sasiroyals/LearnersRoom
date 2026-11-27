@@ -1,114 +1,111 @@
 topic = "28"
+# One problem per lesson sub-topic. Generated test answers come from the solution.
 
 [[problem]]
-id = "stairs"
+id = "climb_stairs"
+lesson = "dp_fib_calls"
 title = "Climbing stairs"
 level = "Medium"
-story = "You climb a staircase 1 or 2 steps at a time. Write stairs(n) that returns how many different ways there are to reach step n. It must handle n = 40 quickly."
-hint = "ways(n) = ways(n - 1) + ways(n - 2). Fill a list from the bottom up, or keep just the last two values."
+kind = "function"
+story = "You can climb 1 or 2 steps at a time. Write climb(n) that returns how many different ways there are to reach step n. It must be fast for n = 40."
+hints = ["The last move was 1 step or 2 steps: ways(n) = ways(n - 1) + ways(n - 2).", "Plain recursion repeats work. Keep just the last two answers in a loop."]
+approach = "Each answer needs only the two before it, so a loop is O(n) time and O(1) space, versus O(2^n) for plain recursion."
+gfg = "climbing stairs problem"
 starter = '''
-def stairs(n):
-    if n < 2:
-        return 1
-    return stairs(n - 1)
+def climb(n):
+    # Write your code here
+    pass
 '''
 solution = '''
-def stairs(n):
+def climb(n):
     a, b = 1, 1
-    for _ in range(n - 1):
+    for _ in range(n):
         a, b = b, a + b
-    return b if n > 0 else 1
+    return a
 '''
-demo = '''
-print(stairs(5))
-'''
-
 [[problem.tests]]
-call = "stairs(1)"
+call = "climb(1)"
 expect = "1"
-
 [[problem.tests]]
-call = "stairs(5)"
+call = "climb(3)"
+expect = "3"
+[[problem.tests]]
+call = "climb(5)"
 expect = "8"
-
 [[problem.tests]]
-call = "stairs(40)"
+call = "climb(40)"
 expect = "165580141"
 
 [[problem]]
-id = "grid_paths"
-title = "Paths across a grid"
+id = "fib_memo"
+lesson = "dp_memo"
+title = "Fibonacci with memo"
 level = "Medium"
-story = "A robot starts at the top-left of a grid with rows × cols cells and can only move right or down. Write grid_paths(rows, cols) that returns how many different paths reach the bottom-right cell."
-hint = "Paths to a cell = paths to the cell above + paths to the cell on the left. The top row and left column have 1 path each."
+kind = "function"
+story = "Write fib(n) recursively (fib(0) = 0, fib(1) = 1), but remember answers in a dict so fib(60) is instant."
+hints = ["Pass a dict memo along, or keep one outside the function.", "Before working anything out, check if n is already in memo."]
+approach = "Each n is worked out once, so the call tree shrinks from O(2^n) to O(n)."
+gfg = "fibonacci memoization"
 starter = '''
-def grid_paths(rows, cols):
-    return rows + cols
+def fib(n):
+    if n < 2:
+        return n
+    return fib(n - 1) + fib(n - 2)
 '''
 solution = '''
-def grid_paths(rows, cols):
-    row = [1] * cols
-    for _ in range(rows - 1):
-        for c in range(1, cols):
-            row[c] += row[c - 1]
-    return row[-1]
+def fib(n, memo=None):
+    if memo is None:
+        memo = {}
+    if n < 2:
+        return n
+    if n not in memo:
+        memo[n] = fib(n - 1, memo) + fib(n - 2, memo)
+    return memo[n]
 '''
-demo = '''
-print(grid_paths(3, 3))
-'''
-
 [[problem.tests]]
-call = "grid_paths(1, 5)"
-expect = "1"
-
+call = "fib(0)"
+expect = "0"
 [[problem.tests]]
-call = "grid_paths(3, 3)"
-expect = "6"
-
+call = "fib(10)"
+expect = "55"
 [[problem.tests]]
-call = "grid_paths(10, 10)"
-expect = "48620"
+call = "fib(60)"
+expect = "1548008755920"
 
 [[problem]]
-id = "fewest_coins"
+id = "min_coins"
+lesson = "dp_table"
 title = "Fewest coins"
 level = "Hard"
-story = "Write fewest_coins(coins, amount) that returns the smallest number of coins that add up to amount, using any coin as often as you like. Return -1 if it cannot be done. Being greedy (always the biggest coin) is not always right."
-hint = "Make a list best where best[a] is the fewest coins for amount a. best[0] is 0. For each amount, try every coin c: best[a - c] + 1."
+kind = "function"
+story = "Write min_coins(coins, amount) that returns the fewest coins that add up to amount, using any coin as many times as you like, or -1 if it cannot be done."
+hints = ["Build a table best[0..amount], where best[0] = 0.", "For each amount a, try every coin c <= a: best[a] = min(best[a], best[a - c] + 1)."]
+approach = "The table is filled from small amounts up, so each answer reuses smaller ones: O(amount x coins) time."
+gfg = "coin change problem"
 starter = '''
-def fewest_coins(coins, amount):
-    count = 0
-    for c in sorted(coins, reverse=True):
-        count += amount // c
-        amount %= c
-    return count if amount == 0 else -1
+def min_coins(coins, amount):
+    # Write your code here
+    pass
 '''
 solution = '''
-def fewest_coins(coins, amount):
-    big = amount + 1
-    best = [0] + [big] * amount
+def min_coins(coins, amount):
+    INF = amount + 1
+    best = [0] + [INF] * amount
     for a in range(1, amount + 1):
         for c in coins:
             if c <= a and best[a - c] + 1 < best[a]:
                 best[a] = best[a - c] + 1
-    return best[amount] if best[amount] <= amount else -1
+    return best[amount] if best[amount] != INF else -1
 '''
-demo = '''
-print(fewest_coins([1, 3, 4], 6))
-'''
-
 [[problem.tests]]
-call = "fewest_coins([1, 3, 4], 6)"
-expect = "2"
-
+call = "min_coins([1, 2, 5], 11)"
+expect = "3"
 [[problem.tests]]
-call = "fewest_coins([2], 3)"
+call = "min_coins([2], 3)"
 expect = "-1"
-
 [[problem.tests]]
-call = "fewest_coins([1, 5, 10], 27)"
-expect = "5"
-
-[[problem.tests]]
-call = "fewest_coins([5], 0)"
+call = "min_coins([1], 0)"
 expect = "0"
+[[problem.tests]]
+call = "min_coins([3, 7], 13)"
+expect = "3"

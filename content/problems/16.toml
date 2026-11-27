@@ -1,23 +1,29 @@
 topic = "16"
+# One problem per lesson sub-topic. Generated test answers come from the solution.
 
 [[problem]]
-id = "abstract"
-title = "Finish the abstract class"
+id = "abstract_shape"
+lesson = "abs_abc"
+title = "An abstract Shape"
 level = "Medium"
-story = "Shape is abstract and cannot be created. Write Square(side) that inherits from Shape and implements area()."
-hint = "Square must define area itself, or it stays abstract too."
+kind = "function"
+story = "Make Shape an abstract class (from abc) with an abstract method area(), so Shape() cannot be created. Then write Rectangle(w, h) that inherits from Shape and implements area()."
+hints = ["class Shape(ABC): with @abstractmethod above def area(self).", "Rectangle must define area, or it is abstract too."]
+approach = "An abstract method is a promise: every concrete subclass must provide it, and the abstract class itself cannot be made."
+gfg = "python abstract base class"
 starter = '''
 from abc import ABC, abstractmethod
 
 
-class Shape(ABC):
-    @abstractmethod
+class Shape:
     def area(self):
-        pass
+        return 0
 
 
-class Square(Shape):
-    pass
+class Rectangle(Shape):
+    def __init__(self, w, h):
+        self.w = w
+        self.h = h
 '''
 solution = '''
 from abc import ABC, abstractmethod
@@ -29,125 +35,115 @@ class Shape(ABC):
         pass
 
 
-class Square(Shape):
-    def __init__(self, side):
-        self.side = side
+class Rectangle(Shape):
+    def __init__(self, w, h):
+        self.w = w
+        self.h = h
 
     def area(self):
-        return self.side * self.side
-'''
-demo = '''
-print(Square(3).area())
+        return self.w * self.h
 '''
 [[problem.tests]]
-call = "Square(3).area()"
-expect = "9"
+call = "Rectangle(2, 3).area()"
+expect = "6"
 [[problem.tests]]
 setup = '''
 try:
     Shape()
-    r = 'created'
+    result = "created"
 except TypeError:
-    r = 'blocked'
+    result = "blocked"
 '''
-call = "r"
+call = "result"
 expect = "'blocked'"
 
 [[problem]]
-id = "car"
-title = "A car has an engine"
+id = "car_engine"
+lesson = "abs_comp"
+title = "A Car has an Engine"
 level = "Easy"
-story = "Use composition: Car creates its own Engine in __init__. car.start() should call the engine's start() and return its result."
-hint = "A car is not an engine, it has one. Store it on self.engine."
+kind = "function"
+story = "Engine is given. Write Car(engine) that keeps the engine it is given, and start() that returns \"Car started: \" followed by the engine's start() text."
+hints = ["Composition: store the engine object on the car (self.engine = engine).", "Car.start can call self.engine.start()."]
+approach = "The car does not inherit from Engine; it has one and passes work to it."
+gfg = "python composition"
 starter = '''
 class Engine:
-    def start(self):
-        return 'Engine on'
-
-
-class Car:
-    def __init__(self):
-        pass
+    def __init__(self, kind):
+        self.kind = kind
 
     def start(self):
-        pass
+        return f"{self.kind} engine on"
+
+
+# Write class Car here
 '''
 solution = '''
 class Engine:
+    def __init__(self, kind):
+        self.kind = kind
+
     def start(self):
-        return 'Engine on'
+        return f"{self.kind} engine on"
 
 
 class Car:
-    def __init__(self):
-        self.engine = Engine()
+    def __init__(self, engine):
+        self.engine = engine
 
     def start(self):
-        return self.engine.start()
-'''
-demo = '''
-car = Car()
-print(car.start())
+        return "Car started: " + self.engine.start()
 '''
 [[problem.tests]]
-call = "Car().start()"
-expect = "'Engine on'"
+call = "Car(Engine(\"V8\")).start()"
+expect = "'Car started: V8 engine on'"
 [[problem.tests]]
-call = "isinstance(Car().engine, Engine)"
-expect = "True"
+call = "Car(Engine(\"electric\")).start()"
+expect = "'Car started: electric engine on'"
 
 [[problem]]
-id = "library"
-title = "A library of books"
+id = "stack_has_list"
+lesson = "abs_choose"
+title = "A Stack that has a list"
 level = "Medium"
-story = "Library holds Book objects. add(book) stores one, and titles() returns the titles in the order they were added."
-hint = "Keep a list on self, and build the titles from it."
+kind = "function"
+story = "Write a class Stack with push(x), pop() and size(). Build it with composition: keep a list inside it rather than inheriting from list, so users cannot call list methods like insert on it."
+hints = ["self._items = [] in __init__.", "push appends, pop uses self._items.pop()."]
+approach = "Composition exposes only the three methods a stack needs. Inheriting from list would expose dozens."
+gfg = "python stack implementation"
 starter = '''
-class Book:
-    def __init__(self, title):
-        self.title = title
+class Stack(list):
+    def push(self, x):
+        self.append(x)
 
-
-class Library:
-    def __init__(self):
-        pass
-
-    def add(self, book):
-        pass
-
-    def titles(self):
-        pass
+    def size(self):
+        return len(self)
 '''
 solution = '''
-class Book:
-    def __init__(self, title):
-        self.title = title
-
-
-class Library:
+class Stack:
     def __init__(self):
-        self.books = []
+        self._items = []
 
-    def add(self, book):
-        self.books.append(book)
+    def push(self, x):
+        self._items.append(x)
 
-    def titles(self):
-        return [b.title for b in self.books]
-'''
-demo = '''
-lib = Library()
-lib.add(Book('Dune'))
-lib.add(Book('Emma'))
-print(lib.titles())
+    def pop(self):
+        return self._items.pop()
+
+    def size(self):
+        return len(self._items)
 '''
 [[problem.tests]]
 setup = '''
-lib = Library()
-lib.add(Book('Dune'))
-lib.add(Book('Emma'))
+s = Stack()
+s.push(1)
+s.push(2)
 '''
-call = "lib.titles()"
-expect = "['Dune', 'Emma']"
+call = "(s.pop(), s.size())"
+expect = "(2, 1)"
 [[problem.tests]]
-call = "Library().titles()"
-expect = "[]"
+setup = '''
+s = Stack()
+'''
+call = "(isinstance(s, list), hasattr(s, \"insert\"))"
+expect = "(False, False)"

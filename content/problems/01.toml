@@ -1,142 +1,175 @@
 topic = "01"
-
-# Beginner problems: change the program so it prints the right output.
-[[problem]]
-id = "use_name"
-title = "Use a name"
-level = "Easy"
-kind = "output"
-story = "Change the last line so it prints Hi Ava, using the name called name."
-hint = "print can show two things if you put a comma between them: print(\"Hi\", name)."
-starter = '''
-name = "Ava"
-print("Hi")
-'''
-solution = '''
-name = "Ava"
-print("Hi", name)
-'''
-[[problem.tests]]
-output = '''
-Hi Ava
-'''
-
-[[problem]]
-id = "add_points"
-title = "Add points"
-level = "Easy"
-kind = "output"
-story = "Add a line that adds 5 to score, so the program prints 15."
-hint = "score = score + 5 works out the right side first, then moves the name."
-starter = '''
-score = 10
-# add 5 to score on the next line
-
-print(score)
-'''
-solution = '''
-score = 10
-score = score + 5
-print(score)
-'''
-[[problem.tests]]
-output = '''
-15
-'''
-
-[[problem]]
-id = "text_to_number"
-title = "Text to number"
-level = "Easy"
-kind = "output"
-story = "age holds the text \"15\". Make the last line print 16."
-hint = "int(age) turns the text \"15\" into the number 15."
-starter = '''
-age = "15"
-print(age + 1)
-'''
-solution = '''
-age = "15"
-print(int(age) + 1)
-'''
-[[problem.tests]]
-output = '''
-16
-'''
+# One problem per lesson sub-topic. Generated test answers come from the solution.
 
 [[problem]]
 id = "swap"
+lesson = "val_assign"
 title = "Swap two values"
 level = "Easy"
-story = "Write swap(a, b) so it returns the two values in the opposite order, as a tuple."
-hint = "A tuple is written with a comma: (b, a)."
+kind = "output"
+story = "Two numbers are stored in a and b. Swap them so that a holds b's old value and b holds a's old value. Then print a, then b, on separate lines."
+hints = ["If you write a = b first, a's old value is lost. Save it in another name first.", "Python can also swap in one line: a, b = b, a."]
+approach = "a, b = b, a works out both values on the right first, then gives them to the names on the left, so nothing is lost."
+gfg = "python swap two variables"
 starter = '''
-def swap(a, b):
-    # return the two values swapped
-    pass
+# The input is already in: a, b
+# Write your code below and print the answer.
 '''
 solution = '''
-def swap(a, b):
-    return (b, a)
-'''
-demo = '''
-x, y = swap(1, 2)
-print(x, y)
+a, b = b, a
+print(a)
+print(b)
 '''
 [[problem.tests]]
-call = "swap(1, 2)"
-expect = "(2, 1)"
+before = '''
+a = 1
+b = 2
+'''
+output = '''
+2
+1
+'''
 [[problem.tests]]
-call = "swap('left', 'right')"
-expect = "('right', 'left')"
+before = '''
+a = 50
+b = -3
+'''
+output = '''
+-3
+50
+'''
+[[problem.tests]]
+before = '''
+a = 7
+b = 7
+'''
+output = '''
+7
+7
+'''
 
 [[problem]]
-id = "greet"
-title = "Build a greeting"
+id = "score_update"
+lesson = "val_keep"
+title = "Update the score"
 level = "Easy"
-story = "Write greet(name) that returns 'Hello, ' followed by the name and an exclamation mark."
-hint = "Join strings with +. Do not forget the comma and space after Hello."
+kind = "output"
+story = "score is given. Add 10 to it, then double it, then print the final score."
+hints = ["score + 10 on its own works out a value but does not change score.", "Write score = score + 10 so the name points at the new value."]
+approach = "Each line works out a new value and points score at it. The second line uses the score from the first."
+gfg = "python variables assignment"
 starter = '''
-def greet(name):
-    pass
+score + 10
+score * 2
+print(score)
 '''
 solution = '''
-def greet(name):
-    message = 'Hello, ' + name + '!'
-    return message
-'''
-demo = '''
-print(greet('Ana'))
+score = score + 10
+score = score * 2
+print(score)
 '''
 [[problem.tests]]
-call = "greet('Ana')"
-expect = "'Hello, Ana!'"
+before = '''
+score = 5
+'''
+output = '''
+30
+'''
 [[problem.tests]]
-call = "greet('Sam')"
-expect = "'Hello, Sam!'"
+before = '''
+score = 0
+'''
+output = '''
+20
+'''
+[[problem.tests]]
+before = '''
+score = -10
+'''
+output = '''
+0
+'''
 
 [[problem]]
-id = "addtext"
-title = "Add numbers typed as text"
+id = "join_or_add"
+lesson = "val_strnum"
+title = "Join or add?"
 level = "Easy"
-story = "Input always arrives as text. Write add_text(a, b) that takes two strings like '7' and '5' and returns their sum as a number."
-hint = "'7' + '5' glues text into '75'. Convert each with int() first."
+kind = "output"
+story = "a and b hold digits as text, like \"3\" and \"4\". Print them joined together on the first line (34), and their sum as numbers on the second line (7)."
+hints = ["a + b on two pieces of text joins them.", "int(a) turns the text \"3\" into the number 3."]
+approach = "+ joins text and adds numbers. Converting with int() first changes which one happens."
+gfg = "python type conversion"
 starter = '''
-def add_text(a, b):
-    pass
+# The input is already in: a, b
+# Write your code below and print the answer.
 '''
 solution = '''
-def add_text(a, b):
-    first = int(a)
-    second = int(b)
-    return first + second
-'''
-demo = '''
-print(add_text('7', '5'))
+print(a + b)
+print(int(a) + int(b))
 '''
 [[problem.tests]]
-call = "add_text('7', '5')"
-expect = "12"
+before = '''
+a = "3"
+b = "4"
+'''
+output = '''
+34
+7
+'''
 [[problem.tests]]
-call = "add_text('10', '0')"
-expect = "10"
+before = '''
+a = "10"
+b = "5"
+'''
+output = '''
+105
+15
+'''
+[[problem.tests]]
+before = '''
+a = "0"
+b = "9"
+'''
+output = '''
+09
+9
+'''
+
+[[problem]]
+id = "age_next_year"
+lesson = "val_int"
+title = "Age next year"
+level = "Easy"
+kind = "output"
+story = "age_text holds an age as text, for example \"15\". Print the age the person will be next year."
+hints = ["You cannot add 1 to text. Convert it first.", "int(age_text) + 1"]
+approach = "int() turns the text into a number, and then + 1 is normal maths."
+gfg = "python int function"
+starter = '''
+print(age_text + 1)
+'''
+solution = '''
+print(int(age_text) + 1)
+'''
+[[problem.tests]]
+before = '''
+age_text = "15"
+'''
+output = '''
+16
+'''
+[[problem.tests]]
+before = '''
+age_text = "0"
+'''
+output = '''
+1
+'''
+[[problem.tests]]
+before = '''
+age_text = "99"
+'''
+output = '''
+100
+'''

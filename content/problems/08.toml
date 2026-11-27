@@ -1,83 +1,124 @@
 topic = "08"
+# One problem per lesson sub-topic. Generated test answers come from the solution.
 
 [[problem]]
-id = "clamp"
-title = "Clamp a number"
+id = "rect_area"
+lesson = "fn_frame"
+title = "Rectangle area"
 level = "Easy"
-story = "Write clamp(n, low, high) that returns n, but never less than low and never more than high."
-hint = "Two ifs: one for too small, one for too big. Otherwise return n unchanged."
+kind = "function"
+story = "Write area(width, height) that returns the area of a rectangle."
+hints = ["The area is width times height.", "Use return, not print."]
+approach = "The arguments arrive in width and height, and return hands the answer back to the caller."
+gfg = "python functions"
 starter = '''
-def clamp(n, low, high):
+def area(width, height):
+    # Write your code here
     pass
 '''
 solution = '''
-def clamp(n, low, high):
-    if n < low:
-        return low
-    if n > high:
-        return high
-    return n
-'''
-demo = '''
-print(clamp(15, 0, 10))
-'''
-[[problem.tests]]
-call = "clamp(15, 0, 10)"
-expect = "10"
-[[problem.tests]]
-call = "clamp(-3, 0, 10)"
-expect = "0"
-[[problem.tests]]
-call = "clamp(5, 0, 10)"
-expect = "5"
-
-[[problem]]
-id = "label"
-title = "Price label"
-level = "Easy"
-story = "Write label(name, price) that returns text like 'Tea: $3'."
-hint = "Return the text, do not print it. str(price) turns the number into text."
-starter = '''
-def label(name, price):
-    pass
-'''
-solution = '''
-def label(name, price):
-    return name + ': $' + str(price)
-'''
-demo = '''
-print(label('Tea', 3))
-'''
-[[problem.tests]]
-call = "label('Tea', 3)"
-expect = "'Tea: $3'"
-[[problem.tests]]
-call = "label('Cake', 12)"
-expect = "'Cake: $12'"
-
-[[problem]]
-id = "area"
-title = "Area with a default"
-level = "Easy"
-story = "Write area(width, height=None). With one argument it is a square, so height equals width."
-hint = "Check height is None, and if so use width for it."
-starter = '''
-def area(width, height=None):
-    pass
-'''
-solution = '''
-def area(width, height=None):
-    if height is None:
-        height = width
+def area(width, height):
     return width * height
 '''
-demo = '''
-print(area(3))
-print(area(3, 4))
-'''
-[[problem.tests]]
-call = "area(3)"
-expect = "9"
 [[problem.tests]]
 call = "area(3, 4)"
 expect = "12"
+[[problem.tests]]
+call = "area(5, 0)"
+expect = "0"
+[[problem.tests]]
+call = "area(1, 1)"
+expect = "1"
+
+[[problem]]
+id = "is_even_fn"
+lesson = "fn_return"
+title = "Return, don't print"
+level = "Easy"
+kind = "function"
+story = "is_even(n) should return True if n is even and False otherwise. The current version prints the answer instead of returning it, so callers get None. Fix it."
+hints = ["print shows a value; return hands it back to the caller.", "return n % 2 == 0"]
+approach = "Without return, a function gives back None, however much it prints."
+gfg = "python return statement"
+starter = '''
+def is_even(n):
+    print(n % 2 == 0)
+'''
+solution = '''
+def is_even(n):
+    return n % 2 == 0
+'''
+[[problem.tests]]
+call = "is_even(4)"
+expect = "True"
+[[problem.tests]]
+call = "is_even(7)"
+expect = "False"
+[[problem.tests]]
+call = "is_even(0)"
+expect = "True"
+
+[[problem]]
+id = "greet_default"
+lesson = "fn_params"
+title = "Greeting with a default"
+level = "Easy"
+kind = "function"
+story = "Write greet(name, greeting=\"Hello\") that returns text like \"Hello, Sam!\". If no greeting is given, use Hello."
+hints = ["A default value goes in the def line: greeting=\"Hello\".", "Build the text with an f-string: f\"{greeting}, {name}!\""]
+approach = "The default fills greeting only when the caller leaves it out; a keyword argument can still change it."
+gfg = "python default arguments"
+starter = '''
+def greet(name, greeting="Hello"):
+    # Write your code here
+    pass
+'''
+solution = '''
+def greet(name, greeting="Hello"):
+    return f"{greeting}, {name}!"
+'''
+[[problem.tests]]
+call = "greet(\"Sam\")"
+expect = "'Hello, Sam!'"
+[[problem.tests]]
+call = "greet(\"Ava\", \"Hi\")"
+expect = "'Hi, Ava!'"
+[[problem.tests]]
+call = "greet(greeting=\"Hey\", name=\"Lee\")"
+expect = "'Hey, Lee!'"
+
+[[problem]]
+id = "count_long"
+lesson = "fn_scope"
+title = "Count long words"
+level = "Easy"
+kind = "function"
+story = "count_long(words) should return how many words have more than 3 letters. The current version crashes because it changes a global count. Make the count local and return it."
+hints = ["Python treats count as local inside the function because you assign to it.", "Start count = 0 inside the function and return it at the end."]
+approach = "A local counter starts fresh on every call and is handed back with return."
+gfg = "python global and local variables"
+starter = '''
+count = 0
+
+def count_long(words):
+    for w in words:
+        if len(w) > 3:
+            count += 1
+'''
+solution = '''
+def count_long(words):
+    count = 0
+    for w in words:
+        if len(w) > 3:
+            count += 1
+    return count
+'''
+[[problem.tests]]
+call = "count_long([\"tree\", \"a\", \"house\"])"
+expect = "2"
+[[problem.tests]]
+call = "count_long([])"
+expect = "0"
+[[problem.tests]]
+call = "count_long([\"cat\", \"dog\"])"
+expect = "0"

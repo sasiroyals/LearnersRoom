@@ -1,7 +1,7 @@
 // Runs every practice problem in a real browser (Skulpt, as students use it) and checks that:
 //   1. the solution passes all of its tests,
 //   2. the starter code does not,
-//   3. the solution (plus its example, for function problems) can be stepped through without an error.
+//   3. the solution can be stepped through on example 1 without an error.
 // Output problems compare what the whole program prints.
 //
 // Set SKULPT_DIR to a folder holding skulpt.min.js and skulpt-stdlib.js to run offline.
@@ -11,7 +11,7 @@ const path = require('path');
 
 (async () => {
   const html = fs.readFileSync(path.join(__dirname, '..', '..', 'index.html'), 'utf8')
-    .replace('async function prRunTests(){', 'window.__p = {get pr(){ return pr; }, openProblem, tracePy, PROBLEMS, run: () => prRunTests()};\nasync function prRunTests(){');
+    .replace('async function prRunTests(kind){', 'window.__p = {get pr(){ return pr; }, openProblem, tracePy, debugProgram, PROBLEMS, run: () => prRunTests("submit")};\nasync function prRunTests(kind){');
   const browser = await chromium.launch();
   const page = await browser.newPage();
   const errors = [];
@@ -34,7 +34,7 @@ const path = require('path');
       if (sol.pass !== sol.total) bad.push(`${pb.id}: solution passes ${sol.pass}/${sol.total}: ${sol.items.filter(x => !x.ok).map(x => x.error || x.got).join(' | ')}`);
       set(pb.starter); await P.run();
       if (P.pr.results.pass === P.pr.results.total) bad.push(`${pb.id}: starter already passes`);
-      const tr = await P.tracePy(pb.kind === 'output' ? pb.solution : pb.solution + '\n# example\n' + pb.demo, []);
+      const tr = await P.tracePy(P.debugProgram(pb, pb.solution).src, []);
       const last = tr.steps[tr.steps.length - 1];
       if (last.error) bad.push(`${pb.id}: stepping the solution fails: ${last.error}`);
     }

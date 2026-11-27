@@ -1,88 +1,127 @@
 topic = "23"
+# One problem per lesson sub-topic. Generated test answers come from the solution.
 
 [[problem]]
-id = "sorted"
-title = "Is it sorted?"
+id = "clamp_typed"
+lesson = "typ_hints"
+title = "Clamp with type hints"
 level = "Easy"
-story = "Write is_sorted(items: list) -> bool that says whether each item is no bigger than the next one."
-hint = "Compare each item with the one after it. One wrong pair is enough to answer False."
+kind = "function"
+story = "Write clamp(value: int, low: int, high: int) -> int that returns value limited to the range low to high."
+hints = ["Type hints describe the types; Python does not check them when the code runs.", "return max(low, min(value, high))"]
+approach = "min caps the value at high and max lifts it to low. The hints are documentation for people and tools."
+gfg = "python type hints"
 starter = '''
-def is_sorted(items: list) -> bool:
+def clamp(value: int, low: int, high: int) -> int:
+    # Write your code here
     pass
 '''
 solution = '''
-def is_sorted(items: list) -> bool:
-    for i in range(len(items) - 1):
-        if items[i] > items[i + 1]:
-            return False
-    return True
-'''
-demo = '''
-print(is_sorted([1, 2, 2, 5]))
+def clamp(value: int, low: int, high: int) -> int:
+    return max(low, min(value, high))
 '''
 [[problem.tests]]
-call = "is_sorted([1, 2, 2, 5])"
+call = "clamp(5, 0, 10)"
+expect = "5"
+[[problem.tests]]
+call = "clamp(-3, 0, 10)"
+expect = "0"
+[[problem.tests]]
+call = "clamp(99, 0, 10)"
+expect = "10"
+
+[[problem]]
+id = "describe_all"
+lesson = "typ_protocol"
+title = "Anything describable"
+level = "Medium"
+kind = "function"
+story = "Describable is a Protocol with describe() -> str. Write describe_all(items) that returns \"; \" joined descriptions. Cat and Car do not inherit from Describable but still fit it."
+hints = ["A Protocol is checked by shape, not by inheritance.", "\"; \".join(i.describe() for i in items)"]
+approach = "Any object with the right method fits the Protocol, so the function works for both classes."
+gfg = "python typing protocol"
+starter = '''
+from typing import Protocol
+
+
+class Describable(Protocol):
+    def describe(self) -> str:
+        ...
+
+
+class Cat:
+    def describe(self) -> str:
+        return "a cat"
+
+
+class Car:
+    def describe(self) -> str:
+        return "a car"
+
+
+def describe_all(items) -> str:
+    # Write your code here
+    pass
+'''
+solution = '''
+from typing import Protocol
+
+
+class Describable(Protocol):
+    def describe(self) -> str:
+        ...
+
+
+class Cat:
+    def describe(self) -> str:
+        return "a cat"
+
+
+class Car:
+    def describe(self) -> str:
+        return "a car"
+
+
+def describe_all(items) -> str:
+    return "; ".join(i.describe() for i in items)
+'''
+[[problem.tests]]
+call = "describe_all([Cat(), Car()])"
+expect = "'a cat; a car'"
+[[problem.tests]]
+call = "describe_all([])"
+expect = "''"
+
+[[problem]]
+id = "valid_password"
+lesson = "typ_assert"
+title = "Password rules"
+level = "Medium"
+kind = "function"
+story = "Write is_valid_password(pw): True when pw has at least 8 characters and at least one digit. Then add a few assert lines under it that test your function."
+hints = ["any(ch.isdigit() for ch in pw) checks for a digit.", "assert is_valid_password(\"abc12345\") stays silent when it passes."]
+approach = "Each assert is a tiny test: it does nothing when true and stops the program when false."
+gfg = "python assert"
+starter = '''
+def is_valid_password(pw):
+    # Write your code here
+    pass
+'''
+solution = '''
+def is_valid_password(pw):
+    return len(pw) >= 8 and any(ch.isdigit() for ch in pw)
+
+
+assert is_valid_password("abc12345")
+assert not is_valid_password("short1")
+assert not is_valid_password("noDigitsHere")
+'''
+[[problem.tests]]
+call = "is_valid_password(\"abc12345\")"
 expect = "True"
 [[problem.tests]]
-call = "is_sorted([3, 1])"
+call = "is_valid_password(\"abcdefgh\")"
 expect = "False"
 [[problem.tests]]
-call = "is_sorted([])"
-expect = "True"
-
-[[problem]]
-id = "safeint"
-title = "Convert with a fallback"
-level = "Easy"
-story = "Write safe_int(text: str, default: int = 0) -> int that returns int(text), or default if the text is not a whole number."
-hint = "Type hints document what goes in and out. They do not check anything by themselves."
-starter = '''
-def safe_int(text: str, default: int = 0) -> int:
-    pass
-'''
-solution = '''
-def safe_int(text: str, default: int = 0) -> int:
-    try:
-        return int(text)
-    except ValueError:
-        return default
-'''
-demo = '''
-print(safe_int('42'))
-print(safe_int('abc', -1))
-'''
-[[problem.tests]]
-call = "safe_int('42')"
-expect = "42"
-[[problem.tests]]
-call = "safe_int('abc', -1)"
-expect = "-1"
-[[problem.tests]]
-call = "safe_int('x')"
-expect = "0"
-
-[[problem]]
-id = "asserts"
-title = "Make the asserts pass"
-level = "Medium"
-story = "Write middle(items) that returns the middle item of a list with an odd length. The asserts in the demo are your tests: when they all pass, nothing is printed except 'all good'."
-hint = "len(items) // 2 is the index of the middle item."
-starter = '''
-def middle(items):
-    pass
-'''
-solution = '''
-def middle(items):
-    return items[len(items) // 2]
-'''
-demo = '''
-assert middle([1, 2, 3]) == 2
-assert middle(['a']) == 'a'
-print('all good')
-'''
-[[problem.tests]]
-call = "middle([1, 2, 3])"
-expect = "2"
-[[problem.tests]]
-call = "middle(['a', 'b', 'c', 'd', 'e'])"
-expect = "'c'"
+call = "is_valid_password(\"a1\")"
+expect = "False"
