@@ -63,7 +63,15 @@ Commit the rebuilt `index.html` with your change; CI fails if it is out of date.
 
 ## Accounts
 
-Log in and sign up use Firebase when `src/config/firebase.json` holds the
-project's web config (it is public by design; Firestore rules keep each
-student's `users/{uid}` document private). Without that file the pages still
-work, but accounts are kept in the visitor's browser only.
+Log in and sign up use Amazon Cognito when `src/config/cognito.json` exists:
+
+```json
+{"region": "us-east-1", "userPoolId": "us-east-1_XXXXXXXXX", "clientId": "XXXXXXXXXXXXXXXXXXXXXXXXXX"}
+```
+
+These values are public by design. The page calls Cognito directly
+(`USER_PASSWORD_AUTH`, so the app client must allow that flow). Sign up sends
+a verification code by email; forgotten passwords use a reset code. Trophies
+and the last lesson are saved in the user's `custom:progress` attribute
+(string, max 2048), so no database is needed. Without the file the pages
+still work, but accounts are kept in the visitor's browser only.

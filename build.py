@@ -76,9 +76,9 @@ def data_js() -> str:
     )
 
 
-def firebase_js():
-    """The public Firebase web config, or null to use browser-only accounts."""
-    path = ROOT / "src" / "config" / "firebase.json"
+def cognito_js():
+    """The public Cognito pool settings, or null to use browser-only accounts."""
+    path = ROOT / "src" / "config" / "cognito.json"
     if not path.exists():
         return "null"
     cfg = json.loads(path.read_text(encoding="utf-8") or "null")
@@ -96,7 +96,7 @@ def build() -> str:
         if path.name == DATA_BEFORE:
             parts.append(data_js())
         parts.append(path.read_text())
-    js = "\n".join(parts).replace("/*@SHIMS@*/null", shims_js()).replace("/*@FIREBASE@*/null", firebase_js())
+    js = "\n".join(parts).replace("/*@SHIMS@*/null", shims_js()).replace("/*@COGNITO@*/null", cognito_js())
     page = (SRC / "index.html").read_text()
     for slot, text in (("/*@CSS@*/", (SRC / "css" / "app.css").read_text()), ("/*@JS@*/", js)):
         if page.count(slot) != 1:

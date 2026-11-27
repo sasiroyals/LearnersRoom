@@ -136,15 +136,15 @@
           <button type="button" role="tab" data-auth="login" id="seg-login">Log in</button>
           <button type="button" role="tab" data-auth="signup" id="seg-signup">Sign up</button>
         </div>
-        <button type="button" class="btn-google wide" id="au-google" hidden><svg viewBox="0 0 48 48" aria-hidden="true"><path fill="#EA4335" d="M24 9.5c3.5 0 6.6 1.2 9 3.6l6.7-6.7C35.6 2.4 30.2 0 24 0 14.6 0 6.6 5.4 2.6 13.2l7.8 6.1C12.3 13.6 17.6 9.5 24 9.5z"/><path fill="#4285F4" d="M46.5 24.5c0-1.6-.1-3.1-.4-4.5H24v9h12.7c-.6 3-2.3 5.5-4.8 7.2l7.5 5.8c4.4-4 7.1-10 7.1-17.5z"/><path fill="#FBBC05" d="M10.4 28.7A14.5 14.5 0 0 1 9.5 24c0-1.6.3-3.2.9-4.7l-7.8-6.1A24 24 0 0 0 0 24c0 3.9.9 7.5 2.6 10.8l7.8-6.1z"/><path fill="#34A853" d="M24 48c6.5 0 11.9-2.1 15.9-5.8l-7.5-5.8c-2.1 1.4-4.9 2.3-8.4 2.3-6.4 0-11.7-4.1-13.6-9.8l-7.8 6.1C6.6 42.6 14.6 48 24 48z"/></svg>Continue with Google</button>
-        <div class="or" id="au-or" hidden><span>or use email</span></div>
         <label class="fld" id="fld-name"><span>Your name</span><input id="au-name" autocomplete="name" placeholder="Ada Lovelace"></label>
-        <label class="fld"><span>Email</span><input id="au-email" type="email" autocomplete="email" placeholder="you@example.com" required></label>
-        <label class="fld"><span>Password</span>
+        <label class="fld" id="fld-code"><span>Verification code</span><input id="au-code" inputmode="numeric" autocomplete="one-time-code" placeholder="6-digit code" maxlength="8"></label>
+        <label class="fld" id="fld-email"><span>Email</span><input id="au-email" type="email" autocomplete="email" placeholder="you@example.com" required></label>
+        <label class="fld" id="fld-pass"><span id="au-pass-label">Password</span>
           <span class="pw"><input id="au-pass" type="password" autocomplete="current-password" placeholder="At least 8 characters" required><button type="button" class="pw-eye" id="au-eye" aria-label="Show password">Show</button></span>
         </label>
         <div class="meter" id="au-meter" aria-live="polite"><i></i><i></i><i></i><i></i><span></span></div>
         <button type="button" class="link-btn forgot" id="au-forgot" hidden>Forgot password?</button>
+        <button type="button" class="link-btn forgot" id="au-resend" hidden>Send a new code</button>
         <p class="auth-err" id="au-err" role="alert" hidden></p>
         <p class="auth-ok" id="au-ok" role="status" hidden></p>
         <button class="btn-primary big wide" type="submit" id="au-submit">Log in</button>
