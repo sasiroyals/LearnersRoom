@@ -1,0 +1,58 @@
+topic = "00"
+
+# Beginner problems: change the program so it prints the right output.
+[[problem]]
+id = "hello_world"
+title = "Say hello"
+level = "Easy"
+kind = "output"
+story = "Change the program so it prints exactly: Hello, world!"
+hint = "The text inside the quotes is what gets printed. Add the comma, the space and world!"
+starter = '''
+print("Hello")
+'''
+solution = '''
+print("Hello, world!")
+'''
+[[problem.tests]]
+output = '''
+Hello, world!
+'''
+
+[[problem]]
+id = "two_lines"
+title = "Two lines"
+level = "Easy"
+kind = "output"
+story = "Make the program print Python on the first line and is fun on the second line."
+hint = "Each print(...) makes one line. You need two of them."
+starter = '''
+print("Python is fun")
+'''
+solution = '''
+print("Python")
+print("is fun")
+'''
+[[problem.tests]]
+output = '''
+Python
+is fun
+'''
+
+[[problem]]
+id = "fix_print"
+title = "Fix the typo"
+level = "Easy"
+kind = "output"
+story = "This program stops with an error. Fix it so it prints Ready."
+hint = "Python cares about capital letters. Is it Print or print?"
+starter = '''
+Print("Ready")
+'''
+solution = '''
+print("Ready")
+'''
+[[problem.tests]]
+output = '''
+Ready
+'''

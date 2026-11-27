@@ -17,7 +17,7 @@ const L = {
   },
   java: {
     name:'Java', names:'variables', nameWord:'variable', nameWords:'variables', listWord:'ArrayList', listWords:'lists',
-    listLabel:n=>'ArrayList #'+n, objects:'objects (heap)',
+    listLabel:n=>'ArrayList #'+n, objects:'objects in memory',
     code:{ alias:['List<Integer> a = new ArrayList<>(List.of(1, 2));','List<Integer> b = a;','b.add(3);','System.out.println(a);'],
            copy:['List<Integer> a = new ArrayList<>(List.of(1, 2));','List<Integer> b = new ArrayList<>(a);','b.add(3);','System.out.println(a);'] },
     wrapBefore:['import java.util.*;','','public class Main {','  public static void main(String[] args) {'], wrapAfter:['  }','}'],
@@ -183,12 +183,12 @@ const STEPS = [
            'Right. The deciding step is y = x: no new list was made, so the 6 appended through x shows through y.'],
           ['Not quite. Find the step that decides it: y = x copies a reference, not the list. x and y share one ArrayList, so the 6 shows through y: [5, 6].',
            'Right. The deciding step is y = x: it copies a reference, so the 6 added through x shows through y.'])},
-   next:T('Finish lesson')}
+   next:T('Next lesson', 'Finish lesson')}
 ];
 
 /* What to look at, and a one-line summary for the steps-so-far log */
 const GUIDE = {
-  start:   {look:T('The code panel on the lower right. Nothing exists on the canvas yet.'), sum:T('Read the program.')},
+  start:   {look:T('The code panel, with line numbers. Nothing exists on the canvas yet.'), sum:T('Read the program.')},
   create:  {look:T('The new list on the right, and the arrow from a to it.','The new ArrayList on the right, and the arrow from a to it.'), sum:T('a = [1, 2] made one list named a.','a got a reference to a new ArrayList [1, 2].')},
   assign:  {look:T('Two arrows now end at the same list. Count the arrows, then the lists.'), sum:T('b = a gave the same list a second name.','b = a copied the reference, not the list.')},
   append:  {look:T('The tile 3 travels along b’s arrow into a new slot, index 2.'), sum:T('Through b, 3 was appended to the shared list.','Through b, 3 was added to the shared list.')},

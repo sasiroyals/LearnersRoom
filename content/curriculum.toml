@@ -2,6 +2,17 @@
 # A topic shows its built lessons first, then the remaining titles as "planned".
 
 [[py]]
+n = "00"
+t = "Start here"
+level = "Level 1: Beginner"
+subs = [
+  "What does a program do?",
+  "Can a program remember things?",
+  "What happens when Python finds a mistake?",
+]
+book = "Crash Course ch. 1"
+
+[[py]]
 n = "01"
 t = "Values and names"
 level = "Level 1: Beginner"

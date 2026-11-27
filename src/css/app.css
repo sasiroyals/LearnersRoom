@@ -416,7 +416,7 @@ button:focus-visible,a:focus-visible,[tabindex]:focus-visible{outline:2px solid 
 .ln .edited{font:600 10px var(--f-body);text-transform:uppercase;letter-spacing:.06em;color:var(--val-stroke);align-self:center}
 .ln.flash{animation:flash 1.2s ease}
 @keyframes flash{0%,40%{background:var(--val-bg)}}
-.tok-kw{color:var(--kw)} .tok-num{color:var(--num)} .tok-str{color:var(--str)}
+.tok-kw{color:var(--kw)} .tok-num{color:var(--num)} .tok-str{color:var(--str)} .tok-com{color:var(--muted);font-style:italic}
 .runlink{display:flex;justify-content:space-between;align-items:center;margin-top:10px;font-size:12px;color:var(--muted);gap:8px;flex-wrap:wrap}
 .runlink a{color:var(--ref);font-weight:600}
 .pseudo{list-style:none;margin:0;padding:0;counter-reset:p}
@@ -663,7 +663,7 @@ button:focus-visible,a:focus-visible,[tabindex]:focus-visible{outline:2px solid 
 .ht-prac:hover{background:var(--accent);color:#fff}
 .ht-prac.full{border-color:var(--good);color:var(--good)}
 .lib-scrim{display:none}
-@media (max-width:1360px){
+@media (max-width:1440px){
   .practice{grid-template-columns:minmax(0,1.1fr) minmax(0,1fr) 330px}
   .lib{position:fixed;z-index:15;top:0;bottom:0;left:0;width:300px;border-radius:0;box-shadow:4px 0 30px rgba(0,0,0,.25);transform:translateX(-105%);transition:transform .2s;padding-top:env(safe-area-inset-top,0px)}
   .practice.lib-open .lib{transform:none}
@@ -687,3 +687,11 @@ button:focus-visible,a:focus-visible,[tabindex]:focus-visible{outline:2px solid 
   #acct .btn-primary.sm,.trophies,#toggle-outline{min-height:40px}
   #auth-switch button{padding:10px 4px;margin:-10px 0}
 }
+
+/* output-checked beginner problems */
+.prob-want{font-size:12.5px;color:var(--muted)}
+.prob-want pre{margin:4px 0 0;font:600 13px var(--f-mono);background:var(--code-bg);color:var(--ink);padding:8px 10px;border-radius:8px;white-space:pre-wrap}
+.prob-note{margin:0;font-size:12.5px;color:var(--muted);background:var(--bg);border-radius:8px;padding:6px 9px}
+.prob-note code{font:600 12px var(--f-mono)}
+.lib-def{font:700 10px var(--f-mono);color:var(--muted);border:1px solid var(--line);border-radius:5px;padding:0 4px;margin-left:auto}
+.java-soon{margin:0 0 12px;font-size:12.5px;line-height:1.5;color:var(--ink);background:var(--val-bg);border:1px solid var(--val-stroke);border-radius:8px;padding:8px 10px}

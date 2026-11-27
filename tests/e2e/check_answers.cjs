@@ -39,7 +39,7 @@ const path = require('path');
       while (guard++ < 400) {
         if (!tlCanAdvance()) { if (tl.k === tl.trace.steps.length) tl.answers.check = 0; else tl.answers[0] = 0; renderTL(); }
         const atEnd = tl.k === tl.trace.steps.length;
-        tlNext();
+        await tlNext();  // the last step opens the next lesson: wait for it before moving on
         if (atEnd) { finished = true; break; }
       }
       if (!finished) bad.push(`${id}: could not step to the end`); else done.push(id);

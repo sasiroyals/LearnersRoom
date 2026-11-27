@@ -111,7 +111,7 @@ async function tracePy(code, inputs){
       if(k===0){
         const vars = [];
         Object.keys(x.$gbl||{}).forEach(n=>{ if(n.startsWith('__') || imported.has(n)) return; const vv = val(x.$gbl[n], heap); if(vv) vars.push([n.replace(/_\$rw\$$/,''), vv]); });
-        frames.push({name:'Global frame', vars, line:x.$lineno});
+        frames.push({name:'Main program', vars, line:x.$lineno});
       } else {
         const vars = [];
         Object.keys(x.$tmps||{}).forEach(n=>{ if(n[0]==='$') return; const raw = x.$tmps[n]; if(raw===undefined) return; const vv = val(raw, heap); if(vv) vars.push([n.replace(/_\$rw\$$/,''), vv]); });

@@ -24,7 +24,7 @@ pseudo = [
 [lesson.lines.1]
 t = "Make a value, then a name"
 b = "Python makes the value 10 first. Then = ties the name score to it. = is not \"equals\" from maths. It means \"let this name refer to this value\"."
-look = "score appears in the global frame."
+look = "score appears in the Main program box."
 
 [lesson.lines.2]
 t = "Right side first"

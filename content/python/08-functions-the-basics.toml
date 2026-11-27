@@ -30,11 +30,11 @@ pseudo = [
 [lesson.lines.1]
 t = "Define the function"
 b = "def stores the function under the name area. Its body does not run yet."
-look = "The global frame now holds area. Nothing else happened."
+look = "The Main program box now holds area. Nothing else happened."
 
 [lesson.lines.2]
 t = "Work inside the frame"
-b = "result is a local name. It lives in the call’s frame, not in the global frame."
+b = "result is a local name. It lives in the call’s frame, not in the Main program box (Python calls it the global frame)."
 look = "result appears inside the area() frame only."
 
 [lesson.lines.3]
@@ -90,7 +90,7 @@ opts = ["It prints 5.0", "A NameError"]
 right = 1
 fb = [
   "Not quite. h was local to half. Its frame is gone once the call returns.",
-  "Right. h existed only inside the call’s frame, so the global frame has no h.",
+  "Right. h existed only inside the call’s frame, so the Main program box has no h.",
 ]
 
 [[lesson]]

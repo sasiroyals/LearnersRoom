@@ -183,11 +183,18 @@ function renderExplain(){
 }
 
 /* ---------------- code + views ---------------- */
+/* Syntax colours in one pass, so a colour added for one token can never be matched again by the next rule. */
+const HL_RE = /(#.*$)|("(?:[^"\\]|\\.)*"|'(?:[^'\\]|\\.)*')|\b(import|from|public|class|static|void|new|print|return|def|for|while|in|if|elif|else|and|or|not|True|False|None|try|except|finally|with|as|lambda|yield|pass|break|continue|raise|global|nonlocal|is)\b|\b(\d+(?:\.\d+)?)\b/g;
 function hl(src){
-  return esc(src)
-    .replace(/(&quot;[^&]*&quot;)/g,'<span class="tok-str">$1</span>')
-    .replace(/\b(import|public|class|static|void|new|print|return|def|for|in|if|else)\b/g,'<span class="tok-kw">$1</span>')
-    .replace(/\b(\d+)\b/g,'<span class="tok-num">$1</span>');
+  let out = '', last = 0, m;
+  HL_RE.lastIndex = 0;
+  while((m = HL_RE.exec(src))){
+    out += esc(src.slice(last, m.index));
+    const cls = m[1] ? 'tok-com' : m[2] ? 'tok-str' : m[3] ? 'tok-kw' : 'tok-num';
+    out += `<span class="${cls}">${esc(m[0])}</span>`;
+    last = HL_RE.lastIndex;
+  }
+  return out + esc(src.slice(last));
 }
 function displayLine(core){ return L[lang].wrapBefore.length + core + 1; }
 function renderCode(){
