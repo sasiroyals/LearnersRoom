@@ -115,9 +115,12 @@ $('#pr-edit-btn').onclick = ()=>{ setEditing(true); $('#pr-code').focus(); };
 function setMode(m){
   mode = m;
   document.querySelectorAll('.modes .tab').forEach(t=>{ t.setAttribute('aria-selected', t.dataset.mode===m); t.tabIndex = t.dataset.mode===m?0:-1; });
-  $('#main').hidden = m!=='lesson'; $('#practice').hidden = m!=='practice'; $('#home').hidden = m!=='home';
+  $('#main').hidden = m!=='lesson'; $('#practice').hidden = m!=='practice'; $('#home').hidden = m!=='home'; $('#auth').hidden = m!=='auth';
   $('#toggle-outline').hidden = m!=='lesson';
+  document.body.dataset.mode = m;
+  if(m!=='auth' && /^#\/(login|signup)$/.test(location.hash)) history.replaceState(null,'',location.pathname + location.search);
   if(m==='home'){ stopAnims(); renderHome(); return; }
+  if(m==='auth'){ stopAnims(); return; }
   if(m==='practice'){ stopAnims(); renderPractice(); loadSkulpt().catch(()=>{}); }
   else if(!ALL_LESSONS[lang].includes(lessonId)) openLesson(firstLesson(lang));
   else if(lessonId==='alias') render(false); else renderTL();

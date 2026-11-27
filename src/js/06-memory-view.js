@@ -6,13 +6,34 @@ function reach(snapS){
   while(q.length){ const nq = []; q.forEach(id=>{ const o = snapS.heap[id]; const kids = (o.items||[]).concat((o.entries||[]).map(e=>e[1]), o.cls ? [o.cls] : [], o.base ? [o.base] : []); kids.forEach(k=>{ if(k && k.r && level[k.r]===undefined){ level[k.r]=level[id]+1; nq.push(k.r); } }); }); q = nq; }
   return Object.keys(level).map(Number).sort((a,b)=>a-b).map(id=>Object.assign({lvl:level[id]}, snapS.heap[id]));
 }
+const _mctx = document.createElement('canvas').getContext('2d');
+let _mono = null;
+function textW(t, wt, px){
+  if(!_mono) _mono = getComputedStyle(document.documentElement).getPropertyValue('--f-mono').trim() || 'monospace';
+  _mctx.font = `${wt} ${px}px ${_mono}`; return Math.ceil(_mctx.measureText(String(t)).width);
+}
+function fitText(t, max, wt, px){
+  t = String(t); if(textW(t, wt, px) <= max) return t;
+  let lo = 0, hi = t.length;
+  while(lo < hi){ const m = (lo + hi + 1) >> 1; if(textW(t.slice(0,m)+'…', wt, px) <= max) lo = m; else hi = m - 1; }
+  return t.slice(0, lo) + '…';
+}
 function renderMem(){ if(pr.trace) renderMemInto($('#pr-canvas'), pr.trace, pr.i); }
 function renderMemInto(cv, T, idx){
   const cur = T.steps[idx], prev = T.steps[idx-1];
   const cellPos = {}, objBase = {}, varPos = {};
   const stacked = cv.clientWidth > 0 && cv.clientWidth < 560;
-  const FX=14, FW=stacked?300:240, ROW=36, CW=50, CHH=40, PER=6;
-  let OX = 320;
+  const ROW=36, CW=50, CHH=40, PER=6, FX=14;
+  // Size the frame columns from the real text so long names and values never overlap.
+  let nameW = 64, valW = 110;
+  cur.frames.forEach(f=>{
+    nameW = Math.max(nameW, textW(f.name, 700, 13) - 40);
+    f.vars.forEach(([n,v])=>{ nameW = Math.max(nameW, textW(n, 600, 14)); if(v.r===undefined) valW = Math.max(valW, textW(short(v.p, 40), v.fn?500:600, v.fn?12:13) + 20); });
+  });
+  nameW = Math.min(nameW, stacked ? 120 : 170); valW = Math.min(valW, stacked ? 170 : 230);
+  const NX = 14, VX = NX + nameW + 14;                 // name column, value column (relative to frame)
+  const FW = Math.max(stacked ? 300 : 240, VX + valW + 14);
+  let OX = FX + FW + 66;
   let h = '', y = 14, frameEnds = [];
   const anchors = {}; const links = [];
   const pvMap = {}; if(prev) prev.frames.forEach((f,d)=>f.vars.forEach(([n,v])=>pvMap[d+':'+n] = v.r!==undefined ? 'r'+v.r : 'p'+v.p));
@@ -27,11 +48,12 @@ function renderMemInto(cv, T, idx){
       const ry = y + 34 + k*ROW;
       const key = d+':'+n, now = v.r!==undefined ? 'r'+v.r : 'p'+v.p;
       const chg = prev && pvMap[key] !== now;
-      h += `<text class="vname" x="${FX+14}" y="${ry+21}">${esc(n)}</text>`;
-      varPos[n] = {x:FX+108, y:ry+4, w:FW-122, h:ROW-8};
-      h += `<rect class="vcell${chg?' chg pchg':''}" x="${FX+108}" y="${ry+4}" width="${FW-122}" height="${ROW-8}" rx="6"/>`;
+      h += `<text class="vname" x="${FX+NX}" y="${ry+22}">${esc(fitText(n, nameW, 600, 14))}<title>${esc(n)}</title></text>`;
+      const cw = FW - VX - 14;
+      varPos[n] = {x:FX+VX, y:ry+4, w:cw, h:ROW-8};
+      h += `<rect class="vcell${chg?' chg pchg':''}" x="${FX+VX}" y="${ry+4}" width="${cw}" height="${ROW-8}" rx="6"/>`;
       if(v.r!==undefined){ h += `<circle class="refdot" cx="${FX+FW-26}" cy="${ry+ROW/2}" r="5"/>`; links.push({x:FX+FW-26, y:ry+ROW/2, to:v.r, chg}); }
-      else h += `<text class="vtext${v.fn?' fn':''}" x="${FX+116}" y="${ry+22}">${esc(short(v.p, v.fn?24:18))}</text>`;
+      else h += `<text class="vtext${v.fn?' fn':''}" x="${FX+VX+9}" y="${ry+22}">${esc(fitText(String(v.p), cw-18, v.fn?500:600, v.fn?12:13))}<title>${esc(v.p)}</title></text>`;
     });
     h += `</g>`;
     y += H + 14;
@@ -85,10 +107,10 @@ function renderMemInto(cv, T, idx){
         const ry = oy+20+r*RH;
         const pe = pobj && pobj.entries ? pobj.entries.find(e=>e[0]===k) : null;
         const chg = prev && !isNew && (!pe || pe[1].p!==x.p || pe[1].r!==x.r);
-        g += `<text class="okey" x="${OX+12}" y="${ry+21}">${esc(short(k,12))}</text>`;
+        g += `<text class="okey" x="${OX+12}" y="${ry+21}">${esc(fitText(String(k), 88, 600, 13))}<title>${esc(k)}</title></text>`;
         g += `<rect class="ocell${chg?' chg pchg':''}" x="${OX+108}" y="${ry+4}" width="${W-116}" height="${RH-8}" rx="6"/>`;
         if(x.r!==undefined){ g += `<circle class="refdot" cx="${OX+W-22}" cy="${ry+RH/2}" r="5"/>`; links.push({x:OX+W-22, y:ry+RH/2, to:x.r, inner:true}); }
-        else g += `<text class="vtext${x.fn?' fn':''}" x="${OX+114}" y="${ry+21}">${esc(short(x.p,x.fn?16:12))}</text>`;
+        else g += `<text class="vtext${x.fn?' fn':''}" x="${OX+114}" y="${ry+21}">${esc(fitText(String(x.p), W-132, x.fn?500:600, x.fn?12:13))}<title>${esc(x.p)}</title></text>`;
       });
       anchors[o.id] = stacked ? {x:OX+40, y:oy+18, top:true} : {x:OX-6, y:oy+36};
     }

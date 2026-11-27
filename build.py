@@ -76,6 +76,15 @@ def data_js() -> str:
     )
 
 
+def firebase_js():
+    """The public Firebase web config, or null to use browser-only accounts."""
+    path = ROOT / "src" / "config" / "firebase.json"
+    if not path.exists():
+        return "null"
+    cfg = json.loads(path.read_text(encoding="utf-8") or "null")
+    return js_value(cfg) if cfg else "null"
+
+
 def shims_js() -> str:
     shims = {f"src/lib/{p.name}": p.read_text() for p in sorted((SRC / "shims").glob("*.py"))}
     return js_value(shims)
@@ -87,7 +96,7 @@ def build() -> str:
         if path.name == DATA_BEFORE:
             parts.append(data_js())
         parts.append(path.read_text())
-    js = "\n".join(parts).replace("/*@SHIMS@*/null", shims_js())
+    js = "\n".join(parts).replace("/*@SHIMS@*/null", shims_js()).replace("/*@FIREBASE@*/null", firebase_js())
     page = (SRC / "index.html").read_text()
     for slot, text in (("/*@CSS@*/", (SRC / "css" / "app.css").read_text()), ("/*@JS@*/", js)):
         if page.count(slot) != 1:
