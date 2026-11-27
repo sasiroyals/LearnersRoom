@@ -705,6 +705,8 @@ button:focus-visible,a:focus-visible,[tabindex]:focus-visible{outline:2px solid 
 .prob-note code{font:600 12px var(--f-mono)}
 .lib-def{font:700 10px var(--f-mono);color:var(--muted);border:1px solid var(--line);border-radius:5px;padding:0 4px;margin-left:auto}
 .java-soon{margin:0 0 12px;font-size:12.5px;line-height:1.5;color:var(--ink);background:var(--val-bg);border:1px solid var(--val-stroke);border-radius:8px;padding:8px 10px}
+.demo-head{margin:10px 0 2px;padding:4px 10px;font:600 11.5px var(--f-body);color:var(--muted);border-top:1px dashed var(--line)}
+.ln.demo:not(.active):not(.err){opacity:.6}
 </style>
 </head>
 <body>
@@ -2143,9 +2145,12 @@ function renderPracticeCode(){
   const T = pr.trace, v = $('#pr-view');
   if(!T) return;
   const cur = T.steps[pr.i];
+  /* For function problems the site adds an example call after "# example". Show it apart, so it is not mistaken for the student's code. */
+  const p = curProblem(), exAt = p && !isOutProb(p) ? T.src.lastIndexOf('# example') : -1;
   v.innerHTML = `<pre class="code">` + T.src.map((t,k)=>{
+    if(k===exAt) return `<div class="demo-head">Added by the site to try your function. Not part of your answer.</div>`;
     const here = cur.line === k+1;
-    const cls = here ? (cur.error ? ' err' : ' active') : '';
+    const cls = (here ? (cur.error ? ' err' : ' active') : '') + (exAt>=0 && k>exAt ? ' demo' : '');
     return `<div class="ln${cls}"${here?' aria-current="true"':''}><span class="n">${k+1}</span><span class="here">${here?(cur.error?'!':'▶'):''}</span><span>${hl(t)||' '}</span></div>`;
   }).join('') + `</pre>`;
   const a = v.querySelector('.ln.active, .ln.err'); if(a) a.scrollIntoView({block:'nearest'});

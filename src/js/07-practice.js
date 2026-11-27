@@ -4,9 +4,12 @@ function renderPracticeCode(){
   const T = pr.trace, v = $('#pr-view');
   if(!T) return;
   const cur = T.steps[pr.i];
+  /* For function problems the site adds an example call after "# example". Show it apart, so it is not mistaken for the student's code. */
+  const p = curProblem(), exAt = p && !isOutProb(p) ? T.src.lastIndexOf('# example') : -1;
   v.innerHTML = `<pre class="code">` + T.src.map((t,k)=>{
+    if(k===exAt) return `<div class="demo-head">Added by the site to try your function. Not part of your answer.</div>`;
     const here = cur.line === k+1;
-    const cls = here ? (cur.error ? ' err' : ' active') : '';
+    const cls = (here ? (cur.error ? ' err' : ' active') : '') + (exAt>=0 && k>exAt ? ' demo' : '');
     return `<div class="ln${cls}"${here?' aria-current="true"':''}><span class="n">${k+1}</span><span class="here">${here?(cur.error?'!':'▶'):''}</span><span>${hl(t)||' '}</span></div>`;
   }).join('') + `</pre>`;
   const a = v.querySelector('.ln.active, .ln.err'); if(a) a.scrollIntoView({block:'nearest'});
