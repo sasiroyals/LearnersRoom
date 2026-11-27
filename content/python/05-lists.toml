@@ -1,0 +1,387 @@
+# Python 05: Lists
+# One [[lesson]] block per lesson, in the order students see them.
+# Line numbers in lines, predict.line and pline count from 1.
+
+topic = "05"
+
+[[lesson]]
+id = "index"
+title = "Which item does index -1 pick?"
+recap = "pets[0] took the first item, and pets[-1] took the last one. For a list of 3, index -1 and index 2 reach the same slot, because -1 means \"length minus 1\"."
+code = '''
+pets = ['cat', 'dog', 'eel']
+first = pets[0]
+last = pets[-1]
+print(first, last)
+'''
+pseudo = [
+  "Make a list of three pets. Call it pets.",
+  "Take the item in slot 0. Call it first.",
+  "Take the item one slot from the end. Call it last.",
+  "Show first and last.",
+]
+
+[lesson.lines.1]
+t = "Make the list"
+b = "Each item gets a numbered slot. Counting starts at 0, so three items use slots 0, 1 and 2."
+look = "The small numbers under each cell are the indexes."
+
+[lesson.lines.2]
+t = "Read index 0"
+b = "pets[0] means: go to the list named pets and take the item in slot 0, the first item."
+look = "The pointer lands on slot 0, and its value travels to first."
+
+[lesson.lines.3]
+t = "Read a negative index"
+b = "A negative index counts from the end. -1 is the last slot, -2 the one before it."
+look = "Watch which slot the pointer lands on."
+
+[lesson.lines.4]
+t = "Print both"
+b = "print shows both values on one line, with a space between them."
+look = "The output box under the canvas."
+
+[lesson.predict]
+line = 3
+q = "What will last hold?"
+target = { v = "last" }
+opts = ["'cat'", "'dog'", "'eel'", "An error"]
+
+[lesson.predict.fb]  # feedback for specific wrong answers
+"'cat'" = "Not quite. That is index 0. A negative index counts from the end, so -1 is the last slot."
+"'dog'" = "Not quite. That is index 1, the middle. -1 counts back one slot from the end of the list."
+"An error" = "No error. Python allows negative indexes: -1 means the last item."
+
+[[lesson.variants]]
+label = "pets[-1]"
+
+[[lesson.variants]]
+label = "pets[-2]"
+from = "pets[-1]"
+to = "pets[-2]"
+
+[[lesson.variants]]
+label = "pets[2]"
+from = "pets[-1]"
+to = "pets[2]"
+
+[lesson.check]  # the final unfamiliar-input question
+code = '''
+nums = [5, 6, 7, 8]
+x = nums[-2]'''
+q = "What is x?"
+opts = ["6", "7", "8"]
+right = 1
+fb = [
+  "Not quite. -2 counts two slots back from the end: 8 is -1, 7 is -2.",
+  "Right. -1 is 8, so -2 is the slot before it: 7.",
+  "Not quite. 8 is nums[-1]. -2 is one slot further back: 7.",
+]
+
+[[lesson]]
+id = "slice"
+title = "Why does a slice stop before its end index?"
+recap = "nums[1:3] took slots 1 and 2, and stopped before slot 3. The length of a slice is stop minus start: 3 - 1 = 2 items. The original list did not change."
+code = '''
+nums = [10, 20, 30, 40]
+part = nums[1:3]
+print(part)
+'''
+pseudo = [
+  "Make a list of four numbers. Call it nums.",
+  "Copy the items from slot 1 up to, but not including, slot 3. Call the new list part.",
+  "Show part.",
+]
+
+[lesson.lines.1]
+t = "Make the list"
+b = "Four items sit in slots 0 to 3."
+look = "The indexes under each cell."
+
+[lesson.lines.2]
+t = "Take a slice"
+b = "nums[start:stop] copies items from start up to stop, and stop itself is left out. The result is a new list."
+look = "The blue line marks the start, and the red dashed line marks the stop. Only the outlined cells go into part."
+
+[lesson.lines.3]
+t = "Print the slice"
+b = "part is its own list, so printing it shows only the copied items."
+look = "Two lists now: nums is unchanged."
+
+[lesson.predict]
+line = 2
+q = "What will part hold?"
+target = { v = "part" }
+opts = ["[20, 30]", "[20, 30, 40]", "[10, 20, 30]", "[30]"]
+
+[lesson.predict.fb]  # feedback for specific wrong answers
+"[20, 30, 40]" = "Not quite. The stop index 3 is left out, so 40 (slot 3) is not included."
+"[10, 20, 30]" = "Not quite. The slice starts at slot 1, which holds 20, not slot 0."
+"[30]" = "Not quite. A slice takes every item from start up to stop. Here that is slots 1 and 2."
+
+[[lesson.variants]]
+label = "nums[1:3]"
+
+[[lesson.variants]]
+label = "nums[:2]"
+from = "nums[1:3]"
+to = "nums[:2]"
+opts = ["[10, 20]", "[10, 20, 30]", "[20]"]
+
+[[lesson.variants]]
+label = "nums[2:]"
+from = "nums[1:3]"
+to = "nums[2:]"
+opts = ["[30, 40]", "[20, 30, 40]", "[40]"]
+
+[[lesson.variants]]
+label = "nums[-3:-1]"
+from = "nums[1:3]"
+to = "nums[-3:-1]"
+opts = ["[20, 30]", "[20, 30, 40]", "[10, 20]"]
+
+[lesson.check]  # the final unfamiliar-input question
+code = '''
+word = ['p', 'y', 't', 'h', 'o', 'n']
+mid = word[2:4]'''
+q = "What is mid?"
+opts = ["['t', 'h']", "['y', 't', 'h']", "['t', 'h', 'o']"]
+right = 0
+fb = [
+  "Right. Slots 2 and 3, then stop before 4.",
+  "Not quite. Slot 1 is y, but the slice starts at 2.",
+  "Not quite. Slot 4 is the stop, so o is left out.",
+]
+
+[[lesson]]
+id = "append"
+title = "Where do append and insert put a new item?"
+recap = "append added Cy at the end without moving anything. insert(0, 'Dee') put Dee at the front and moved Ana, Ben and Cy one slot right. One list was changed in place; no new list was made."
+code = '''
+queue = ['Ana', 'Ben']
+queue.append('Cy')
+queue.insert(0, 'Dee')
+print(queue)
+'''
+pseudo = [
+  "Make a list of two names. Call it queue.",
+  "Add Cy at the end.",
+  "Put Dee at slot 0 and shift everyone else one slot right.",
+  "Show queue.",
+]
+
+[lesson.lines.1]
+t = "Make the list"
+b = "Two names in slots 0 and 1."
+look = "The two cells and their indexes."
+
+[lesson.lines.2]
+t = "Append at the end"
+b = "append always adds one item after the last slot. Nothing else moves."
+look = "A new cell appears at the right end."
+
+[lesson.lines.3]
+t = "Insert at a position"
+b = "insert(i, item) puts the item at slot i. Every item from slot i onward moves one slot to the right."
+look = "Compare each name with its index before and after this step."
+
+[lesson.lines.4]
+t = "Print the list"
+b = "The list now holds four names in their new order."
+look = "The output box."
+
+[lesson.predict]
+line = 3
+q = "What will queue hold after insert(0, 'Dee')?"
+target = { v = "queue" }
+opts = [
+  "['Dee', 'Ana', 'Ben', 'Cy']",
+  "['Ana', 'Ben', 'Cy', 'Dee']",
+  "['Dee', 'Ben', 'Cy']",
+]
+
+[lesson.predict.fb]  # feedback for specific wrong answers
+"['Ana', 'Ben', 'Cy', 'Dee']" = "Not quite. That is what append would do. insert(0, ...) puts the item in slot 0, the front."
+"['Dee', 'Ben', 'Cy']" = "Not quite. insert never replaces an item. Ana moves to slot 1 instead."
+
+[[lesson.variants]]
+label = "insert(0, ...)"
+
+[[lesson.variants]]
+label = "insert(1, ...)"
+from = "insert(0,"
+to = "insert(1,"
+opts = [
+  "['Ana', 'Dee', 'Ben', 'Cy']",
+  "['Dee', 'Ana', 'Ben', 'Cy']",
+  "['Ana', 'Dee', 'Cy']",
+]
+
+[[lesson.variants]]
+label = "insert(10, ...)"
+from = "insert(0,"
+to = "insert(10,"
+opts = ["['Ana', 'Ben', 'Cy', 'Dee']", "An error", "['Dee', 'Ana', 'Ben', 'Cy']"]
+
+[lesson.check]  # the final unfamiliar-input question
+code = '''
+xs = [1, 2, 3]
+xs.insert(2, 9)'''
+q = "What is xs now?"
+opts = ["[1, 2, 9, 3]", "[1, 9, 2, 3]", "[1, 2, 3, 9]"]
+right = 0
+fb = [
+  "Right. 9 goes into slot 2, and 3 moves to slot 3.",
+  "Not quite. Slot 2 is the third position, after 1 and 2.",
+  "Not quite. That is append. insert(2, 9) puts 9 at slot 2.",
+]
+
+[[lesson]]
+id = "member"
+title = "Does in look at the items or the indexes?"
+recap = "in compared pear with each item and found it, so has_pear is True. It compared 1 with apple and pear, found no match, so has_one is False. in checks items, and the comparison is exact: 'Pear' and 'pear' are different."
+code = '''
+basket = ['apple', 'pear']
+has_pear = 'pear' in basket
+has_one = 1 in basket
+print(has_pear, has_one)
+'''
+pseudo = [
+  "Make a list of two fruits. Call it basket.",
+  "Ask: is pear one of the items? Store the answer.",
+  "Ask: is 1 one of the items? Store the answer.",
+  "Show both answers.",
+]
+
+[lesson.lines.1]
+t = "Make the list"
+b = "Two strings, in slots 0 and 1."
+look = "The two cells."
+
+[lesson.lines.2]
+t = "Check for pear"
+b = "x in a_list compares x with each item, one by one, and answers True as soon as one matches."
+look = "has_pear holds the answer, a bool."
+
+[lesson.lines.3]
+t = "Check for 1"
+b = "in compares with the items, never with the indexes. Slot 1 exists, but no item equals 1."
+look = "has_one holds the answer."
+
+[lesson.lines.4]
+t = "Print the answers"
+b = "Both answers are printed on one line."
+look = "The output box."
+
+[lesson.predict]
+line = 3
+q = "What will has_one hold?"
+target = { v = "has_one" }
+opts = ["True", "False", "An error"]
+
+[lesson.predict.fb]  # feedback for specific wrong answers
+True = "Not quite. Slot 1 exists, but in checks the items. The items are apple and pear, and neither equals 1."
+"An error" = "No error. Comparing a number with strings is allowed. They are just never equal."
+
+[[lesson.variants]]
+label = "1 in basket"
+
+[[lesson.variants]]
+label = "'Pear' in basket"
+from = "1 in basket"
+to = "'Pear' in basket"
+
+[[lesson.variants]]
+label = "'apple' in basket"
+from = "1 in basket"
+to = "'apple' in basket"
+
+[lesson.check]  # the final unfamiliar-input question
+code = '''
+codes = [10, 20]
+ok = 0 in codes'''
+q = "What is ok?"
+opts = ["True", "False"]
+right = 1
+fb = [
+  "Not quite. Slot 0 exists, but no item equals 0.",
+  "Right. in checks the items 10 and 20, and neither is 0.",
+]
+
+[[lesson]]
+id = "range"
+title = "What happens at index 3 of a 3-item list?"
+recap = "A list of 3 has slots 0, 1 and 2. nums[3] asked for a slot that does not exist, so Python raised IndexError and stopped. Negative indexes have a limit too: -3 is the first item, and -4 is out of range."
+code = '''
+nums = [4, 5, 6]
+last = nums[2]
+missing = nums[3]
+print(missing)
+'''
+pseudo = [
+  "Make a list of three numbers. Call it nums.",
+  "Take the item in slot 2. Call it last.",
+  "Try to take the item in slot 3.",
+  "Show it.",
+]
+
+[lesson.lines.1]
+t = "Make the list"
+b = "Three items, so the slots are 0, 1 and 2."
+look = "The last index is 2, one less than the length."
+
+[lesson.lines.2]
+t = "Read the last slot"
+b = "nums[2] is the last item, because indexes start at 0."
+look = "The pointer lands on slot 2."
+
+[lesson.lines.3]
+t = "Read past the end"
+b = "There is no slot 3. Python stops the program with an IndexError instead of guessing a value."
+look = "The dashed red cell is where slot 3 would be."
+
+[lesson.lines.4]
+t = "Print"
+b = "This line never runs, because the error stopped the program on the line before."
+look = "The output box stays empty."
+
+[lesson.predict]
+line = 3
+q = "What happens when Python runs nums[3]?"
+target = { v = "missing" }
+opts = ["6", "None", "An error"]
+
+[lesson.predict.fb]  # feedback for specific wrong answers
+6 = "Not quite. 6 is in slot 2. Slot 3 does not exist."
+None = "Not quite. Python does not invent a value for a missing slot. It raises an IndexError."
+
+[[lesson.variants]]
+label = "nums[3]"
+
+[[lesson.variants]]
+label = "nums[-3]"
+from = "nums[3]"
+to = "nums[-3]"
+opts = ["4", "6", "An error"]
+
+[[lesson.variants]]
+label = "nums[-4]"
+from = "nums[3]"
+to = "nums[-4]"
+opts = ["4", "6", "An error"]
+
+[lesson.check]  # the final unfamiliar-input question
+code = '''
+letters = ['a', 'b']
+x = letters[2]'''
+q = "What happens?"
+opts = ["x is 'b'", "An IndexError"]
+right = 1
+fb = [
+  "Not quite. 'b' is in slot 1. A list of 2 has no slot 2.",
+  "Right. The slots are 0 and 1, so index 2 is out of range.",
+]
+
+[[lesson]]
+id = "alias"
+builtin = true  # the hand-animated lesson in src/js/01-alias-content.js

@@ -1,0 +1,394 @@
+# Python 12: Classes and objects
+# One [[lesson]] block per lesson, in the order students see them.
+# Line numbers in lines, predict.line and pline count from 1.
+
+topic = "12"
+
+[[lesson]]
+id = "cls_blueprint"
+topic = "Classes and objects"
+title = "What is the difference between a class and an object?"
+recap = "One class, Dog, built two separate objects. Each object stored its own name through self. A class is the blueprint, and an object is one thing built from it."
+code = '''
+class Dog:
+    def __init__(self, name):
+        self.name = name
+
+a = Dog('Rex')
+b = Dog('Bo')
+print(a.name, b.name)
+'''
+pseudo = [
+  "Define the class Dog: the blueprint.",
+  "When a Dog is built, store its name on it.",
+  "(store the name)",
+  "(blank)",
+  "Build a Dog named Rex. Call it a.",
+  "Build a Dog named Bo. Call it b.",
+  "Show both names.",
+]
+
+[lesson.lines.1]
+t = "Define the class"
+b = "class creates a blueprint. No dog exists yet."
+look = "The class box on the right lists the methods."
+
+[lesson.lines.3]
+t = "Store data on the object"
+b = "self.name = name puts an attribute on this object only."
+look = "The object box gains a name row."
+
+[lesson.lines.5]
+t = "Build an object"
+b = "Dog('Rex') makes a new, empty object and runs __init__ on it. self is that new object."
+look = "self in the __init__ frame points to the new object."
+
+[lesson.lines.6]
+t = "Build a second object"
+b = "The same blueprint builds another, separate object with its own name."
+look = "Two object boxes, both pointing to the one class."
+
+[lesson.predict]
+line = 7
+q = "What will print(a.name, b.name) show?"
+target = { out = true }
+opts = ["Rex Bo", "Bo Bo", "Rex Rex"]
+
+[lesson.predict.fb]  # feedback for specific wrong answers
+"Bo Bo" = "Not quite. Each object keeps its own name. Building b did not change a."
+"Rex Rex" = "Not quite. b was built with Bo, and it is a separate object."
+
+[[lesson.variants]]
+label = "two dogs"
+
+[lesson.check]  # the final unfamiliar-input question
+code = '''
+class Cup:
+    def __init__(self, ml):
+        self.ml = ml
+
+x = Cup(200)
+y = Cup(300)
+x.ml = 50'''
+q = "What is y.ml?"
+opts = ["50", "300"]
+right = 1
+fb = [
+  "Not quite. x and y are different objects. Changing x.ml leaves y alone.",
+  "Right. Each object has its own ml.",
+]
+
+[[lesson]]
+id = "cls_self"
+topic = "Classes and objects"
+title = "How does a method know which object to change?"
+recap = "Every call c.tick() passed the object before the dot in as self. So tick changed c1’s count twice and c2’s count once. self is how one method works for every object."
+code = '''
+class Counter:
+    def __init__(self):
+        self.count = 0
+
+    def tick(self):
+        self.count = self.count + 1
+
+c1 = Counter()
+c2 = Counter()
+c1.tick()
+c1.tick()
+c2.tick()
+print(c1.count, c2.count)
+'''
+pseudo = [
+  "Define Counter.",
+  "When built, start count at 0.",
+  "(start at 0)",
+  "(blank)",
+  "tick adds 1 to this object’s count.",
+  "(add 1)",
+  "(blank)",
+  "Build c1.",
+  "Build c2.",
+  "Tick c1.",
+  "Tick c1 again.",
+  "Tick c2.",
+  "Show both counts.",
+]
+
+[lesson.lines.6]
+t = "Change through self"
+b = "self.count changes the object that self refers to, and no other."
+look = "Only one object’s count changes."
+
+[lesson.lines.10]
+t = "Call a method"
+b = "c1.tick() is the same as Counter.tick(c1). Python passes the object before the dot as self."
+look = "self in the tick() frame points to the object c1 points to."
+
+[lesson.lines.12]
+t = "Tick the other object"
+b = "This time self is c2’s object."
+look = "Follow the self arrow."
+
+[lesson.predict]
+line = 13
+q = "What will print(c1.count, c2.count) show?"
+target = { out = true }
+opts = ["2 1", "3 3", "1 1"]
+
+[lesson.predict.fb]  # feedback for specific wrong answers
+"3 3" = "Not quite. Each object has its own count. c1 was ticked twice and c2 once."
+"1 1" = "Not quite. c1.tick() ran twice, so c1’s count reached 2."
+
+[[lesson.variants]]
+label = "tick c1 twice"
+
+[lesson.check]  # the final unfamiliar-input question
+code = '''
+class Lamp:
+    def __init__(self):
+        self.on = False
+    def flip(self):
+        self.on = not self.on
+
+a = Lamp()
+b = Lamp()
+b.flip()'''
+q = "What is a.on?"
+opts = ["True", "False"]
+right = 1
+fb = [
+  "Not quite. flip ran with self = b. a was never flipped.",
+  "Right. Only b was passed as self.",
+]
+
+[[lesson]]
+id = "cls_attr"
+topic = "Classes and objects"
+title = "Why did one change reach every object?"
+recap = "p.team looked on p first, found nothing, then found the class value Blue. q.team found q’s own attribute Green first. Attribute lookup checks the object, then its class."
+dec = "Looking up obj.attr asks: does the object have it? If yes, use it. If not, does its class have it? If not, its parent class? Otherwise an AttributeError."
+code = '''
+class Player:
+    team = 'Red'
+
+    def __init__(self, name):
+        self.name = name
+
+p = Player('Ana')
+q = Player('Ben')
+Player.team = 'Blue'
+q.team = 'Green'
+print(p.team, q.team)
+'''
+pseudo = [
+  "Define Player.",
+  "A class attribute team, shared by all players.",
+  "(blank)",
+  "When built, store this player’s name.",
+  "(store)",
+  "(blank)",
+  "Build Ana.",
+  "Build Ben.",
+  "Change the shared team on the class.",
+  "Give q its own team attribute.",
+  "Show both teams.",
+]
+
+[lesson.lines.1]
+t = "A class attribute"
+b = "team belongs to the class, so every Player shares it."
+look = "team sits in the class box, not in an object."
+
+[lesson.lines.9]
+t = "Change the class attribute"
+b = "Changing Player.team changes the one shared value. Every object that does not have its own team sees it."
+look = "The team row in the class box."
+
+[lesson.lines.10]
+t = "Shadow it on one object"
+b = "q.team = ... creates a new attribute on q only. It hides the class value for q."
+look = "q’s object box gains its own team row."
+
+[lesson.predict]
+line = 11
+q = "What will print(p.team, q.team) show?"
+target = { out = true }
+opts = ["Blue Green", "Red Green", "Blue Blue"]
+
+[lesson.predict.fb]  # feedback for specific wrong answers
+"Red Green" = "Not quite. Player.team was changed to Blue, and p has no team of its own, so p sees Blue."
+"Blue Blue" = "Not quite. q.team = 'Green' gave q its own attribute, which wins over the class value."
+
+[[lesson.variants]]
+label = "shared team"
+
+[lesson.check]  # the final unfamiliar-input question
+code = '''
+class A:
+    n = 1
+
+x = A()
+y = A()
+A.n = 5'''
+q = "What is x.n + y.n?"
+opts = ["2", "10", "6"]
+right = 1
+fb = [
+  "Not quite. Both read the shared class value, which is now 5.",
+  "Right. Neither object has its own n, so both read 5 from the class.",
+  "Not quite. Neither object has its own n.",
+]
+
+[[lesson]]
+id = "cls_state"
+topic = "Classes and objects"
+title = "How does a method keep track of a balance?"
+recap = "The object stored balance as state. Each deposit call read it through self, added to it and saved it back. The second call started from 70, not 50."
+code = '''
+class Account:
+    def __init__(self, balance):
+        self.balance = balance
+
+    def deposit(self, amount):
+        self.balance = self.balance + amount
+        return self.balance
+
+acct = Account(50)
+acct.deposit(20)
+total = acct.deposit(5)
+print(total)
+'''
+pseudo = [
+  "Define Account.",
+  "When built, store the starting balance.",
+  "(store)",
+  "(blank)",
+  "deposit adds an amount to this account.",
+  "(add)",
+  "Give back the new balance.",
+  "(blank)",
+  "Open an account with 50.",
+  "Deposit 20.",
+  "Deposit 5 and keep the returned balance.",
+  "Show it.",
+]
+
+[lesson.lines.6]
+t = "Update the state"
+b = "The object remembers its balance between calls. That stored data is its state."
+look = "The balance row changes in the object box."
+
+[lesson.lines.10]
+t = "Call deposit"
+b = "self is acct’s object and amount is the argument."
+look = "The deposit() frame."
+
+[lesson.predict]
+line = 11
+q = "What will total hold?"
+target = { v = "total" }
+opts = ["75", "25", "70"]
+
+[lesson.predict.fb]  # feedback for specific wrong answers
+25 = "Not quite. The object kept the balance from the first deposit."
+70 = "Not quite. 70 was the balance after the first deposit. Then 5 more was added."
+
+[[lesson.variants]]
+label = "deposit 20 then 5"
+
+[[lesson.variants]]
+label = "deposit 20 then -30"
+from = "acct.deposit(5)"
+to = "acct.deposit(-30)"
+opts = ["40", "20", "An error"]
+
+[lesson.check]  # the final unfamiliar-input question
+code = '''
+class T:
+    def __init__(self):
+        self.n = 0
+    def add(self):
+        self.n += 2
+        return self.n
+
+t = T()
+t.add()
+r = t.add()'''
+q = "What is r?"
+opts = ["2", "4"]
+right = 1
+fb = ["Not quite. The first add already raised n to 2.", "Right. n went 0, 2, 4."]
+
+[[lesson]]
+id = "cls_repr"
+topic = "Classes and objects"
+title = "Why does print show <__main__.Plain object>?"
+recap = "print asked each object for its text form. Plain had none, so Python showed a generic <__main__.Plain object>. Nice defined __repr__, and Python called it to get Nice(3). Defining __repr__ makes your objects readable in output and while debugging."
+code = '''
+class Plain:
+    def __init__(self, x):
+        self.x = x
+
+class Nice:
+    def __init__(self, x):
+        self.x = x
+
+    def __repr__(self):
+        return 'Nice(' + str(self.x) + ')'
+
+print(Plain(3))
+print(Nice(3))
+'''
+pseudo = [
+  "Define Plain, with no text form of its own.",
+  "(init)",
+  "(store x)",
+  "(blank)",
+  "Define Nice.",
+  "(init)",
+  "(store x)",
+  "(blank)",
+  "Nice’s text form is Nice(x).",
+  "(build the text)",
+  "(blank)",
+  "Print a Plain object.",
+  "Print a Nice object.",
+]
+
+[lesson.lines.12]
+t = "Print a plain object"
+b = "Plain defines no text form, so Python falls back to a generic one with the class name."
+look = "The output box."
+
+[lesson.lines.13]
+t = "Print a Nice object"
+b = "print asks the object for its text form. Nice defines __repr__, so Python calls it."
+look = "A __repr__ frame appears."
+
+[lesson.predict]
+line = 13
+q = "What will print(Nice(3)) show?"
+target = { out = true }
+opts = ["Nice(3)", "<__main__.Nice object>", "3"]
+
+[lesson.predict.fb]  # feedback for specific wrong answers
+3 = "Not quite. print shows the object’s text form, which __repr__ builds as Nice(3)."
+"<__main__.Nice object>" = "Not quite. Nice defines __repr__, so print uses it."
+
+[[lesson.variants]]
+label = "with __repr__"
+
+[lesson.check]  # the final unfamiliar-input question
+code = '''
+class P:
+    def __repr__(self):
+        return 'P!'
+
+print([P(), P()])'''
+q = "What is printed?"
+opts = ["[P!, P!]", "[<P object>, <P object>]"]
+right = 0
+fb = [
+  "Right. A list prints each item using its __repr__.",
+  "Not quite. P defines __repr__, so the list uses it.",
+]

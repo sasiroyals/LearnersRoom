@@ -1,0 +1,266 @@
+# Python 10: Mutability and copying
+# One [[lesson]] block per lesson, in the order students see them.
+# Line numbers in lines, predict.line and pline count from 1.
+
+topic = "10"
+
+[[lesson]]
+id = "mut_immut"
+topic = "Mutability and copying"
+title = "Why does += change a list but not a string?"
+recap = "Immutable values (int, str, tuple) never change; operations make new ones. Mutable ones (list, dict, set) can change in place, and every name that refers to them sees it. xs = xs + [2] makes a new list, so ys keeps the old one."
+code = '''
+s = 'ab'
+t = s
+s += 'c'
+xs = [1]
+ys = xs
+xs += [2]
+print(t, ys)
+'''
+pseudo = [
+  "s is a string.",
+  "t names the same string.",
+  "\"Add\" to s.",
+  "xs is a list.",
+  "ys names the same list.",
+  "\"Add\" to xs.",
+  "Show t and ys.",
+]
+
+[lesson.lines.3]
+t = "Strings are immutable"
+b = "A string cannot change, so s += 'c' builds a new string and moves s to it. t still refers to the old one."
+look = "s and t now point at different strings."
+
+[lesson.lines.6]
+t = "Lists are mutable"
+b = "For a list, += extends the same list in place. ys refers to that list too, so it sees the change."
+look = "xs and ys still share one list."
+
+[lesson.predict]
+line = 7
+q = "What will print(t, ys) show?"
+target = { out = true }
+opts = ["ab [1, 2]", "abc [1, 2]", "ab [1]"]
+
+[lesson.predict.fb]  # feedback for specific wrong answers
+"abc [1, 2]" = "Not quite. Strings cannot change. s moved to a new string; t kept the old one."
+"ab [1]" = "Not quite. += on a list changes that same list, which ys also refers to."
+
+[[lesson.variants]]
+label = "+="
+
+[[lesson.variants]]
+label = "xs = xs + [2]"
+from = "xs += [2]"
+to = "xs = xs + [2]"
+opts = ["ab [1]", "ab [1, 2]", "abc [1]"]
+
+[lesson.check]  # the final unfamiliar-input question
+code = '''
+a = (1, 2)
+b = a
+a += (3,)'''
+q = "What is b?"
+opts = ["(1, 2)", "(1, 2, 3)"]
+right = 0
+fb = [
+  "Right. Tuples are immutable, so a moved to a new tuple.",
+  "Not quite. A tuple cannot be extended in place.",
+]
+
+[[lesson]]
+id = "mut_shallow"
+topic = "Mutability and copying"
+title = "Why is copy() only one level deep?"
+recap = "A shallow copy duplicates only the outer container. Inner objects are shared, so changing them through either name changes both. Adding or removing items in the outer list does not."
+code = '''
+grid = [[1, 2], [3, 4]]
+copy1 = grid.copy()
+copy1[0].append(9)
+copy1.append([5])
+print(grid)
+'''
+pseudo = [
+  "A list of two inner lists.",
+  "Copy the outer list only.",
+  "Change an inner list through the copy.",
+  "Add a new row to the copy.",
+  "Show the original.",
+]
+
+[lesson.lines.2]
+t = "A shallow copy"
+b = "copy() makes a new outer list, but its slots point at the same inner lists."
+look = "Two outer lists, sharing the inner ones."
+
+[lesson.lines.3]
+t = "Change a shared inner list"
+b = "copy1[0] is the same list object as grid[0]."
+look = "The inner list changes for both."
+
+[lesson.lines.4]
+t = "Change the outer copy"
+b = "Appending to copy1 only changes the new outer list."
+look = "grid does not get the new row."
+
+[lesson.predict]
+line = 5
+q = "What will print(grid) show?"
+target = { out = true }
+opts = ["[[1, 2, 9], [3, 4]]", "[[1, 2], [3, 4]]", "[[1, 2, 9], [3, 4], [5]]"]
+
+[lesson.predict.fb]  # feedback for specific wrong answers
+"[[1, 2], [3, 4]]" = "Not quite. The inner lists are shared, so the 9 shows in grid too."
+"[[1, 2, 9], [3, 4], [5]]" = "Not quite. The outer lists are separate, so the new row only went into copy1."
+
+[[lesson.variants]]
+label = "copy()"
+
+[lesson.check]  # the final unfamiliar-input question
+code = '''
+a = [[0]]
+b = a[:]
+b[0][0] = 7'''
+q = "What is a?"
+opts = ["[[7]]", "[[0]]"]
+right = 0
+fb = [
+  "Right. a[:] is a shallow copy; the inner list is shared.",
+  "Not quite. Slicing copies only the outer list.",
+]
+
+[[lesson]]
+id = "mut_deep"
+topic = "Mutability and copying"
+title = "When do I need deepcopy?"
+recap = "Use deepcopy when the data is nested and the copy must be fully independent. copy.copy (like list.copy() and slicing) is shallow."
+code = '''
+import copy
+grid = [[1, 2], [3, 4]]
+safe = copy.deepcopy(grid)
+safe[0].append(9)
+print(grid, safe)
+'''
+pseudo = [
+  "Load the copy module.",
+  "A nested list.",
+  "Copy every level.",
+  "Change an inner list of the copy.",
+  "Show both.",
+]
+
+[lesson.lines.3]
+t = "A deep copy"
+b = "deepcopy copies the outer list and, recursively, everything inside it. Nothing is shared."
+look = "Two separate sets of inner lists."
+
+[lesson.lines.4]
+t = "Change the copy"
+b = "safe[0] is its own list now."
+look = "Only safe changes."
+
+[lesson.predict]
+line = 5
+q = "What will print(grid, safe) show?"
+target = { out = true }
+opts = [
+  "[[1, 2], [3, 4]] [[1, 2, 9], [3, 4]]",
+  "[[1, 2, 9], [3, 4]] [[1, 2, 9], [3, 4]]",
+]
+
+[lesson.predict.fb]  # feedback for specific wrong answers
+"[[1, 2, 9], [3, 4]] [[1, 2, 9], [3, 4]]" = "Not quite. That is what a shallow copy would do. deepcopy shares nothing."
+
+[[lesson.variants]]
+label = "deepcopy"
+
+[[lesson.variants]]
+label = "copy.copy"
+from = "copy.deepcopy(grid)"
+to = "copy.copy(grid)"
+opts = [
+  "[[1, 2], [3, 4]] [[1, 2, 9], [3, 4]]",
+  "[[1, 2, 9], [3, 4]] [[1, 2, 9], [3, 4]]",
+]
+
+[lesson.check]  # the final unfamiliar-input question
+code = '''
+import copy
+a = {'k': [1]}
+b = copy.deepcopy(a)
+b['k'].append(2)'''
+q = "What is a['k']?"
+opts = ["[1]", "[1, 2]"]
+right = 0
+fb = [
+  "Right. The inner list was copied too.",
+  "Not quite. deepcopy made a new inner list.",
+]
+
+[[lesson]]
+id = "mut_param"
+topic = "Mutability and copying"
+title = "Can a function change the list I pass in?"
+recap = "Arguments are passed by sharing a reference. Changing the object (append, item assignment) is visible to the caller. Assigning the parameter name to something new is not."
+code = '''
+def add_bonus(scores):
+    scores.append(10)
+    scores = [0]
+
+mine = [5]
+add_bonus(mine)
+print(mine)
+'''
+pseudo = [
+  "Define add_bonus(scores):",
+  "add 10 to the list it was given,",
+  "then point the local name at a new list.",
+  "(blank)",
+  "My list.",
+  "Pass it in.",
+  "Show my list.",
+]
+
+[lesson.lines.2]
+t = "Change the shared list"
+b = "append changes the object itself, so mine sees it."
+look = "The list grows."
+
+[lesson.lines.3]
+t = "Rebind the local name"
+b = "= only moves the local name scores. mine is not affected."
+look = "scores now points at a different list."
+
+[lesson.lines.6]
+t = "Pass the list"
+b = "The parameter scores refers to the same list object as mine. Nothing is copied."
+look = "Both names point at one list."
+
+[lesson.predict]
+line = 7
+q = "What will print(mine) show?"
+target = { out = true }
+opts = ["[5, 10]", "[0]", "[5]"]
+
+[lesson.predict.fb]  # feedback for specific wrong answers
+"[0]" = "Not quite. scores = [0] only moved the local name."
+"[5]" = "Not quite. append changed the shared list."
+
+[[lesson.variants]]
+label = "append then rebind"
+
+[lesson.check]  # the final unfamiliar-input question
+code = '''
+def f(n):
+    n = n + 1
+x = 1
+f(x)'''
+q = "What is x?"
+opts = ["1", "2"]
+right = 0
+fb = [
+  "Right. n = n + 1 only rebinds the local name.",
+  "Not quite. ints cannot change in place.",
+]

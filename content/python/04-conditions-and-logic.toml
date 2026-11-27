@@ -1,0 +1,270 @@
+# Python 04: Conditions and logic
+# One [[lesson]] block per lesson, in the order students see them.
+# Line numbers in lines, predict.line and pline count from 1.
+
+topic = "04"
+
+[[lesson]]
+id = "cond_branch"
+topic = "Conditions and logic"
+title = "Which branch runs?"
+recap = "if checks its condition once. True runs the if block, False runs the else block, never both. 25 > 25 is False, so 25 went to the else branch."
+dec = "One question decides the path: is temp > 25? Yes leads to \"hot\", no leads to \"mild\". Both paths then meet at print."
+code = '''
+temp = 30
+if temp > 25:
+    label = "hot"
+else:
+    label = "mild"
+print(label)
+'''
+pseudo = [
+  "temp is 30.",
+  "Is temp above 25?",
+  "Yes: label is \"hot\".",
+  "Otherwise:",
+  "label is \"mild\".",
+  "Show label.",
+]
+
+[lesson.lines.2]
+t = "Ask the question"
+b = "The condition temp > 25 is worked out to True or False. Exactly one branch will run."
+look = "The next highlighted line tells you which branch was chosen."
+
+[lesson.lines.3]
+t = "The if branch"
+b = "The condition was True, so the indented block under if runs. The else block is skipped."
+look = "label appears."
+
+[lesson.lines.5]
+t = "The else branch"
+b = "The condition was False, so Python skipped the if block and ran the else block."
+look = "label appears."
+
+[lesson.lines.6]
+t = "Back to the main path"
+b = "Both branches lead here. The program continues after the if statement."
+look = "The output box."
+
+[lesson.predict]
+line = 6
+q = "What will print(label) show?"
+target = { out = true }
+opts = ["hot", "mild", "hot mild"]
+
+[lesson.predict.fb]  # feedback for specific wrong answers
+"hot mild" = "Not quite. Only one branch of an if / else runs."
+
+[[lesson.variants]]
+label = "temp = 30"
+
+[[lesson.variants]]
+label = "temp = 25"
+from = "temp = 30"
+to = "temp = 25"
+
+[[lesson.variants]]
+label = "temp = 12"
+from = "temp = 30"
+to = "temp = 12"
+
+[lesson.check]  # the final unfamiliar-input question
+code = '''
+x = 0
+if x:
+    r = 'yes'
+else:
+    r = 'no''''
+q = "What is r?"
+opts = ["'no'", "'yes'"]
+right = 0
+fb = [
+  "Right. 0 counts as False.",
+  "Not quite. The number 0 is treated as False in a condition.",
+]
+
+[[lesson]]
+id = "cond_boundary"
+topic = "Conditions and logic"
+title = "Does >= include the boundary?"
+recap = "The boundary value is where bugs hide. >= and <= include the boundary; > and < leave it out. Always test the exact boundary value, like 18 here."
+dec = "Is age >= 18? The boundary case, 18, goes down the \"yes\" path. Change it to > and 18 goes down the \"no\" path."
+code = '''
+age = 18
+if age >= 18:
+    status = "adult"
+else:
+    status = "minor"
+print(status)
+'''
+pseudo = ["age is 18.", "Is age 18 or more?", "Yes: adult.", "Otherwise:", "minor.", "Show status."]
+
+[lesson.lines.2]
+t = "Check the boundary"
+b = ">= means \"greater than or equal to\", so 18 itself passes."
+look = "Which line runs next."
+
+[lesson.predict]
+line = 6
+q = "What will print(status) show?"
+target = { out = true }
+opts = ["adult", "minor"]
+
+[lesson.predict.fb]  # feedback for specific wrong answers
+minor = "Not quite. >= includes 18 itself."
+
+[[lesson.variants]]
+label = ">="
+
+[[lesson.variants]]
+label = ">"
+from = "age >= 18"
+to = "age > 18"
+q = "With age > 18, what will print(status) show?"
+
+[lesson.check]  # the final unfamiliar-input question
+code = '''
+n = 10
+ok = n < 10'''
+q = "What is ok?"
+opts = ["False", "True"]
+right = 0
+fb = ["Right. 10 is not less than 10.", "Not quite. < leaves out the boundary."]
+
+[[lesson]]
+id = "cond_and"
+topic = "Conditions and logic"
+title = "When does and stop early?"
+recap = "and stops at the first False; or stops at the first True. Putting the safe check first (is the list non-empty?) protects the risky one (items[0]). Swap them and the risky part runs first and crashes."
+dec = "First question: is the list non-empty? If no, stop: the answer is False. Only if yes, ask the second question: is the first item \"x\"?"
+code = '''
+items = []
+ok = len(items) > 0 and items[0] == "x"
+print(ok)
+'''
+pseudo = [
+  "items is an empty list.",
+  "Is the list non-empty AND is its first item \"x\"?",
+  "Show the answer.",
+]
+
+[lesson.lines.2]
+t = "Short-circuit"
+b = "and checks the left side first. If it is False, the whole answer is False, so Python never looks at the right side. That is why items[0] is never read here."
+look = "No error, even though items is empty."
+
+[lesson.predict]
+line = 2
+q = "What will ok hold?"
+target = { v = "ok" }
+opts = ["False", "An error", "True"]
+
+[lesson.predict.fb]  # feedback for specific wrong answers
+"An error" = "Not quite. and stops as soon as the left side is False, so items[0] never runs."
+
+[[lesson.variants]]
+label = "length check first"
+
+[[lesson.variants]]
+label = "items[0] first"
+from = "len(items) > 0 and items[0] == \"x\""
+to = "items[0] == \"x\" and len(items) > 0"
+
+[lesson.check]  # the final unfamiliar-input question
+code = '''
+d = None
+ok = d is not None and d > 3'''
+q = "What is ok?"
+opts = ["False", "An error"]
+right = 0
+fb = [
+  "Right. The first part is False, so d > 3 never runs.",
+  "Not quite. and stops early here.",
+]
+
+[[lesson]]
+id = "cond_elif"
+topic = "Conditions and logic"
+title = "Which elif wins?"
+recap = "An if / elif / else chain runs at most one block: the first one whose condition is True. That is why the order matters: put the strictest test first."
+dec = "90 or more? No. 70 or more? Yes: grade B, and the chain stops. The remaining questions are never asked."
+code = '''
+score = 72
+if score >= 90:
+    grade = "A"
+elif score >= 70:
+    grade = "B"
+elif score >= 50:
+    grade = "C"
+else:
+    grade = "F"
+print(grade)
+'''
+pseudo = [
+  "score is 72.",
+  "90 or more?",
+  "A.",
+  "Otherwise, 70 or more?",
+  "B.",
+  "Otherwise, 50 or more?",
+  "C.",
+  "None of those:",
+  "F.",
+  "Show grade.",
+]
+
+[lesson.lines.2]
+t = "First test"
+b = "Python checks the conditions top to bottom."
+look = "Which line runs next."
+
+[lesson.lines.4]
+t = "Next test"
+b = "The first test failed, so Python tries the elif."
+look = "Which line runs next."
+
+[lesson.lines.5]
+t = "First match wins"
+b = "This condition is True. Its block runs and every later elif and else is skipped, even though 72 >= 50 is also True."
+look = "grade appears."
+
+[lesson.predict]
+line = 10
+q = "What will print(grade) show?"
+target = { out = true }
+opts = ["B", "C", "B C"]
+
+[lesson.predict.fb]  # feedback for specific wrong answers
+C = "Not quite. 72 >= 50 is True, but Python stops at the first True condition, which is 70."
+"B C" = "Not quite. Only one block of an if / elif chain runs."
+
+[[lesson.variants]]
+label = "72"
+
+[[lesson.variants]]
+label = "95"
+from = "score = 72"
+to = "score = 95"
+opts = ["A", "B", "A B"]
+
+[[lesson.variants]]
+label = "40"
+from = "score = 72"
+to = "score = 40"
+opts = ["F", "C", "An error"]
+
+[lesson.check]  # the final unfamiliar-input question
+code = '''
+x = 5
+if x > 1:
+    r = 'a'
+elif x > 3:
+    r = 'b''''
+q = "What is r?"
+opts = ["'a'", "'b'"]
+right = 0
+fb = [
+  "Right. x > 1 is checked first and is True.",
+  "Not quite. x > 3 is True too, but the chain stopped at the first match.",
+]

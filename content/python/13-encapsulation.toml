@@ -1,0 +1,261 @@
+# Python 13: Encapsulation
+# One [[lesson]] block per lesson, in the order students see them.
+# Line numbers in lines, predict.line and pline count from 1.
+
+topic = "13"
+
+[[lesson]]
+id = "enc_private"
+topic = "Encapsulation"
+title = "Does a leading underscore make a name private?"
+recap = "_cash changed to 999 without any complaint. In Python, a leading underscore marks an attribute as internal by convention only. Good code respects it, and uses methods or properties to change internal data."
+code = '''
+class Wallet:
+    def __init__(self):
+        self._cash = 10
+
+w = Wallet()
+w._cash = 999
+print(w._cash)
+'''
+pseudo = [
+  "Define Wallet.",
+  "When built:",
+  "store _cash = 10. The underscore says: internal, please don’t touch.",
+  "(blank)",
+  "Build a wallet.",
+  "Change _cash from outside anyway.",
+  "Show it.",
+]
+
+[lesson.lines.3]
+t = "An internal attribute"
+b = "A single leading underscore is a naming convention. It tells other programmers the attribute is internal."
+look = "_cash on the object."
+
+[lesson.lines.6]
+t = "Change it from outside"
+b = "Python does not stop you. The underscore is a promise between programmers, not a lock."
+look = "_cash changes."
+
+[lesson.predict]
+line = 6
+q = "What happens when outside code sets w._cash = 999?"
+target = { out = true }
+ok = "_cash becomes 999"
+opts = ["_cash becomes 999", "An error"]
+
+[lesson.predict.fb]  # feedback for specific wrong answers
+"An error" = "Not quite. Python has no private keyword. _cash is just a normal attribute with a name that signals intent."
+
+[[lesson.variants]]
+label = "_cash"
+
+[lesson.check]  # the final unfamiliar-input question
+code = '''
+class A:
+    def __init__(self):
+        self._x = 1
+
+a = A()
+print(a._x)'''
+q = "What happens?"
+opts = ["It prints 1", "An error"]
+right = 0
+fb = [
+  "Right. The underscore is only a convention.",
+  "Not quite. Python allows it. The underscore is a hint, not a lock.",
+]
+
+[[lesson]]
+id = "enc_mangle"
+topic = "Encapsulation"
+title = "What does a double underscore do to a name?"
+recap = "self.__code was stored as _Safe__code. Reading s.__code from outside failed with an AttributeError, but s._Safe__code still works. Double underscores prevent accidents and name clashes in subclasses. They are not real security."
+code = '''
+class Safe:
+    def __init__(self):
+        self.__code = 1234
+
+s = Safe()
+print(s.__dict__)
+print(s.__code)
+'''
+pseudo = [
+  "Define Safe.",
+  "When built:",
+  "store __code. Python renames it to _Safe__code.",
+  "(blank)",
+  "Build a safe.",
+  "Show the object’s real attribute names.",
+  "Try to read __code from outside.",
+]
+
+[lesson.lines.3]
+t = "Name mangling"
+b = "Inside a class, a name that starts with two underscores is renamed to _ClassName__name. This avoids clashes with subclasses."
+look = "The attribute is stored as _Safe__code."
+
+[lesson.lines.6]
+t = "Look at the real names"
+b = "__dict__ shows the attributes stored on the object."
+look = "The output shows _Safe__code."
+
+[lesson.lines.7]
+t = "Read from outside"
+b = "Outside the class there is no renaming, so Python looks for an attribute literally called __code, and none exists."
+look = "The error on this line."
+
+[lesson.predict]
+line = 7
+q = "What will print(s.__code) do?"
+target = { out = true }
+opts = ["Print 1234", "An error", "Print None"]
+
+[lesson.predict.fb]  # feedback for specific wrong answers
+"Print 1234" = "Not quite. The attribute was stored as _Safe__code, so __code is not found outside the class."
+"Print None" = "Not quite. A missing attribute is an AttributeError, not None."
+
+[[lesson.variants]]
+label = "s.__code"
+
+[[lesson.variants]]
+label = "s._Safe__code"
+from = "print(s.__code)"
+to = "print(s._Safe__code)"
+opts = ["Print 1234", "An error", "Print None"]
+q = "What will print(s._Safe__code) do?"
+
+[lesson.check]  # the final unfamiliar-input question
+code = '''
+class K:
+    def __init__(self):
+        self.__v = 7
+    def get(self):
+        return self.__v
+
+print(K().get())'''
+q = "What is printed?"
+opts = ["7", "An error"]
+right = 0
+fb = [
+  "Right. Inside the class, self.__v is renamed the same way, so it is found.",
+  "Not quite. Inside the class, the same renaming applies, so self.__v works.",
+]
+
+[[lesson]]
+id = "enc_property"
+topic = "Encapsulation"
+title = "How can a class reject a bad value?"
+recap = "Outside code wrote t.c = 25 and t.c = -300 like plain attributes, but each one ran the setter. 25 passed the check and was stored. -300 was refused with a ValueError, so _c stayed 25. A property lets a class protect its data without changing how callers use it."
+dec = "The setter asks one question: is the value below -273? Yes: raise ValueError and store nothing. No: store it in _c."
+code = '''
+class Temp:
+    def __init__(self, c):
+        self._c = c
+
+    @property
+    def c(self):
+        return self._c
+
+    @c.setter
+    def c(self, value):
+        if value < -273:
+            raise ValueError('below absolute zero')
+        self._c = value
+
+t = Temp(20)
+t.c = 25
+t.c = -300
+print(t.c)
+'''
+pseudo = [
+  "Define Temp.",
+  "When built, store the temperature in _c.",
+  "(store)",
+  "(blank)",
+  "c is a property:",
+  "reading t.c runs this method,",
+  "which gives back _c.",
+  "(blank)",
+  "Setting t.c runs this method instead:",
+  "(setter)",
+  "if the value is below -273,",
+  "refuse it with a ValueError.",
+  "Otherwise store it.",
+  "(blank)",
+  "Make a Temp of 20.",
+  "Set c to 25.",
+  "Set c to -300.",
+  "Show c.",
+]
+
+[lesson.lines.11]
+t = "Check the value"
+b = "The setter checks the rule before it stores anything."
+look = "value in the frame."
+
+[lesson.lines.12]
+t = "Refuse"
+b = "raise stops the setter with a ValueError. _c is never changed."
+look = "_c still holds 25."
+
+[lesson.lines.13]
+t = "Store it"
+b = "The value passed the check, so it goes into _c."
+look = "_c changes on the object."
+
+[lesson.lines.16]
+t = "Set through the property"
+b = "t.c = 25 looks like a plain assignment, but Python calls the setter method with value = 25."
+look = "A c() frame opens with value = 25."
+
+[lesson.lines.17]
+t = "Try a bad value"
+b = "The setter runs again with value = -300."
+look = "Watch which branch the check takes."
+
+[lesson.predict]
+line = 17
+q = "What happens on t.c = -300?"
+target = { out = true }
+opts = ["_c becomes -300", "An error"]
+
+[lesson.predict.fb]  # feedback for specific wrong answers
+"_c becomes -300" = "Not quite. The setter checks the value first and raises a ValueError for anything below -273."
+
+[[lesson.variants]]
+label = "-300"
+
+[[lesson.variants]]
+label = "-100"
+from = "t.c = -300"
+to = "t.c = -100"
+q = "What happens on t.c = -100?"
+ok = "It is stored"
+opts = ["It is stored", "An error"]
+
+[lesson.check]  # the final unfamiliar-input question
+code = '''
+class Age:
+    def __init__(self):
+        self._a = 0
+    @property
+    def a(self):
+        return self._a
+    @a.setter
+    def a(self, v):
+        if v < 0:
+            raise ValueError('neg')
+        self._a = v
+
+x = Age()
+x.a = 5'''
+q = "What is x._a now?"
+opts = ["0", "5", "An error"]
+right = 1
+fb = [
+  "Not quite. 5 passed the check and was stored.",
+  "Right. The setter stored 5 in _a.",
+  "Not quite. 5 is not negative, so no error.",
+]

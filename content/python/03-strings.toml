@@ -1,0 +1,276 @@
+# Python 03: Strings
+# One [[lesson]] block per lesson, in the order students see them.
+# Line numbers in lines, predict.line and pline count from 1.
+
+topic = "03"
+
+[[lesson]]
+id = "str_index"
+topic = "Strings"
+title = "Why is the first letter at index 0?"
+recap = "Strings are indexed like lists: slots 0 to len - 1 from the front, and -1, -2 ... from the back. \"python\" has 6 characters, so slot 6 does not exist and raises IndexError."
+code = '''
+word = "python"
+first = word[0]
+last = word[-1]
+print(first, last)
+'''
+pseudo = [
+  "word is \"python\".",
+  "Take the character in slot 0.",
+  "Take the last character.",
+  "Show both.",
+]
+
+[lesson.lines.2]
+t = "Slot 0"
+b = "An index counts how far from the start you move. The first character is 0 steps away."
+look = "first holds 'p'."
+
+[lesson.lines.3]
+t = "Counting from the end"
+b = "-1 means one step back from the end: the last character."
+look = "last holds 'n'."
+
+[lesson.predict]
+line = 2
+q = "What will first = word[0] hold?"
+target = { v = "first" }
+opts = ["'p'", "'y'", "'python'"]
+
+[lesson.predict.fb]  # feedback for specific wrong answers
+"'y'" = "Not quite. That is slot 1. Counting starts at 0."
+
+[[lesson.variants]]
+label = "word[0]"
+
+[[lesson.variants]]
+label = "word[1]"
+from = "word[0]"
+to = "word[1]"
+q = "What will first = word[1] hold?"
+opts = ["'y'", "'p'", "'t'"]
+
+[[lesson.variants]]
+label = "word[6]"
+from = "word[0]"
+to = "word[6]"
+q = "What will first = word[6] hold?"
+opts = ["'n'", "An error", "''"]
+
+[lesson.check]  # the final unfamiliar-input question
+code = '''
+s = "cat"
+c = s[-2]'''
+q = "What is c?"
+opts = ["'a'", "'t'", "'c'"]
+right = 0
+fb = [
+  "Right. -1 is t, so -2 is a.",
+  "Not quite. -1 is the last one, t.",
+  "Not quite. -3 would be c.",
+]
+
+[[lesson]]
+id = "str_slice"
+topic = "Strings"
+title = "Which characters does a slice keep?"
+recap = "A slice [start:stop] keeps from start up to stop - 1. Leaving start out means \"from the beginning\"; leaving stop out means \"to the end\". The length of the slice is stop - start."
+code = '''
+word = "python"
+part = word[1:4]
+print(part)
+'''
+pseudo = ["word is \"python\".", "Take slots 1 up to, but not including, 4.", "Show it."]
+
+[lesson.lines.2]
+t = "Start is in, stop is out"
+b = "word[1:4] keeps slots 1, 2 and 3. The stop index marks where to stop, and is left out."
+look = "part is a new string."
+
+[lesson.predict]
+line = 2
+q = "What will part = word[1:4] hold?"
+target = { v = "part" }
+opts = ["'yth'", "'ytho'", "'pyt'"]
+
+[lesson.predict.fb]  # feedback for specific wrong answers
+"'ytho'" = "Not quite. Slot 4 is the stop, and the stop is left out."
+"'pyt'" = "Not quite. Slot 1 is y, not p."
+
+[[lesson.variants]]
+label = "[1:4]"
+
+[[lesson.variants]]
+label = "[:2]"
+from = "[1:4]"
+to = "[:2]"
+q = "What will part = word[:2] hold?"
+opts = ["'py'", "'pyt'", "'y'"]
+
+[[lesson.variants]]
+label = "[3:]"
+from = "[1:4]"
+to = "[3:]"
+q = "What will part = word[3:] hold?"
+opts = ["'hon'", "'thon'", "'h'"]
+
+[lesson.check]  # the final unfamiliar-input question
+code = '''
+s = "hello"
+t = s[1:3]'''
+q = "What is t?"
+opts = ["'el'", "'ell'", "'he'"]
+right = 0
+fb = [
+  "Right. Slots 1 and 2.",
+  "Not quite. Slot 3 is the stop, so it is left out.",
+  "Not quite. Slot 0 is not included; the slice starts at 1.",
+]
+
+[[lesson]]
+id = "str_immut"
+topic = "Strings"
+title = "Why can’t I change a letter?"
+recap = "Strings are immutable: no operation changes a string in place. To \"change\" one, build a new string (with +, slicing, or replace()) and move the name to it."
+code = '''
+name = "cat"
+name[0] = "b"
+print(name)
+'''
+pseudo = ["name is \"cat\".", "Try to replace the first letter.", "Show name."]
+
+[lesson.lines.2]
+t = "Strings are immutable"
+b = "A string cannot be changed after it is made. Assigning to one slot is not allowed."
+look = "Watch for an error."
+
+[lesson.predict]
+line = 2
+q = "What happens on name[0] = \"b\"?"
+target = { out = true }
+ok = "name becomes 'bat'"
+opts = ["name becomes 'bat'", "An error"]
+
+[lesson.predict.fb]  # feedback for specific wrong answers
+"name becomes 'bat'" = "Not quite. Lists allow that, but strings are immutable."
+
+[[lesson.variants]]
+label = "name[0] = \"b\""
+
+[[lesson.variants]]
+label = "build a new string"
+from = "name[0] = \"b\""
+to = "name = \"b\" + name[1:]"
+q = "What happens on name = \"b\" + name[1:]?"
+opts = ["name becomes 'bat'", "An error"]
+
+[lesson.check]  # the final unfamiliar-input question
+code = '''
+s = "hi"
+t = s.upper()'''
+q = "What is s after this?"
+opts = ["'hi'", "'HI'"]
+right = 0
+fb = [
+  "Right. upper() returns a new string. s is unchanged.",
+  "Not quite. String methods never change the original; t holds the new one.",
+]
+
+[[lesson]]
+id = "str_find"
+topic = "Strings"
+title = "What does find give when the text is missing?"
+recap = "find and index both search, but they differ when nothing matches: find returns -1, index raises ValueError. Careful: -1 is also a valid index (the last character), so always check for it before using the result."
+code = '''
+s = "banana"
+a = s.find("n")
+b = s.find("z")
+print(a, b)
+'''
+pseudo = ["s is \"banana\".", "Where is the first n?", "Where is z?", "Show both."]
+
+[lesson.lines.2]
+t = "First match"
+b = "find returns the index of the first match. The first n is in slot 2."
+look = "a is 2."
+
+[lesson.lines.3]
+t = "No match"
+b = "When there is no match, find returns -1 instead of raising an error."
+look = "b holds the \"not found\" value."
+
+[lesson.predict]
+line = 3
+q = "What will b = s.find(\"z\") hold?"
+target = { v = "b" }
+opts = ["-1", "None", "An error"]
+
+[lesson.predict.fb]  # feedback for specific wrong answers
+None = "Not quite. find always returns a number. -1 means \"not found\"."
+"An error" = "Not quite. find does not raise an error. index() does."
+
+[[lesson.variants]]
+label = "find"
+
+[[lesson.variants]]
+label = "index"
+from = "s.find(\"z\")"
+to = "s.index(\"z\")"
+q = "What will b = s.index(\"z\") hold?"
+opts = ["-1", "None", "An error"]
+
+[lesson.check]  # the final unfamiliar-input question
+code = "x = \"abc\".find(\"c\")"
+q = "What is x?"
+opts = ["2", "3", "-1"]
+right = 0
+fb = [
+  "Right. c is in slot 2.",
+  "Not quite. Counting starts at 0.",
+  "Not quite. c is in the string.",
+]
+
+[[lesson]]
+id = "str_fstring"
+topic = "Strings"
+title = "How does an f-string fill in values?"
+recap = "An f-string is built once, when its line runs: every {expression} is worked out and turned into text. Changing name later does not change msg."
+code = '''
+name = "Ana"
+age = 9
+msg = f"{name} is {age + 1}"
+print(msg)
+'''
+pseudo = ["name is \"Ana\".", "age is 9.", "Build a string, filling in each {...}.", "Show it."]
+
+[lesson.lines.3]
+t = "Fill in the braces"
+b = "An f-string runs the code inside each pair of braces and puts the result into the text. It even works with expressions like age + 1."
+look = "msg is one finished string."
+
+[lesson.predict]
+line = 3
+q = "What will msg hold?"
+target = { v = "msg" }
+opts = ["'Ana is 10'", "'Ana is age + 1'", "'{name} is 10'"]
+
+[lesson.predict.fb]  # feedback for specific wrong answers
+"'Ana is age + 1'" = "Not quite. The code inside braces is run, so age + 1 becomes 10."
+"'{name} is 10'" = "Not quite. Every pair of braces is filled in."
+
+[[lesson.variants]]
+label = "f-string"
+
+[lesson.check]  # the final unfamiliar-input question
+code = '''
+x = 3
+s = f"{x * 2}!"'''
+q = "What is s?"
+opts = ["'6!'", "'x * 2!'", "'3!'"]
+right = 0
+fb = [
+  "Right. x * 2 is worked out.",
+  "Not quite. The braces are filled in with the result.",
+  "Not quite. The braces contain x * 2, not x.",
+]

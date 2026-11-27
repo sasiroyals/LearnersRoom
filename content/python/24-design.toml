@@ -1,0 +1,232 @@
+# Python 24: Design
+# One [[lesson]] block per lesson, in the order students see them.
+# Line numbers in lines, predict.line and pline count from 1.
+
+topic = "24"
+
+[[lesson]]
+id = "des_srp"
+topic = "Design"
+title = "Why give each class one job?"
+recap = "SOLID is five design rules: Single responsibility, Open for extension but closed for modification, Liskov substitution, Interface segregation, Dependency inversion. Here Report has one reason to change (the data), each printer has another (its format), and adding JSON later would not change existing code."
+code = '''
+class Report:
+    def __init__(self, rows):
+        self.rows = rows
+
+    def total(self):
+        return sum(self.rows)
+
+class TextPrinter:
+    def show(self, report):
+        return 'Total: ' + str(report.total())
+
+class CsvPrinter:
+    def show(self, report):
+        return ','.join([str(r) for r in report.rows])
+
+r = Report([3, 4])
+print(TextPrinter().show(r))
+print(CsvPrinter().show(r))
+'''
+pseudo = [
+  "Report holds data and does maths: one job.",
+  "(body)",
+  "(body)",
+  "(blank)",
+  "its calculation,",
+  "(body)",
+  "(blank)",
+  "TextPrinter only formats as text.",
+  "(body)",
+  "(body)",
+  "(blank)",
+  "CsvPrinter only formats as CSV.",
+  "(body)",
+  "(body)",
+  "(blank)",
+  "Some data.",
+  "Show it one way.",
+  "Show it another way.",
+]
+
+[lesson.lines.17]
+t = "One job each"
+b = "Report does not know how it will be shown. Adding a new format means adding a new printer class, without touching Report. This is the Single Responsibility Principle, the S in SOLID."
+look = "The frames: TextPrinter.show calls Report.total."
+
+[lesson.predict]
+line = 18
+q = "What will the CSV printer show?"
+target = { out = true }
+opts = ["3,4", "Total: 7", "7"]
+
+[[lesson.variants]]
+label = "two printers"
+
+[lesson.check]  # the final unfamiliar-input question
+code = '''
+# A User class also sends emails and writes to a database.
+# Which SOLID rule does that break?'''
+q = "Pick one:"
+opts = ["Single responsibility", "Liskov substitution"]
+right = 0
+fb = [
+  "Right. It has three reasons to change.",
+  "Not quite. Liskov is about subclasses being usable in place of their parent.",
+]
+
+[[lesson]]
+id = "des_strategy"
+topic = "Design"
+title = "How does the strategy pattern swap behaviour?"
+recap = "The strategy pattern puts each variation of an algorithm behind the same interface and lets the caller choose. In Python a strategy is often just a function. Checkout never changes when you add a new pricing rule."
+code = '''
+def no_discount(price):
+    return price
+
+def sale(price):
+    return price * 0.8
+
+class Checkout:
+    def __init__(self, pricing):
+        self.pricing = pricing
+
+    def pay(self, price):
+        return self.pricing(price)
+
+c = Checkout(sale)
+print(c.pay(50))
+'''
+pseudo = [
+  "Strategy 1: full price.",
+  "(body)",
+  "(blank)",
+  "Strategy 2: 20% off.",
+  "(body)",
+  "(blank)",
+  "Checkout is given a pricing strategy:",
+  "keep it.",
+  "(body)",
+  "(blank)",
+  "Paying asks the strategy.",
+  "(body)",
+  "(blank)",
+  "A checkout using the sale strategy.",
+  "Pay 50.",
+]
+
+[lesson.lines.12]
+t = "Delegate"
+b = "pay calls whatever strategy it was given."
+look = "A sale() frame appears."
+
+[lesson.lines.14]
+t = "Inject a strategy"
+b = "Checkout receives a function and stores it. It does not know or care which one."
+look = "pricing points at the sale function."
+
+[lesson.predict]
+line = 15
+q = "What will print(c.pay(50)) show?"
+target = { out = true }
+opts = ["40.0", "50", "An error"]
+
+[[lesson.variants]]
+label = "sale"
+
+[[lesson.variants]]
+label = "no_discount"
+from = "Checkout(sale)"
+to = "Checkout(no_discount)"
+opts = ["50", "40.0", "An error"]
+
+[lesson.check]  # the final unfamiliar-input question
+code = '''
+# sort(key=...) takes a function to decide the order.
+# Which pattern is that?'''
+q = "Pick one:"
+opts = ["Strategy", "Factory"]
+right = 0
+fb = [
+  "Right. The ordering rule is a pluggable strategy.",
+  "Not quite. A factory creates objects.",
+]
+
+[[lesson]]
+id = "des_factory"
+topic = "Design"
+title = "What does a factory decide?"
+recap = "A factory hides which class gets created. Callers ask for \"sms\" and get something with send. Adding a new channel means one new class and one new dict entry. An unknown name raises KeyError, which a real factory would turn into a clear error message."
+code = '''
+class Email:
+    def send(self, msg):
+        return 'email: ' + msg
+
+class Sms:
+    def send(self, msg):
+        return 'sms: ' + msg
+
+def make_notifier(kind):
+    kinds = {'email': Email, 'sms': Sms}
+    return kinds[kind]()
+
+n = make_notifier('sms')
+print(n.send('hi'))
+'''
+pseudo = [
+  "One kind of notifier.",
+  "(body)",
+  "(body)",
+  "(blank)",
+  "Another kind, same send method.",
+  "(body)",
+  "(body)",
+  "(blank)",
+  "A factory: given a name, build the right object.",
+  "look the class up by name,",
+  "create and return one.",
+  "(blank)",
+  "Ask the factory for an sms notifier.",
+  "Use it.",
+]
+
+[lesson.lines.10]
+t = "Map names to classes"
+b = "Classes are objects, so they can sit in a dict like any value."
+look = "kinds holds two classes."
+
+[lesson.lines.11]
+t = "Build the chosen one"
+b = "kinds[kind] picks the class; () creates an instance. The caller never names Email or Sms directly."
+look = "A new Sms object."
+
+[lesson.predict]
+line = 14
+q = "What will print(n.send('hi')) show?"
+target = { out = true }
+opts = ["sms: hi", "email: hi", "An error"]
+
+[[lesson.variants]]
+label = "'sms'"
+
+[[lesson.variants]]
+label = "'fax'"
+from = "make_notifier('sms')"
+to = "make_notifier('fax')"
+pline = 13
+q = "What happens on make_notifier('fax')?"
+opts = ["An error", "n is None"]
+
+[lesson.check]  # the final unfamiliar-input question
+code = '''
+# Your code says Email() in 40 places.
+# You now need Sms sometimes.
+# What helps most?'''
+q = "Pick one:"
+opts = ["A factory function", "Copying the code"]
+right = 0
+fb = [
+  "Right. One place decides which class to build.",
+  "Not quite. That spreads the decision across 40 places.",
+]

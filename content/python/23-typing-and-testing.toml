@@ -1,0 +1,202 @@
+# Python 23: Typing and testing
+# One [[lesson]] block per lesson, in the order students see them.
+# Line numbers in lines, predict.line and pline count from 1.
+
+topic = "23"
+
+[[lesson]]
+id = "typ_hints"
+topic = "Typing and testing"
+title = "Does Python enforce type hints?"
+recap = "Type hints are for people and tools, not for the interpreter. Python ran add('ab', 'c') happily. add(1, 'c') failed only because + cannot mix them, not because of the hints. Run a type checker to catch these before the program runs."
+code = '''
+def add(a: int, b: int) -> int:
+    return a + b
+
+x = add(2, 3)
+y = add('ab', 'c')
+print(x, y)
+'''
+pseudo = [
+  "Define add: a and b should be ints, and it returns an int.",
+  "(body)",
+  "(blank)",
+  "Call with ints.",
+  "Call with strings.",
+  "Show both.",
+]
+
+[lesson.lines.1]
+t = "Hints, not rules"
+b = "The annotations document what the function expects. Python itself does not check them when it runs."
+look = "The function is created."
+
+[lesson.lines.5]
+t = "Wrong types still run"
+b = "Strings support + too, so this runs. A type checker such as mypy, run before the program, would flag this line."
+look = "y holds a string."
+
+[lesson.predict]
+line = 5
+q = "What happens on y = add('ab', 'c')?"
+target = { v = "y" }
+opts = ["'abc'", "An error", "None"]
+
+[lesson.predict.fb]  # feedback for specific wrong answers
+"An error" = "Not quite. Type hints are not checked at run time."
+
+[[lesson.variants]]
+label = "strings"
+
+[[lesson.variants]]
+label = "int and str"
+from = "add('ab', 'c')"
+to = "add(1, 'c')"
+opts = ["An error", "'1c'", "None"]
+
+[lesson.check]  # the final unfamiliar-input question
+code = '''
+def f(n: int) -> str:
+    return n
+x = f(5)'''
+q = "What is x?"
+opts = ["5", "An error"]
+right = 0
+fb = [
+  "Right. The wrong return type is not checked at run time.",
+  "Not quite. Nothing enforces -> str while running.",
+]
+
+[[lesson]]
+id = "typ_protocol"
+topic = "Typing and testing"
+title = "What is a Protocol?"
+recap = "A Protocol names a set of methods. Any class with those methods satisfies it, with no inheritance. Abstract base classes (topic 16) require inheritance; Protocols do not. Both are checked by type checkers; at run time, Python just calls the method."
+code = '''
+from typing import Protocol
+
+class Drawable(Protocol):
+    def draw(self) -> str:
+        ...
+
+class Circle:
+    def draw(self):
+        return 'O'
+
+def render(item: Drawable) -> str:
+    return '[' + item.draw() + ']'
+
+print(render(Circle()))
+'''
+pseudo = [
+  "Load Protocol.",
+  "(blank)",
+  "Describe a shape of object: anything with a draw method.",
+  "(the method it must have)",
+  "(no body: this is only a description)",
+  "(blank)",
+  "Circle never mentions Drawable,",
+  "but it has draw.",
+  "(body)",
+  "(blank)",
+  "render accepts anything Drawable.",
+  "(body)",
+  "(blank)",
+  "Render a circle.",
+]
+
+[lesson.lines.3]
+t = "A described shape"
+b = "A Protocol describes which methods an object must have. It is a typed version of duck typing."
+look = "A Drawable class appears."
+
+[lesson.lines.7]
+t = "No inheritance needed"
+b = "Circle matches Drawable just by having draw. A type checker accepts it; this is called structural typing."
+look = "Circle does not inherit from Drawable."
+
+[lesson.predict]
+line = 14
+q = "What will print(render(Circle())) show?"
+target = { out = true }
+opts = ["[O]", "An error", "[None]"]
+
+[lesson.predict.fb]  # feedback for specific wrong answers
+"An error" = "Not quite. Circle does not inherit from Drawable, but it has draw, which is all render needs."
+
+[[lesson.variants]]
+label = "Circle has draw"
+
+[lesson.check]  # the final unfamiliar-input question
+code = '''
+# Square has draw() and does not inherit from anything.
+# Is Square a Drawable to a type checker?'''
+q = "Pick one:"
+opts = ["Yes", "No"]
+right = 0
+fb = [
+  "Right. Matching methods are enough.",
+  "Not quite. Protocols match by shape, not by inheritance.",
+]
+
+[[lesson]]
+id = "typ_assert"
+topic = "Typing and testing"
+title = "How does a test with assert work?"
+recap = "A test calls your code with known inputs and asserts the expected outputs. Here the test itself was wrong (it expected a_b). A failing test means the code and the expectation disagree; read the message to decide which is right."
+code = '''
+def slugify(title):
+    return title.lower().replace(' ', '-')
+
+def test_slugify():
+    assert slugify('Hello World') == 'hello-world'
+    assert slugify('A B') == 'a_b', 'spaces should become dashes'
+
+test_slugify()
+'''
+pseudo = [
+  "The code under test.",
+  "(body)",
+  "(blank)",
+  "A test: call the code with known inputs and check the results.",
+  "First check.",
+  "Second check, with a message for when it fails.",
+  "(blank)",
+  "Run the test.",
+]
+
+[lesson.lines.5]
+t = "A passing check"
+b = "assert does nothing when its condition is True."
+look = "No output, no error."
+
+[lesson.lines.6]
+t = "A failing check"
+b = "When the condition is False, assert raises AssertionError with the message. Test runners such as pytest find functions named test_... and report each failure."
+look = "Watch for an error."
+
+[lesson.predict]
+line = 8
+q = "What happens when test_slugify() runs?"
+target = { out = true }
+opts = ["An error", "Nothing: both checks pass"]
+
+[lesson.predict.fb]  # feedback for specific wrong answers
+"Nothing: both checks pass" = "Not quite. slugify('A B') returns 'a-b', not 'a_b'. The second check is wrong, so it fails."
+
+[[lesson.variants]]
+label = "wrong expectation"
+
+[[lesson.variants]]
+label = "fixed test"
+from = "== 'a_b'"
+to = "== 'a-b'"
+opts = ["An error", "Nothing: both checks pass"]
+ok = "Nothing: both checks pass"
+
+[lesson.check]  # the final unfamiliar-input question
+code = "assert 2 + 2 == 4"
+q = "What happens?"
+opts = ["Nothing", "An error"]
+right = 0
+fb = ["Right. A true assert is silent.", "Not quite. The condition is True."]

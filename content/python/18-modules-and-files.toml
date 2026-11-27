@@ -1,0 +1,208 @@
+# Python 18: Modules and files
+# One [[lesson]] block per lesson, in the order students see them.
+# Line numbers in lines, predict.line and pline count from 1.
+
+topic = "18"
+
+[[lesson]]
+id = "mod_import"
+topic = "Modules and files"
+title = "What does import actually do?"
+recap = "import math gives you the module; from math import sqrt gives you just one name; as renames it. Remove the alias and the name root no longer exists, so using it raises NameError."
+code = '''
+import math
+from math import sqrt as root
+
+r = math.floor(7.8)
+s = root(49)
+print(r, s)
+'''
+pseudo = [
+  "Load the math module and name it math.",
+  "Also take its sqrt function and call it root.",
+  "(blank)",
+  "Use a function through the module.",
+  "Use the imported name directly.",
+  "Show both.",
+]
+
+[lesson.lines.1]
+t = "import"
+b = "Python runs the module once, creates a module object, and binds the name math to it. Later imports reuse the same object."
+look = "(Modules are hidden in the diagram to keep it clear.)"
+
+[lesson.lines.2]
+t = "from ... import ... as"
+b = "This copies one name out of the module into your namespace, under a new name."
+look = "root is a function."
+
+[lesson.lines.4]
+t = "Module.attribute"
+b = "math.floor looks floor up inside the module object."
+look = "r is 7."
+
+[lesson.predict]
+line = 5
+q = "What will s = root(49) hold?"
+target = { v = "s" }
+opts = ["7.0", "7", "An error"]
+
+[lesson.predict.fb]  # feedback for specific wrong answers
+7 = "Not quite. sqrt always returns a float."
+
+[[lesson.variants]]
+label = "as root"
+
+[[lesson.variants]]
+label = "no alias"
+from = "sqrt as root"
+to = "sqrt"
+opts = ["An error", "7.0", "7"]
+
+[lesson.check]  # the final unfamiliar-input question
+code = '''
+import math as m
+x = m.pi > 3'''
+q = "What is x?"
+opts = ["True", "An error"]
+right = 0
+fb = ["Right. m is the math module.", "Not quite. as m just renames the module."]
+
+[[lesson]]
+id = "mod_main"
+topic = "Modules and files"
+title = "What is if __name__ == \"__main__\" for?"
+recap = "The __main__ guard runs code only when the file is the program being run. When another file does import this one, __name__ is the module name, the condition is False, and main() does not start by accident."
+code = '''
+def main():
+    print('running the app')
+
+print('module name:', __name__)
+if __name__ == '__main__':
+    main()
+'''
+pseudo = [
+  "Define main.",
+  "(body)",
+  "(blank)",
+  "Show this module’s name.",
+  "Only when run directly, not imported:",
+  "call main.",
+]
+
+[lesson.lines.4]
+t = "__name__"
+b = "Every module has a __name__. When you run a file directly it is '__main__'. When another file imports it, it is the module’s own name."
+look = "The output box."
+
+[lesson.lines.5]
+t = "The guard"
+b = "This check lets one file be both a runnable program and an importable library. Importing it will not start the app."
+look = "Which line runs next."
+
+[lesson.predict]
+line = 6
+q = "Will main() run here?"
+target = { out = true }
+opts = ["running the app", "Nothing more is printed"]
+
+[lesson.predict.fb]  # feedback for specific wrong answers
+"Nothing more is printed" = "Not quite. This file is being run directly, so __name__ is '__main__'."
+
+[[lesson.variants]]
+label = "run directly"
+
+[lesson.check]  # the final unfamiliar-input question
+code = '''
+# helper.py is imported by app.py.
+# Inside helper.py, what is __name__?'''
+q = "Pick one:"
+opts = ["'helper'", "'__main__'"]
+right = 0
+fb = [
+  "Right. Only the file you run is __main__.",
+  "Not quite. helper.py is imported, not run.",
+]
+
+[[lesson]]
+id = "mod_files"
+topic = "Modules and files"
+title = "Why open files with with?"
+recap = "with open(...) as f opens a file and guarantees it is closed when the block ends. 'w' overwrites, 'a' appends, 'r' reads. Opening a file that does not exist for reading raises an error (FileNotFoundError in standard Python). On this site, files live in memory only while the program runs."
+code = '''
+with open('notes.txt', 'w') as f:
+    f.write('milk\n')
+    f.write('eggs\n')
+
+with open('notes.txt') as f:
+    items = f.readlines()
+print(items, f.closed)
+'''
+pseudo = [
+  "Open notes.txt for writing, call it f:",
+  "write a line,",
+  "write another line.",
+  "(the file is closed here, automatically)",
+  "Open it again for reading:",
+  "read all lines into a list.",
+  "Show the lines and whether f is closed.",
+]
+
+[lesson.lines.1]
+t = "Open for writing"
+b = "Mode 'w' creates the file, or empties it if it exists. with promises to close the file when the block ends, even if something fails inside it."
+look = "f is a file object."
+
+[lesson.lines.2]
+t = "Write text"
+b = "write adds text exactly as given. It does not add a newline for you, which is why each string ends with \\n."
+look = "Nothing printed: the text goes to the file."
+
+[lesson.lines.6]
+t = "Read it back"
+b = "Mode 'r' (the default) reads. readlines gives a list with one string per line, newline included."
+look = "items is a list of two strings."
+
+[lesson.lines.7]
+t = "Closed for you"
+b = "Leaving the with block called f.close()."
+look = "The output box."
+
+[lesson.predict]
+line = 7
+q = "What will print(items, f.closed) show?"
+target = { out = true }
+opts = [
+  "['milk\\n', 'eggs\\n'] True",
+  "['milk', 'eggs'] True",
+  "['milk\\n', 'eggs\\n'] False",
+]
+
+[lesson.predict.fb]  # feedback for specific wrong answers
+"['milk', 'eggs'] True" = "Not quite. readlines keeps the \\n at the end of each line."
+"['milk\\n', 'eggs\\n'] False" = "Not quite. Leaving a with block closes the file."
+
+[[lesson.variants]]
+label = "'w' then read"
+
+[[lesson.variants]]
+label = "read a missing file"
+from = "open('notes.txt')"
+to = "open('todo.txt')"
+pline = 5
+q = "What happens on open('todo.txt')?"
+opts = ["An error", "items is empty"]
+
+[lesson.check]  # the final unfamiliar-input question
+code = '''
+with open('a.txt', 'w') as f:
+    f.write('x')
+with open('a.txt', 'w') as f:
+    f.write('y')'''
+q = "What does a.txt contain?"
+opts = ["'y'", "'xy'"]
+right = 0
+fb = [
+  "Right. 'w' empties the file first.",
+  "Not quite. That would need mode 'a'.",
+]

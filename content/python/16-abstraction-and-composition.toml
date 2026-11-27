@@ -1,0 +1,269 @@
+# Python 16: Abstraction and composition
+# One [[lesson]] block per lesson, in the order students see them.
+# Line numbers in lines, predict.line and pline count from 1.
+
+topic = "16"
+
+[[lesson]]
+id = "abs_abc"
+topic = "Abstraction and composition"
+title = "Why can’t I create an abstract class?"
+recap = "Shape declared area as abstract, so it can describe what every shape must do but cannot be built itself. Sq filled in area, so Sq(3) worked and gave 9. Abstraction lets you write code against \"any Shape\" while each subclass supplies the details."
+code = '''
+from abc import ABC, abstractmethod
+
+class Shape(ABC):
+    @abstractmethod
+    def area(self):
+        pass
+
+class Sq(Shape):
+    def __init__(self, s):
+        self.s = s
+
+    def area(self):
+        return self.s * self.s
+
+print(Sq(3).area())
+s = Shape()
+'''
+pseudo = [
+  "Bring in the tools for abstract classes.",
+  "(blank)",
+  "Define Shape as an abstract class:",
+  "every shape must have an area method,",
+  "but Shape itself does not say how.",
+  "(no body)",
+  "(blank)",
+  "Define Sq as a Shape.",
+  "(init)",
+  "(store s)",
+  "(blank)",
+  "Sq fills in area.",
+  "(compute)",
+  "(blank)",
+  "Build a square and show its area.",
+  "Try to build a plain Shape.",
+]
+
+[lesson.lines.3]
+t = "An abstract class"
+b = "Shape promises that every shape has area, without saying how. It is a contract."
+look = "In the Shape class box, area is marked abstract."
+
+[lesson.lines.8]
+t = "A concrete subclass"
+b = "Sq inherits from Shape and fills in area. Nothing is left abstract."
+look = "Sq’s own area method."
+
+[lesson.lines.16]
+t = "Build the abstract class"
+b = "Shape still has an abstract method, so Python refuses to build it."
+look = "The TypeError message names the missing method."
+
+[lesson.predict]
+line = 16
+q = "What will s = Shape() do?"
+target = { out = true }
+opts = ["An error", "Build a Shape", "Print 0"]
+
+[lesson.predict.fb]  # feedback for specific wrong answers
+"Build a Shape" = "Not quite. Shape has an abstract method, so it cannot be built."
+"Print 0" = "Not quite. Nothing is printed. Building a Shape is refused."
+
+[[lesson.variants]]
+label = "Shape()"
+
+[lesson.check]  # the final unfamiliar-input question
+code = '''
+from abc import ABC, abstractmethod
+
+class Pet(ABC):
+    @abstractmethod
+    def feed(self):
+        pass
+
+class Cat(Pet):
+    pass
+
+c = Cat()'''
+q = "What happens?"
+opts = ["A Cat is built", "A TypeError"]
+right = 1
+fb = [
+  "Not quite. Cat did not fill in feed, so it is still abstract.",
+  "Right. Cat inherits the abstract feed without filling it in.",
+]
+
+[[lesson]]
+id = "abs_comp"
+topic = "Abstraction and composition"
+title = "What does a has-a relationship look like?"
+recap = "The Car object held an Engine object, and car.start() handed the work to it. Inheritance says \"is a\" (a Duck is an Animal). Composition says \"has a\" (a Car has an Engine). Composition lets you swap or change parts without building a deep class tree."
+code = '''
+class Engine:
+    def __init__(self, hp):
+        self.hp = hp
+
+    def start(self):
+        return 'Vroom ' + str(self.hp)
+
+class Car:
+    def __init__(self, hp):
+        self.engine = Engine(hp)
+
+    def start(self):
+        return self.engine.start()
+
+car = Car(120)
+print(car.start())
+'''
+pseudo = [
+  "Define Engine.",
+  "(init)",
+  "(store hp)",
+  "(blank)",
+  "Starting an engine makes a sound with its power.",
+  "(build text)",
+  "(blank)",
+  "Define Car. A car is not an engine; it has one.",
+  "When built:",
+  "build an Engine and keep it.",
+  "(blank)",
+  "Starting the car asks its engine to start.",
+  "(delegate)",
+  "(blank)",
+  "Build a car with 120 hp.",
+  "Start it.",
+]
+
+[lesson.lines.10]
+t = "A car has an engine"
+b = "The car stores an Engine object in its engine attribute. That is composition: one object built from others."
+look = "An arrow from the car’s engine row to the Engine object."
+
+[lesson.lines.15]
+t = "Build a Car"
+b = "Car.__init__ runs with hp = 120."
+look = "The Car.__init__ frame."
+
+[lesson.lines.16]
+t = "Delegate the work"
+b = "car.start() does not know how to make the sound. It passes the job to its engine."
+look = "Car.start, then Engine.start frames."
+
+[lesson.predict]
+line = 16
+q = "What will print(car.start()) show?"
+target = { out = true }
+opts = ["Vroom 120", "An error", "Car"]
+
+[lesson.predict.fb]  # feedback for specific wrong answers
+"An error" = "Not quite. Car.start calls self.engine.start(), which exists."
+Car = "Not quite. start returns the engine’s text."
+
+[[lesson.variants]]
+label = "Car(120)"
+
+[[lesson.variants]]
+label = "Car(300)"
+from = "Car(120)"
+to = "Car(300)"
+opts = ["Vroom 300", "Vroom 120", "An error"]
+
+[lesson.check]  # the final unfamiliar-input question
+code = '''
+class Wheel:
+    def spin(self):
+        return 'spin'
+
+class Bike:
+    def __init__(self):
+        self.front = Wheel()
+
+print(Bike().front.spin())'''
+q = "What is printed?"
+opts = ["spin", "An error"]
+right = 0
+fb = [
+  "Right. The bike has a Wheel object in front.",
+  "Not quite. front holds a Wheel, which has spin.",
+]
+
+[[lesson]]
+id = "abs_choose"
+topic = "Abstraction and composition"
+title = "Should this be inheritance or composition?"
+recap = "Ask \"is a\" or \"has a\". A Dog is an Animal: inheritance fits. A Car has an Engine: composition fits. Composition keeps classes small, lets you swap parts (an ElectricEngine), and avoids deep, fragile class trees."
+dec = "Is the new class a kind of the other one, everywhere it is used? Yes: inherit. No, it only uses it: hold it as an attribute."
+code = '''
+class Engine:
+    def start(self):
+        return 'vroom'
+
+class Radio:
+    def play(self):
+        return 'music'
+
+class Car:
+    def __init__(self):
+        self.engine = Engine()
+        self.radio = Radio()
+
+    def drive(self):
+        return self.engine.start()
+
+car = Car()
+print(car.drive(), car.radio.play())
+'''
+pseudo = [
+  "An Engine can start.",
+  "(body)",
+  "(body)",
+  "(blank)",
+  "A Radio can play.",
+  "(body)",
+  "(body)",
+  "(blank)",
+  "A Car HAS an engine and a radio:",
+  "when built,",
+  "make an engine,",
+  "make a radio.",
+  "(blank)",
+  "Driving asks the engine to start.",
+  "(body)",
+  "(blank)",
+  "Build a car.",
+  "Drive it and play the radio.",
+]
+
+[lesson.lines.11]
+t = "Has-a"
+b = "A car is not an engine and is not a radio. It has them. So it holds them as attributes instead of inheriting from them."
+look = "The car object points at two part objects."
+
+[lesson.lines.15]
+t = "Delegate"
+b = "Car does not know how to start; it asks its engine. This is called delegation."
+look = "The call goes into Engine.start."
+
+[lesson.predict]
+line = 18
+q = "What will print(car.drive(), car.radio.play()) show?"
+target = { out = true }
+opts = ["vroom music", "An error", "None None"]
+
+[[lesson.variants]]
+label = "composition"
+
+[lesson.check]  # the final unfamiliar-input question
+code = '''
+# A Stack needs push and pop.
+# Should Stack inherit from list?'''
+q = "Which is safer?"
+opts = ["Hold a list inside (has-a)", "Inherit from list (is-a)"]
+right = 0
+fb = [
+  "Right. Inheriting would also expose insert, sort and every other list method, which a stack should not allow.",
+  "Not quite. A stack is not a list; it only uses one.",
+]

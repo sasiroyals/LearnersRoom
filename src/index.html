@@ -1,0 +1,178 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Learners Room</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;600;700&family=Space+Grotesk:wght@500;600;700&display=swap">
+<style>
+/*@CSS@*/
+</style>
+</head>
+<body>
+<div class="app" id="app">
+  <header class="top">
+    <button type="button" class="brand" id="brand-home" title="Home" aria-label="Learners Room home"><span class="brand-mark">{}</span><span class="brand-name">Learners Room</span></button>
+    <div class="tabs" role="tablist" aria-label="Language">
+      <button class="tab" role="tab" id="tab-py" data-lang="py">Python</button>
+      <button class="tab" role="tab" id="tab-java" data-lang="java">Java</button>
+    </div>
+    <div class="modes" role="tablist" aria-label="Mode">
+      <button class="tab" role="tab" data-mode="lesson" aria-selected="true">Lessons</button>
+      <button class="tab" role="tab" data-mode="practice" aria-selected="false">Practice</button>
+    </div>
+    <span class="spacer"></span>
+    <button class="ghost" id="toggle-outline" aria-expanded="true" aria-controls="outline"><span class="long">Choose a lesson</span><span class="short">Topics</span></button>
+    <div class="trophies" title="Trophies earned" aria-live="polite"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 21h8M12 17v4M7 4h10v5a5 5 0 0 1-10 0V4zM17 5h3v2a3 3 0 0 1-3 3M7 5H4v2a3 3 0 0 0 3 3"/></svg><span id="trophy-count">0</span></div>
+  </header>
+
+
+  <section class="home" id="home" hidden aria-label="Home">
+    <div class="home-in">
+      <div class="hero">
+        <div class="hero-text">
+          <p class="eyebrow">Python and Java, from first line to professional</p>
+          <h1>Watch your code run, one line at a time.</h1>
+          <p class="lede">Every lesson runs real code step by step. You see each name, list and object change, predict what happens next, and get a plain-English explanation of every line.</p>
+          <div class="hero-cta">
+            <button class="btn-primary" id="home-py">Start Python <span aria-hidden="true">→</span></button>
+            <button class="btn-secondary" id="home-java">Start Java</button>
+          </div>
+          <button class="continue" id="home-continue" hidden></button>
+        </div>
+        <div class="hero-demo" aria-hidden="true">
+          <div class="demo-code"><div class="dl d1"><span class="n">1</span>a = [1, 2]</div><div class="dl d2"><span class="n">2</span>b = a</div><div class="dl d3"><span class="n">3</span>b.append(3)</div></div>
+          <svg class="demo-svg" viewBox="0 0 320 170">
+            <defs><marker id="dm" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto"><path d="M0,0 L10,5 L0,10 z" class="dm-head"/></marker></defs>
+            <g class="tag ta"><rect x="10" y="30" width="54" height="30" rx="8"/><text x="37" y="50">a</text></g>
+            <path class="dm-edge ea" d="M64,45 C110,45 120,78 150,82" marker-end="url(#dm)"/>
+            <g class="tag tb"><rect x="10" y="110" width="54" height="30" rx="8"/><text x="37" y="130">b</text></g>
+            <path class="dm-edge eb" d="M64,125 C110,125 120,98 150,92" marker-end="url(#dm)"/>
+            <g class="cells"><rect x="152" y="68" width="44" height="40" rx="7"/><text x="174" y="93">1</text><rect x="200" y="68" width="44" height="40" rx="7"/><text x="222" y="93">2</text></g>
+            <g class="cells newcell"><rect x="248" y="68" width="44" height="40" rx="7"/><text x="270" y="93">3</text></g>
+            <text class="demo-cap" x="160" y="160">two names, one list</text>
+          </svg>
+        </div>
+      </div>
+
+      <h2 class="home-h">How every lesson works</h2>
+      <div class="how">
+        <div class="how-card"><span class="how-n">1</span><h3>Watch it run</h3><p>The program runs one line at a time. Names, lists, objects and call frames are drawn as they change.</p></div>
+        <div class="how-card"><span class="how-n">2</span><h3>Predict first</h3><p>Before the key line runs, you guess the result. Then you see whether you were right, and why.</p></div>
+        <div class="how-card"><span class="how-n">3</span><h3>Read every step</h3><p>The panel on the right explains what Python did on each line, in plain English. Code, pseudocode and flowchart views sit side by side.</p></div>
+        <div class="how-card"><span class="how-n">4</span><h3>Practice here</h3><p>Write your own code in the built-in editor and step through it with a debugger. Nothing to install.</p></div>
+      </div>
+
+      <div class="home-h-row"><h2 class="home-h">The course</h2><span class="home-lang" id="home-lang"></span></div>
+      <div class="levels" id="home-levels"></div>
+
+      <h2 class="home-h">Built on the best books</h2>
+      <div class="books" id="home-books"></div>
+      <p class="home-foot">Learners Room. Progress and trophies are saved in this browser.</p>
+    </div>
+  </section>
+
+  <div class="main" id="main">
+    <nav class="panel outline" id="outline" aria-label="Course outline"></nav>
+    <div class="scrim" id="scrim"></div>
+
+    <section class="panel stage" aria-label="Simulation">
+      <div class="stage-head">
+        <div>
+          <div class="crumbs" id="crumbs"></div>
+          <h1 class="lesson-title">Why did both lists change?</h1>
+        </div>
+        <div class="dots" id="dots" aria-label="Lesson steps"></div>
+      </div>
+      <div class="canvas" id="canvas">
+        <div class="overlay" id="overlay"></div>
+        <svg id="scene" viewBox="0 70 800 470" preserveAspectRatio="xMidYMid meet" role="img" aria-labelledby="scene-desc"><desc id="scene-desc"></desc></svg>
+      </div>
+      <div class="tl" id="tl" hidden>
+        <div id="tl-top"></div>
+        <div class="tl-mem pv-canvas" id="tl-mem"></div>
+        <div class="tl-out"><span class="tl-out-h">Output</span><pre id="tl-out"></pre></div>
+      </div>
+    </section>
+
+    <section class="panel explain" id="explain" aria-live="polite"></section>
+
+    <section class="panel codebox" aria-label="Code and diagrams">
+      <div class="vtabs" role="tablist" id="vtabs">
+        <button class="vtab" role="tab" data-v="0">Code</button>
+        <button class="vtab" role="tab" data-v="1">Pseudocode</button>
+        <button class="vtab" role="tab" data-v="2">Flowchart</button>
+        <button class="vtab" role="tab" data-v="3">Decision tree</button>
+      </div>
+      <div class="views" id="views">
+        <div class="view" id="v-code"></div>
+        <div class="view" id="v-pseudo"></div>
+        <div class="view" id="v-flow"></div>
+        <div class="view" id="v-dec"></div>
+      </div>
+    </section>
+  </div>
+
+  <div class="practice" id="practice" hidden>
+    <section class="panel ed" aria-label="Code editor">
+      <div class="ed-head">
+        <h2 id="pr-title">Practice</h2>
+        <div class="chips" id="pr-examples" role="group" aria-label="Example programs"></div>
+      </div>
+      <div class="ed-body" id="pr-edit">
+        <div class="ed-gutter" id="pr-gutter" aria-hidden="true">1</div>
+        <textarea id="pr-code" spellcheck="false" autocapitalize="off" autocomplete="off" aria-label="Your code"></textarea>
+      </div>
+      <div class="ed-view" id="pr-view" hidden></div>
+      <div class="ed-foot">
+        <button class="btn primary" id="pr-debug">Step through</button>
+        <button class="btn" id="pr-run">Run</button>
+        <button class="btn" id="pr-edit-btn" hidden>Edit code</button>
+        <span class="ed-note" id="pr-status"></span>
+      </div>
+    </section>
+
+    <section class="panel pv" aria-label="Memory view">
+      <div class="pv-head">
+        <h2>Names and objects</h2>
+        <div class="legend"><span><i style="background:var(--ref)"></i>reference</span><span><i style="background:var(--val-bg);border:1px solid var(--val-stroke)"></i>value</span><span><i style="background:color-mix(in srgb,var(--val-stroke) 30%,var(--val-bg));border:2px solid var(--val-stroke)"></i>just changed</span></div>
+      </div>
+      <div class="pv-canvas" id="pr-canvas"><div class="pv-empty">Press <b>Step through</b> to run your program one line at a time. Each name appears on the left, each object on the right, and an arrow shows which object a name refers to.</div></div>
+    </section>
+
+    <div class="side">
+      <section class="panel dbg" id="pr-dbg" aria-live="polite">
+        <div class="meta"><span id="pr-count">Not running</span></div>
+        <h2 class="step-title">What is happening</h2>
+        <p style="margin:0;color:var(--muted)">Pick an example or write your own code, then press <b>Step through</b>. This panel explains every line as it runs: which names changed, which objects were created or changed, and which way each condition went.</p>
+      </section>
+      <section class="panel io" aria-label="Output">
+        <div class="io-h"><span>Output</span><span id="pr-outcount"></span></div>
+        <pre id="pr-out" aria-live="polite"></pre>
+        <label class="io-in" for="pr-input">input()&nbsp;values <input id="pr-input" placeholder="one per call, separated by commas"></label>
+      </section>
+    </div>
+  </div>
+</div>
+
+<div class="chooser" id="chooser" hidden>
+  <div class="chooser-card" role="dialog" aria-modal="true" aria-labelledby="chooser-h">
+    <h2 id="chooser-h">Which language are you learning?</h2>
+    <p>Your first lesson opens right away. You can switch with the tabs at the top at any time.</p>
+    <div class="big-tabs">
+      <button class="big-tab" data-pick="py"><b>Python</b><span>b = a</span></button>
+      <button class="big-tab" data-pick="java"><b>Java</b><span>List&lt;Integer&gt; b = a;</span></button>
+    </div>
+  </div>
+</div>
+<div class="toast" id="toast" hidden></div>
+
+<script>
+(function(){
+/*@JS@*/
+})();
+</script>
+</body>
+</html>

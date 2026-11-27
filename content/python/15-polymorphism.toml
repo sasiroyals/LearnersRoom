@@ -1,0 +1,287 @@
+# Python 15: Polymorphism
+# One [[lesson]] block per lesson, in the order students see them.
+# Line numbers in lines, predict.line and pline count from 1.
+
+topic = "15"
+
+[[lesson]]
+id = "poly_same"
+topic = "Polymorphism"
+title = "One call, different objects: which code runs?"
+recap = "The loop called sh.area() on every shape without knowing its class. For the circle, Circle.area ran. For the square, Square.area ran. That is polymorphism: one call, and each object answers in its own way."
+code = '''
+class Circle:
+    def __init__(self, r):
+        self.r = r
+
+    def area(self):
+        return 3 * self.r * self.r
+
+class Square:
+    def __init__(self, s):
+        self.s = s
+
+    def area(self):
+        return self.s * self.s
+
+shapes = [Circle(1), Square(2)]
+total = 0
+for sh in shapes:
+    total = total + sh.area()
+print(total)
+'''
+pseudo = [
+  "Define Circle.",
+  "(init)",
+  "(store r)",
+  "(blank)",
+  "A circle’s area (using 3 for pi to keep numbers small).",
+  "(compute)",
+  "(blank)",
+  "Define Square.",
+  "(init)",
+  "(store s)",
+  "(blank)",
+  "A square’s area.",
+  "(compute)",
+  "(blank)",
+  "Put a circle and a square in one list.",
+  "Start the total at 0.",
+  "For each shape:",
+  "add its area. The same call runs different code for each.",
+  "Show the total.",
+]
+
+[lesson.lines.15]
+t = "Mixed objects in one list"
+b = "The list holds objects of two different classes."
+look = "The list cells point to a Circle and a Square."
+
+[lesson.lines.18]
+t = "The same line, two classes"
+b = "sh.area() is one line of code. Python picks the area method from whatever class sh’s object belongs to."
+look = "Which class the area frame belongs to."
+
+[lesson.predict]
+line = 19
+q = "What will print(total) show?"
+target = { out = true }
+opts = ["7", "5", "An error"]
+
+[lesson.predict.fb]  # feedback for specific wrong answers
+5 = "Not quite. The circle’s area is 3 * 1 * 1 = 3, and the square’s is 2 * 2 = 4."
+"An error" = "No error. Both classes define area, so sh.area() works for each."
+
+[[lesson.variants]]
+label = "Circle(1), Square(2)"
+
+[[lesson.variants]]
+label = "Circle(2), Square(3)"
+from = "[Circle(1), Square(2)]"
+to = "[Circle(2), Square(3)]"
+opts = ["21", "13", "25"]
+
+[lesson.check]  # the final unfamiliar-input question
+code = '''
+class A:
+    def go(self):
+        return 1
+class B:
+    def go(self):
+        return 10
+
+print(sum(x.go() for x in [A(), B(), B()]))'''
+q = "What is printed?"
+opts = ["21", "3", "30"]
+right = 0
+fb = [
+  "Right. 1 + 10 + 10.",
+  "Not quite. Each object runs its own go.",
+  "Not quite. A’s go returns 1.",
+]
+
+[[lesson]]
+id = "poly_duck"
+topic = "Polymorphism"
+title = "Does Python check the type before calling a method?"
+recap = "chat worked with a Duck and a Robot, two unrelated classes, because both had a talk method. It failed with a Rock, which had none. This is duck typing: Python cares whether an object can do the job, not what class it is."
+code = '''
+class Duck:
+    def talk(self):
+        return 'Quack'
+
+class Robot:
+    def talk(self):
+        return 'Beep'
+
+class Rock:
+    pass
+
+def chat(thing):
+    return thing.talk()
+
+print(chat(Duck()))
+print(chat(Robot()))
+print(chat(Rock()))
+'''
+pseudo = [
+  "Define Duck, which can talk.",
+  "(talk)",
+  "(return)",
+  "(blank)",
+  "Define Robot, which can also talk.",
+  "(talk)",
+  "(return)",
+  "(blank)",
+  "Define Rock, which cannot talk.",
+  "(empty)",
+  "(blank)",
+  "chat asks any thing to talk.",
+  "(call talk)",
+  "(blank)",
+  "Chat with a duck.",
+  "Chat with a robot.",
+  "Chat with a rock.",
+]
+
+[lesson.lines.15]
+t = "Pass a Duck"
+b = "chat does not check the type. It just calls talk."
+look = "thing points to a Duck object."
+
+[lesson.lines.16]
+t = "Pass a Robot"
+b = "Robot is unrelated to Duck, but it also has talk, so chat works."
+look = "thing points to a Robot object."
+
+[lesson.lines.17]
+t = "Pass a Rock"
+b = "Rock has no talk method, so the call fails with an AttributeError."
+look = "The error on this line."
+
+[lesson.predict]
+line = 17
+q = "What will chat(Rock()) do?"
+target = { out = true }
+opts = ["An error", "Print None", "Print Rock"]
+
+[lesson.predict.fb]  # feedback for specific wrong answers
+"Print None" = "Not quite. A missing method is an error, not None."
+"Print Rock" = "Not quite. chat calls thing.talk(), and Rock has no talk."
+
+[[lesson.variants]]
+label = "Rock()"
+
+[lesson.check]  # the final unfamiliar-input question
+code = '''
+def size(x):
+    return len(x)
+
+print(size('abc'), size([1, 2]))'''
+q = "What is printed?"
+opts = ["3 2", "An error"]
+right = 0
+fb = [
+  "Right. Strings and lists both support len.",
+  "Not quite. Both types support len, so size works with both.",
+]
+
+[[lesson]]
+id = "poly_ops"
+topic = "Polymorphism"
+title = "How does + work on your own objects?"
+recap = "a + b ran Money.__add__ and built a new Money(200). print used __repr__. c == Money(200) ran __eq__, which compared cents and said True. Without __eq__, == only checks whether both sides are the same object, which they are not."
+code = '''
+class Money:
+    def __init__(self, cents):
+        self.cents = cents
+
+    def __add__(self, other):
+        return Money(self.cents + other.cents)
+
+    def __eq__(self, other):
+        return self.cents == other.cents
+
+    def __repr__(self):
+        return 'Money(' + str(self.cents) + ')'
+
+a = Money(150)
+b = Money(50)
+c = a + b
+print(c)
+print(c == Money(200))
+'''
+pseudo = [
+  "Define Money.",
+  "(init)",
+  "(store cents)",
+  "(blank)",
+  "a + b means: make a new Money with both amounts added.",
+  "(build)",
+  "(blank)",
+  "a == b means: same number of cents?",
+  "(compare)",
+  "(blank)",
+  "Its text form.",
+  "(build text)",
+  "(blank)",
+  "Make 150 cents.",
+  "Make 50 cents.",
+  "Add them.",
+  "Show the sum.",
+  "Compare with 200 cents.",
+]
+
+[lesson.lines.6]
+t = "Build a new object"
+b = "__add__ returns a brand new Money. Neither a nor b changes."
+look = "A third Money object appears."
+
+[lesson.lines.16]
+t = "a + b calls __add__"
+b = "For a + b, Python calls a.__add__(b). self is a and other is b."
+look = "The __add__ frame, with self and other."
+
+[lesson.lines.18]
+t = "== calls __eq__"
+b = "Without __eq__, == would ask \"same object?\". With it, Python compares cents."
+look = "The __eq__ frame."
+
+[lesson.predict]
+line = 18
+q = "What will print(c == Money(200)) show?"
+target = { out = true }
+opts = ["True", "False", "An error"]
+
+[lesson.predict.fb]  # feedback for specific wrong answers
+False = "Not quite. They are different objects, but __eq__ compares cents, and both hold 200."
+
+[[lesson.variants]]
+label = "with __eq__"
+
+[[lesson.variants]]
+label = "without __eq__"
+from = '''
+    def __eq__(self, other):
+        return self.cents == other.cents
+
+'''
+to = ""
+opts = ["True", "False", "An error"]
+
+[lesson.check]  # the final unfamiliar-input question
+code = '''
+class V:
+    def __init__(self, n):
+        self.n = n
+    def __len__(self):
+        return self.n
+
+print(len(V(4)))'''
+q = "What is printed?"
+opts = ["4", "An error"]
+right = 0
+fb = [
+  "Right. len(v) calls v.__len__().",
+  "Not quite. Defining __len__ makes len() work on V objects.",
+]

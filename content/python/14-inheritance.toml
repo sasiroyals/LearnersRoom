@@ -1,0 +1,341 @@
+# Python 14: Inheritance
+# One [[lesson]] block per lesson, in the order students see them.
+# Line numbers in lines, predict.line and pline count from 1.
+
+topic = "14"
+
+[[lesson]]
+id = "inh_reuse"
+topic = "Inheritance"
+title = "How does a subclass reuse its parent’s code?"
+recap = "Cat defined nothing, but a Cat object could still be built and described. For each missing method, Python looked in Cat first, then in its parent Animal. Inheritance lets a subclass reuse everything its parent already does."
+code = '''
+class Animal:
+    def __init__(self, name):
+        self.name = name
+
+    def describe(self):
+        return self.name + ' is an animal'
+
+class Cat(Animal):
+    pass
+
+c = Cat('Tom')
+print(c.describe())
+'''
+pseudo = [
+  "Define Animal.",
+  "When built, store the name.",
+  "(store)",
+  "(blank)",
+  "describe gives back a sentence.",
+  "(build it)",
+  "(blank)",
+  "Define Cat as a kind of Animal, with nothing new.",
+  "(empty body)",
+  "(blank)",
+  "Build a Cat named Tom.",
+  "Show its description.",
+]
+
+[lesson.lines.8]
+t = "Define a subclass"
+b = "class Cat(Animal) says: a Cat is an Animal. Cat defines nothing of its own."
+look = "The dashed \"inherits from\" arrow from Cat to Animal."
+
+[lesson.lines.11]
+t = "Build a Cat"
+b = "Cat has no __init__, so Python looks in its parent and runs Animal.__init__."
+look = "The frame name says Animal.__init__."
+
+[lesson.lines.12]
+t = "Call an inherited method"
+b = "Cat has no describe either. Python climbs to Animal and finds it there."
+look = "The describe frame belongs to Animal."
+
+[lesson.predict]
+line = 12
+q = "What will print(c.describe()) show?"
+target = { out = true }
+opts = ["Tom is an animal", "An error", "Cat"]
+
+[lesson.predict.fb]  # feedback for specific wrong answers
+"An error" = "Not quite. Cat inherits describe from Animal, so the call works."
+Cat = "Not quite. describe builds a sentence from the name."
+
+[[lesson.variants]]
+label = "Cat(Animal)"
+
+[lesson.check]  # the final unfamiliar-input question
+code = '''
+class A:
+    def hi(self):
+        return 'hi'
+
+class B(A):
+    pass
+
+class C(B):
+    pass
+
+print(C().hi())'''
+q = "What happens?"
+opts = ["It prints hi", "An error"]
+right = 0
+fb = [
+  "Right. Python climbs C, then B, then A, and finds hi in A.",
+  "Not quite. Lookup keeps climbing through every parent.",
+]
+
+[[lesson]]
+id = "inh_override"
+topic = "Inheritance"
+title = "Which version of a method runs?"
+recap = "Both objects ran the same speak method from Animal. Inside it, self.sound() was looked up on the actual object: the Duck’s own sound gave quack, and the plain Animal’s gave .... Overriding means the subclass’s version wins, even when the parent’s code makes the call."
+dec = "For self.sound(), Python asks: does the object’s own class define sound? Duck: yes, use it. Animal object: use Animal.sound."
+code = '''
+class Animal:
+    def sound(self):
+        return '...'
+
+    def speak(self):
+        return 'It says ' + self.sound()
+
+class Duck(Animal):
+    def sound(self):
+        return 'quack'
+
+d = Duck()
+a = Animal()
+print(d.speak())
+print(a.speak())
+'''
+pseudo = [
+  "Define Animal.",
+  "sound gives back ...",
+  "(return)",
+  "(blank)",
+  "speak builds a sentence using self.sound().",
+  "(build)",
+  "(blank)",
+  "Define Duck as an Animal.",
+  "Duck replaces sound with its own version.",
+  "(return quack)",
+  "(blank)",
+  "Build a Duck.",
+  "Build a plain Animal.",
+  "Make the duck speak.",
+  "Make the animal speak.",
+]
+
+[lesson.lines.6]
+t = "self.sound() inside the parent"
+b = "Python looks up sound on self, which is a Duck. Duck has its own sound, so that one wins."
+look = "The next frame is Duck.sound."
+
+[lesson.lines.14]
+t = "Call an inherited method"
+b = "Duck has no speak, so Animal.speak runs, with self = the duck."
+look = "The Animal.speak frame, and what self points to."
+
+[lesson.lines.15]
+t = "Same code, different object"
+b = "This time self is a plain Animal, so Animal.sound runs."
+look = "Compare the sound frame with the duck’s."
+
+[lesson.predict]
+line = 14
+q = "What will print(d.speak()) show?"
+target = { out = true }
+opts = ["It says quack", "It says ...", "An error"]
+
+[lesson.predict.fb]  # feedback for specific wrong answers
+"It says ..." = "Not quite. speak is Animal’s code, but it calls self.sound(), and self is a Duck. Duck’s sound overrides the parent’s."
+"An error" = "No error. Duck inherits speak from Animal."
+
+[[lesson.variants]]
+label = "Duck overrides sound"
+
+[lesson.check]  # the final unfamiliar-input question
+code = '''
+class P:
+    def name(self):
+        return 'P'
+    def show(self):
+        return self.name()
+
+class Q(P):
+    def name(self):
+        return 'Q'
+
+print(Q().show())'''
+q = "What is printed?"
+opts = ["P", "Q"]
+right = 1
+fb = [
+  "Not quite. self is a Q object, so self.name() finds Q.name first.",
+  "Right. Lookup starts at the object’s own class, Q.",
+]
+
+[[lesson]]
+id = "inh_super"
+topic = "Inheritance"
+title = "Why call super().__init__?"
+recap = "Bike’s own __init__ replaced Vehicle’s. Calling super().__init__(2) let Vehicle set wheels on the same object before Bike added color. Without that call, wheels is never set, and reading it fails with an AttributeError."
+code = '''
+class Vehicle:
+    def __init__(self, wheels):
+        self.wheels = wheels
+
+class Bike(Vehicle):
+    def __init__(self, color):
+        super().__init__(2)
+        self.color = color
+
+b = Bike('red')
+print(b.wheels, b.color)
+'''
+pseudo = [
+  "Define Vehicle.",
+  "When built, store the number of wheels.",
+  "(store)",
+  "(blank)",
+  "Define Bike as a Vehicle.",
+  "Bike has its own __init__:",
+  "first let Vehicle set up its part, with 2 wheels,",
+  "then store the color.",
+  "(blank)",
+  "Build a red Bike.",
+  "Show wheels and color.",
+]
+
+[lesson.lines.3]
+t = "Parent sets its part"
+b = "Vehicle stores wheels on the Bike object."
+look = "wheels appears on the object."
+
+[lesson.lines.7]
+t = "Hand over to the parent"
+b = "super().__init__(2) runs Vehicle.__init__ on the same object, so the parent can set up its attributes."
+look = "A Vehicle.__init__ frame appears with the same self."
+
+[lesson.lines.8]
+t = "Child sets its part"
+b = "Back in Bike.__init__, color is added."
+look = "color appears on the object."
+
+[lesson.lines.10]
+t = "Build a Bike"
+b = "Bike defines its own __init__, so Python runs Bike.__init__, not Vehicle’s."
+look = "The Bike.__init__ frame."
+
+[lesson.predict]
+line = 11
+q = "What will print(b.wheels, b.color) show?"
+target = { out = true }
+opts = ["2 red", "An error", "red"]
+
+[lesson.predict.fb]  # feedback for specific wrong answers
+"An error" = "Not quite with this code. super().__init__(2) set wheels. Try the \"without super()\" input to see the error."
+red = "Not quite. print shows both values."
+
+[[lesson.variants]]
+label = "with super()"
+
+[[lesson.variants]]
+label = "without super()"
+from = '''
+        super().__init__(2)
+'''
+to = ""
+opts = ["2 red", "An error", "red"]
+
+[lesson.check]  # the final unfamiliar-input question
+code = '''
+class A:
+    def __init__(self):
+        self.x = 1
+
+class B(A):
+    def __init__(self):
+        self.y = 2
+
+print(B().x)'''
+q = "What happens?"
+opts = ["It prints 1", "An AttributeError"]
+right = 1
+fb = [
+  "Not quite. B.__init__ replaced A.__init__ and never called super(), so x was never set.",
+  "Right. Without super().__init__(), A never set x.",
+]
+
+[[lesson]]
+id = "inh_isinstance"
+topic = "Inheritance"
+title = "Is a Bike also a Vehicle?"
+recap = "A Bike object counts as a Vehicle, because isinstance checks the whole chain of parents. A plain Vehicle is not a Bike. issubclass asks the same question about classes instead of objects."
+code = '''
+class Vehicle:
+    pass
+
+class Bike(Vehicle):
+    pass
+
+b = Bike()
+v = Vehicle()
+r1 = isinstance(b, Vehicle)
+r2 = isinstance(v, Bike)
+r3 = issubclass(Bike, Vehicle)
+print(r1, r2, r3)
+'''
+pseudo = [
+  "Define Vehicle.",
+  "(empty)",
+  "(blank)",
+  "Define Bike as a Vehicle.",
+  "(empty)",
+  "(blank)",
+  "Build a Bike.",
+  "Build a Vehicle.",
+  "Is the bike a Vehicle?",
+  "Is the vehicle a Bike?",
+  "Is Bike a subclass of Vehicle?",
+  "Show the three answers.",
+]
+
+[lesson.lines.9]
+t = "isinstance follows the chain"
+b = "isinstance(b, Vehicle) checks the object’s class and every parent of it."
+look = "The \"inherits from\" arrow from Bike to Vehicle."
+
+[lesson.lines.10]
+t = "The chain goes one way"
+b = "A Vehicle object is not a Bike. Parents do not inherit from children."
+look = "There is no arrow from Vehicle to Bike."
+
+[lesson.predict]
+line = 10
+q = "What will r2 = isinstance(v, Bike) hold?"
+target = { v = "r2" }
+opts = ["True", "False"]
+
+[lesson.predict.fb]  # feedback for specific wrong answers
+True = "Not quite. Every Bike is a Vehicle, but not every Vehicle is a Bike."
+
+[[lesson.variants]]
+label = "v is a Vehicle"
+
+[lesson.check]  # the final unfamiliar-input question
+code = '''
+class A: pass
+class B(A): pass
+class C(B): pass
+
+print(isinstance(C(), A))'''
+q = "What is printed?"
+opts = ["True", "False"]
+right = 0
+fb = [
+  "Right. C inherits from B, which inherits from A.",
+  "Not quite. isinstance follows the chain all the way up.",
+]
