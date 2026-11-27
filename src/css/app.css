@@ -616,7 +616,6 @@ button:focus-visible,a:focus-visible,[tabindex]:focus-visible{outline:2px solid 
 .lib-sum{margin:0;font-size:12.5px;color:var(--muted)}
 .lib-sum b{color:var(--ink)}
 .lib-list{flex:1;min-height:0;overflow:auto;padding:6px 6px 10px}
-.lib-foot{padding:10px 12px;border-top:1px solid var(--line)}
 .lib-empty{color:var(--muted);font-size:13px;padding:12px}
 .lib-topic ul{list-style:none;margin:0 0 6px;padding:0 0 0 8px}
 .lib-sub{font:700 11px var(--f-body);letter-spacing:.08em;text-transform:uppercase;color:var(--muted);padding:10px 8px 4px}
@@ -687,7 +686,7 @@ button:focus-visible,a:focus-visible,[tabindex]:focus-visible{outline:2px solid 
   .tabs,.modes{order:5;flex:1 1 45%}
   .tabs .tab,.modes .tab{flex:1;min-height:40px;padding:6px 8px}
   #acct .link-btn{display:none}
-  #acct .btn-primary.sm,.trophies,#toggle-outline{min-height:40px}
+  #acct .btn-primary.sm,.trophies,#pr-blank{min-height:40px}
   #auth-switch button{padding:10px 4px;margin:-10px 0}
 }
 
@@ -702,5 +701,6 @@ button:focus-visible,a:focus-visible,[tabindex]:focus-visible{outline:2px solid 
 .ln.demo:not(.active):not(.err){opacity:.6}
 /* The home and login pages are a landing page: the language and mode tabs appear once you are in the course. */
 body[data-mode="home"] .top .tabs,body[data-mode="home"] .top .modes,
-body[data-mode="auth"] .top .tabs,body[data-mode="auth"] .top .modes{display:none}
+body[data-mode="auth"] .top .tabs,body[data-mode="auth"] .top .modes,
+body[data-mode="home"] #pr-blank,body[data-mode="auth"] #pr-blank{display:none}
 body[data-mode="home"] .brand-name,body[data-mode="auth"] .brand-name{display:inline}

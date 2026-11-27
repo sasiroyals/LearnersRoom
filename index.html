@@ -626,7 +626,6 @@ button:focus-visible,a:focus-visible,[tabindex]:focus-visible{outline:2px solid 
 .lib-sum{margin:0;font-size:12.5px;color:var(--muted)}
 .lib-sum b{color:var(--ink)}
 .lib-list{flex:1;min-height:0;overflow:auto;padding:6px 6px 10px}
-.lib-foot{padding:10px 12px;border-top:1px solid var(--line)}
 .lib-empty{color:var(--muted);font-size:13px;padding:12px}
 .lib-topic ul{list-style:none;margin:0 0 6px;padding:0 0 0 8px}
 .lib-sub{font:700 11px var(--f-body);letter-spacing:.08em;text-transform:uppercase;color:var(--muted);padding:10px 8px 4px}
@@ -697,7 +696,7 @@ button:focus-visible,a:focus-visible,[tabindex]:focus-visible{outline:2px solid 
   .tabs,.modes{order:5;flex:1 1 45%}
   .tabs .tab,.modes .tab{flex:1;min-height:40px;padding:6px 8px}
   #acct .link-btn{display:none}
-  #acct .btn-primary.sm,.trophies,#toggle-outline{min-height:40px}
+  #acct .btn-primary.sm,.trophies,#pr-blank{min-height:40px}
   #auth-switch button{padding:10px 4px;margin:-10px 0}
 }
 
@@ -712,7 +711,8 @@ button:focus-visible,a:focus-visible,[tabindex]:focus-visible{outline:2px solid 
 .ln.demo:not(.active):not(.err){opacity:.6}
 /* The home and login pages are a landing page: the language and mode tabs appear once you are in the course. */
 body[data-mode="home"] .top .tabs,body[data-mode="home"] .top .modes,
-body[data-mode="auth"] .top .tabs,body[data-mode="auth"] .top .modes{display:none}
+body[data-mode="auth"] .top .tabs,body[data-mode="auth"] .top .modes,
+body[data-mode="home"] #pr-blank,body[data-mode="auth"] #pr-blank{display:none}
 body[data-mode="home"] .brand-name,body[data-mode="auth"] .brand-name{display:inline}
 </style>
 </head>
@@ -729,7 +729,7 @@ body[data-mode="home"] .brand-name,body[data-mode="auth"] .brand-name{display:in
       <button class="tab" role="tab" data-mode="practice" aria-selected="false">Practice</button>
     </div>
     <span class="spacer"></span>
-    <button class="ghost" id="toggle-outline" aria-expanded="true" aria-controls="outline"><span class="long">Choose a lesson</span><span class="short">Topics</span></button>
+    <button type="button" class="ghost" id="pr-blank" title="Open an empty editor to write your own code"><span class="long">Blank editor</span><span class="short">Blank</span></button>
     <div class="acct" id="acct"></div>
     <div class="trophies" title="Trophies earned" aria-live="polite"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 21h8M12 17v4M7 4h10v5a5 5 0 0 1-10 0V4zM17 5h3v2a3 3 0 0 1-3 3M7 5H4v2a3 3 0 0 0 3 3"/></svg><span id="trophy-count">0</span></div>
   </header>
@@ -910,7 +910,6 @@ body[data-mode="home"] .brand-name,body[data-mode="auth"] .brand-name{display:in
         <p class="lib-sum" id="lib-sum"></p>
       </div>
       <div class="lib-list" id="lib-list"></div>
-      <div class="lib-foot"><button type="button" class="btn wide" id="pr-blank">Blank editor</button></div>
     </nav>
     <div class="scrim lib-scrim" id="lib-scrim"></div>
 
@@ -1523,10 +1522,12 @@ function renderOutline(){
   $('#crumbs').textContent = `${L[lang].name} › ${ct ? ct.n+' '+ct.t : ''}`;
   $('#trophy-count').textContent = ['py','java'].reduce((c,lg)=>c + ALL_LESSONS[lg].filter(id=>hasTrophy(lg,id)).length, 0);
 }
-function setOutline(open){ $('#main').classList.toggle('no-outline', !open); $('#toggle-outline').setAttribute('aria-expanded', open); }
-$('#toggle-outline').onclick = ()=> setOutline($('#main').classList.contains('no-outline'));
+/* The lesson list is always shown on wide screens. On narrow screens it slides out:
+   tapping the Lessons tab again opens and closes it. */
+function setOutline(open){ $('#main').classList.toggle('no-outline', !open); }
 $('#scrim').onclick = ()=> setOutline(false);
 if(innerWidth<=980) setOutline(false);
+addEventListener('resize', ()=>{ if(innerWidth>980) setOutline(true); });
 
 /* ---------------- dots ---------------- */
 function renderDots(){
@@ -2447,13 +2448,12 @@ $('#pr-edit-btn').onclick = ()=>{ setEditing(true); $('#pr-code').focus(); };
 $('#pr-solback').onclick = ()=>{ setEditing(true); $('#pr-code').focus(); };
 $('#pr-sol').onclick = ()=>{ const p = curProblem(); if(p) prStart(false, isOutProb(p) ? p.solution : p.solution.replace(/\s*$/,'\n') + '\n# example\n' + p.demo); };
 $('#pr-reset').onclick = ()=>{ const p = curProblem(); if(!p) return; pr.code.py = p.starter; store.set(draftKey(p.id), p.starter); pr.results = null; renderPractice(); };
-$('#pr-blank').onclick = ()=>{ prOpenCode('', 'Blank editor', {kind:'blank', id:null}, true); closeLibIfNarrow(); $('#pr-code').focus(); };
+$('#pr-blank').onclick = ()=>{ if(mode!=='practice') setMode('practice'); prOpenCode('', 'Blank editor', {kind:'blank', id:null}, true); closeLibIfNarrow(); $('#pr-code').focus(); };
 
 function setMode(m){
   mode = m;
   document.querySelectorAll('.modes .tab').forEach(t=>{ t.setAttribute('aria-selected', t.dataset.mode===m); t.tabIndex = t.dataset.mode===m?0:-1; });
   $('#main').hidden = m!=='lesson'; $('#practice').hidden = m!=='practice'; $('#home').hidden = m!=='home'; $('#auth').hidden = m!=='auth';
-  $('#toggle-outline').hidden = m!=='lesson';
   document.body.dataset.mode = m;
   if(m!=='auth' && /^#\/(login|signup)$/.test(location.hash)) history.replaceState(null,'',location.pathname + location.search);
   if(m==='home'){ stopAnims(); renderHome(); return; }
@@ -2462,7 +2462,10 @@ function setMode(m){
   else if(!lessonOpened || !ALL_LESSONS[lang].includes(lessonId)) openLesson(pickLesson(lang));
   else if(lessonId==='alias') render(false); else renderTL();
 }
-document.querySelectorAll('.modes .tab').forEach(t=> t.onclick = ()=>setMode(t.dataset.mode));
+document.querySelectorAll('.modes .tab').forEach(t=> t.onclick = ()=>{
+  if(t.dataset.mode==='lesson' && mode==='lesson' && innerWidth<=980) return setOutline($('#main').classList.contains('no-outline'));
+  setMode(t.dataset.mode);
+});
 
 /* 08-trace-lessons.js: Trace-driven lessons: predictions, variants, recap, and the code / pseudocode / flowchart / decision views. */
 const BUILT = { py: Object.assign({'05': LISTS_ORDER}, PY_TOPIC_LESSONS), java: {'13': ['alias']} };
