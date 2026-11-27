@@ -92,6 +92,9 @@ button:focus-visible,a:focus-visible,[tabindex]:focus-visible{outline:2px solid 
 .btn-primary.sm{font-size:13.5px;padding:7px 14px;border-radius:9px;box-shadow:0 4px 14px -6px rgba(91,124,255,.7)}
 .big{font-size:16px;padding:14px 24px;border-radius:12px}
 .wide{width:100%}
+.btn-primary.java{background:linear-gradient(135deg,#F59E0B,#EF4444);box-shadow:0 8px 24px -8px rgba(239,68,68,.6),inset 0 1px 0 rgba(255,255,255,.25)}
+.btn-primary.java:hover{box-shadow:0 12px 30px -8px rgba(239,68,68,.8),inset 0 1px 0 rgba(255,255,255,.25)}
+.btn-primary .tag{font:700 10.5px var(--f-body);letter-spacing:.04em;text-transform:uppercase;background:rgba(255,255,255,.22);border-radius:6px;padding:2px 6px;margin-left:4px;vertical-align:2px}
 .btn-glass{border:1px solid rgba(255,255,255,.22);background:rgba(255,255,255,.07);color:#fff;font-weight:600;font-size:15px;padding:11px 18px;border-radius:11px;backdrop-filter:blur(8px);transition:background .15s}
 .btn-glass:hover{background:rgba(255,255,255,.14)}
 .btn-light{border:0;background:#fff;color:#1B1F3B;font-weight:700;border-radius:12px;box-shadow:0 10px 30px -10px rgba(0,0,0,.4)}
@@ -739,7 +742,7 @@ button:focus-visible,a:focus-visible,[tabindex]:focus-visible{outline:2px solid 
           <p class="lede">Learners Room runs real Python and Java step by step. You see every name, list and object change, predict what happens next, and read a plain-English explanation of each line.</p>
           <div class="hero-cta">
             <button class="btn-primary big" id="home-py">Start Python <span aria-hidden="true">→</span></button>
-            <button class="btn-glass big" id="home-java">Java preview</button>
+            <button class="btn-primary big java" id="home-java">Start Java <span class="tag">preview</span> <span aria-hidden="true">→</span></button>
           </div>
           <button class="continue" id="home-continue" hidden></button>
           <ul class="hero-ticks">
