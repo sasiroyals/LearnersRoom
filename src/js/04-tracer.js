@@ -1,5 +1,4 @@
 /* 04-tracer.js: Python runner: loads Skulpt, rewrites unsupported syntax, and records a snapshot of every line (frames, objects, output). */
-/* ================= PRACTICE: editor + step debugger ================= */
 const SK_URLS = ['https://cdn.jsdelivr.net/npm/skulpt@1.2.0/dist/skulpt.min.js','https://cdn.jsdelivr.net/npm/skulpt@1.2.0/dist/skulpt-stdlib.js'];
 const EXAMPLES = {
   py: [
@@ -79,7 +78,6 @@ async function tracePy(code, inputs){
           else if(x && (x.tp$name==='classmethod' || x.tp$name==='staticmethod')) o.entries.push([k+'()', {p:x.tp$name, fn:1}]);
           else { const vv = val(x, heap); if(vv) o.entries.push([k, vv]); }
         });
-        const b = v.prototype.tp$base && v.prototype.tp$base.prototype && v.prototype.tp$base.prototype.constructor;
         const baseT = v.prototype.tp$base;
         if(baseT && isUserClass(baseT)) o.base = val(baseT, heap);
       }

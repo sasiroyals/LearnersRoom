@@ -1,14 +1,13 @@
 /* 09-home.js: Keyboard shortcuts and the home page. */
 document.addEventListener('keydown', e=>{
-  if(!$('#chooser').hidden) return;
-  if(mode==='home') return;
+  if(mode==='home' || mode==='auth') return;
   if(mode==='practice'){
     if(e.target.closest && e.target.closest('textarea, input')) return;
     if(!pr.trace || e.altKey||e.ctrlKey||e.metaKey) return;
     if(e.key==='ArrowRight'){ e.preventDefault(); prGo(pr.i+1); } else if(e.key==='ArrowLeft'){ e.preventDefault(); prGo(pr.i-1); }
     return;
   }
-  if(e.target.closest && e.target.closest('#views, #vtabs')) return;
+  if(e.target.closest && e.target.closest('#views, #vtabs, input, textarea, select')) return;
   if(e.altKey||e.ctrlKey||e.metaKey) return;
   if(lessonId!=='alias'){
     if(!tl.trace) return;
@@ -61,7 +60,7 @@ function renderHome(){
     }).join('') + `</div></div>`;
   }).join('');
   $('#home-levels').querySelectorAll('.ht[data-topic]:not([disabled])').forEach(b=> b.onclick = ()=>{ const B2 = BUILT[lang][b.dataset.topic]; const next = B2.find(id=>!hasTrophy(lang,id)) || B2[0]; goLesson(next); });
-  $('#home-books').innerHTML = ['py','java'].map(lg=>`<div class="book-card"><h3><span class="lang-badge">${lg==='py'?'.py':'.java'}</span>${esc(L[lg].name)}</h3>` + BOOKS[lg].map(([t,a,w,c])=>`<div class="book"><div class="spine" style="background:${c}">${esc(t[0])}</div><div><b>${esc(t)}</b><span class="by">${esc(a)}</span><p>${esc(w)}</p></div></div>`).join('') + `</div>`).join('');
+  $('#home-books').innerHTML = ['py','java'].map(lg=>`<div class="book-card"><h3><span class="lang-badge">${lg==='py'?'.py':'.java'}</span>${esc(L[lg].name)}</h3>` + BOOKS[lg].map(([t,a,w,c])=>`<div class="book-row"><div class="spine" style="background:${c}">${esc(t[0])}</div><div><b>${esc(t)}</b><span class="by">${esc(a)}</span><p>${esc(w)}</p></div></div>`).join('') + `</div>`).join('');
   const last = store.get('cs.last.'+lang), cont = $('#home-continue');
   if(last && ALL_LESSONS[lang].includes(last)){ cont.hidden = false; cont.textContent = 'Continue where you left off: ' + lessonTitle(last) + ' →'; cont.onclick = ()=> goLesson(last); }
   else cont.hidden = true;

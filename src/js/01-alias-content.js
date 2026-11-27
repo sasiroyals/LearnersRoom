@@ -32,15 +32,6 @@ const L = {
 };
 const T = (py, java) => ({py, java: java === undefined ? py : java});
 
-const OUTLINE = [
-  {t:'Numbers & operators', subs:['Addition','Multiplication','Absolute value','Powers','Remainder']},
-  {t:'Strings', subs:['Character count','Substrings','Search and replace','Reversal','Palindrome check']},
-  {t:'Conditions & logic', subs:['Equality','Inclusive thresholds','Boolean AND / OR','Choosing a result']},
-  {t:'Lists & arrays', subs:['Length','Membership','First two elements','Skipping an element',{lesson:true, title:'Why did both lists change?'}]},
-  {t:'Iteration & aggregation', subs:['Running total','Counting matches','Filtering','Transforming values']},
-  {t:'Ordering & uniqueness', subs:['Sorting','Removing duplicates','Distinct count','Maximum with empty fallback']}
-];
-
 /* Scene geometry (stable positions across steps) */
 const NX = 120, AY = 175, BY = 345, LX = 330, L1Y = 145, L2Y = 315, CW = 70, CH = 58;
 const CON = {x:330, y:452, w:420, h:62};

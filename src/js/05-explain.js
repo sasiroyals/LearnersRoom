@@ -40,7 +40,6 @@ function explainStep(T, i){
   }
   // name changes in shared frames (compare by frame index up to common depth)
   const depth = Math.min(pf.length, cf.length);
-  const refCount = (snapS, id) => { let c=0; snapS.frames.forEach(fr=>fr.vars.forEach(([,v])=>{ if(v.r===id) c++; })); return c; };
   for(let d=0; d<depth; d++){
     const pv = new Map(pf[d].vars), where = d===0 ? '' : ` in ${code$(cf[d].name)}`;
     cf[d].vars.forEach(([n, v])=>{

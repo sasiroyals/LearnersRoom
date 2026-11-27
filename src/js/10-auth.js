@@ -186,13 +186,14 @@ function renderAcct(){
       <div class="menu" id="acct-menu" role="menu" hidden><div class="menu-who"><b>${esc(u.name)}</b><span>${esc(u.email||'')}</span></div><button role="menuitem" id="acct-home">Home</button><button role="menuitem" id="acct-out">Log out</button></div>`;
     const btn = $('#acct-btn'), menu = $('#acct-menu');
     btn.onclick = ev=>{ ev.stopPropagation(); menu.hidden = !menu.hidden; btn.setAttribute('aria-expanded', !menu.hidden); };
-    document.addEventListener('click', ()=>{ menu.hidden = true; btn.setAttribute('aria-expanded', false); }, {once:true});
     $('#acct-home').onclick = ()=> goHome();
     $('#acct-out').onclick = async ()=>{ await Auth.logOut(); toast('You are logged out.'); };
   }
   bindGo(el);
   const band = $('.cta-band'); if(band) band.hidden = !!u;
 }
+document.addEventListener('click', e=>{ const m = $('#acct-menu'); if(m && !m.hidden && !e.target.closest('#acct')){ m.hidden = true; $('#acct-btn').setAttribute('aria-expanded', false); } });
+document.addEventListener('keydown', e=>{ const m = $('#acct-menu'); if(e.key==='Escape' && m && !m.hidden){ m.hidden = true; $('#acct-btn').setAttribute('aria-expanded', false); $('#acct-btn').focus(); } });
 function bindGo(root){ root.querySelectorAll('[data-go]').forEach(b=> b.onclick = ()=> openAuth(b.dataset.go)); }
 bindGo(document);
 Auth.onChange(()=>{ renderAcct(); if(mode==='home') renderHome(); });
