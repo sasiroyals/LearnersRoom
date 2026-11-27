@@ -92,7 +92,7 @@ async function tracePy(code, inputs){
         if(tn==='list'||tn==='tuple') o.items = v.v.map(x=>val(x,heap));
         else if(tn==='set') o.items = Sk.misceval.arrayFromIterable(v).map(x=>val(x,heap));
         else if(tn==='dict') o.entries = v.$items().map(([k,x])=>[short(reprOf(k),14), val(x,heap)]);
-        else { o.label = tn+' #'+kindN[tn]; o.cname = tn; o.entries = v.$d.$items().map(([k,x])=>[String(k.v), val(x,heap)]).filter(e=>e[1]); const ct = v.ob$type; if(ct && isUserClass(ct)) o.cls = val(ct, heap); }
+        else { o.cname = tn; o.entries = v.$d.$items().map(([k,x])=>[String(k.v), val(x,heap)]).filter(e=>e[1]); const ct = v.ob$type; if(ct && isUserClass(ct)) o.cls = val(ct, heap); }
       }
       return {r:info.id};
     }

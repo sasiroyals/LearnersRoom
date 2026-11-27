@@ -1,0 +1,93 @@
+topic = "29"
+
+[[problem]]
+id = "make_grid"
+title = "A grid with separate rows"
+level = "Medium"
+story = "make_grid(n) should return an n × n grid of zeros where each row is its own list. This version has a bug: changing one cell changes a whole column. Fix it."
+hint = "[[0] * n] * n repeats one row. Build a new row for each index with a comprehension."
+starter = '''
+def make_grid(n):
+    return [[0] * n] * n
+'''
+solution = '''
+def make_grid(n):
+    return [[0] * n for _ in range(n)]
+'''
+demo = '''
+g = make_grid(3)
+g[0][0] = 1
+print(g)
+'''
+
+[[problem.tests]]
+call = "make_grid(2)"
+expect = "[[0, 0], [0, 0]]"
+
+[[problem.tests]]
+setup = '''
+g = make_grid(3)
+g[0][0] = 1
+'''
+call = "g"
+expect = "[[1, 0, 0], [0, 0, 0], [0, 0, 0]]"
+
+[[problem]]
+id = "value_or"
+title = "A default that keeps zero"
+level = "Medium"
+story = "value_or(value, default) should return default only when value is None. This version also throws away 0, '' and []. Fix it."
+hint = "or treats every falsy value as missing. Test for None directly: value if value is not None else default."
+starter = '''
+def value_or(value, default):
+    return value or default
+'''
+solution = '''
+def value_or(value, default):
+    return value if value is not None else default
+'''
+demo = '''
+print(value_or(0, 10))
+'''
+
+[[problem.tests]]
+call = "value_or(0, 10)"
+expect = "0"
+
+[[problem.tests]]
+call = "value_or(None, 10)"
+expect = "10"
+
+[[problem.tests]]
+call = "value_or('', 'x')"
+expect = "''"
+
+[[problem.tests]]
+call = "value_or(5, 10)"
+expect = "5"
+
+[[problem]]
+id = "multipliers"
+title = "Functions made in a loop"
+level = "Hard"
+story = "multipliers() should return three functions: the first multiplies by 0, the second by 1, the third by 2. Every one of them multiplies by 2 instead. Fix it."
+hint = "The lambda looks i up when it is called, after the loop has finished. Bind the current i with a default argument: lambda x, i=i: x * i."
+starter = '''
+def multipliers():
+    return [lambda x: x * i for i in range(3)]
+'''
+solution = '''
+def multipliers():
+    return [lambda x, i=i: x * i for i in range(3)]
+'''
+demo = '''
+print([f(5) for f in multipliers()])
+'''
+
+[[problem.tests]]
+call = "[f(5) for f in multipliers()]"
+expect = "[0, 5, 10]"
+
+[[problem.tests]]
+call = "multipliers()[1](7)"
+expect = "7"

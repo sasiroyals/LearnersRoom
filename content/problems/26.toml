@@ -1,0 +1,112 @@
+topic = "26"
+
+[[problem]]
+id = "insertion_sort"
+title = "Insertion sort"
+level = "Medium"
+story = "Write insertion_sort(nums) that returns a new sorted list, smallest first, without using sorted() or .sort(). Leave nums unchanged."
+hint = "Copy the list. For each item from position 1, slide it left past every bigger item."
+starter = '''
+def insertion_sort(nums):
+    pass
+'''
+solution = '''
+def insertion_sort(nums):
+    out = list(nums)
+    for i in range(1, len(out)):
+        key = out[i]
+        j = i - 1
+        while j >= 0 and out[j] > key:
+            out[j + 1] = out[j]
+            j -= 1
+        out[j + 1] = key
+    return out
+'''
+demo = '''
+print(insertion_sort([5, 2, 9, 1]))
+'''
+
+[[problem.tests]]
+call = "insertion_sort([5, 2, 9, 1])"
+expect = "[1, 2, 5, 9]"
+
+[[problem.tests]]
+call = "insertion_sort([])"
+expect = "[]"
+
+[[problem.tests]]
+call = "insertion_sort([3, 3, 1])"
+expect = "[1, 3, 3]"
+
+[[problem.tests]]
+setup = '''
+nums = [2, 1]
+insertion_sort(nums)
+'''
+call = "nums"
+expect = "[2, 1]"
+
+[[problem]]
+id = "merge_sorted"
+title = "Merge two sorted lists"
+level = "Medium"
+story = "Write merge_sorted(a, b) that merges two sorted lists into one sorted list in O(n). Do not just add them and sort."
+hint = "Compare the front items, take the smaller, and move that pointer on. Add any leftovers at the end."
+starter = '''
+def merge_sorted(a, b):
+    return a + b
+'''
+solution = '''
+def merge_sorted(a, b):
+    out, i, j = [], 0, 0
+    while i < len(a) and j < len(b):
+        if a[i] <= b[j]:
+            out.append(a[i])
+            i += 1
+        else:
+            out.append(b[j])
+            j += 1
+    return out + a[i:] + b[j:]
+'''
+demo = '''
+print(merge_sorted([1, 4, 9], [2, 3, 10]))
+'''
+
+[[problem.tests]]
+call = "merge_sorted([1, 4, 9], [2, 3, 10])"
+expect = "[1, 2, 3, 4, 9, 10]"
+
+[[problem.tests]]
+call = "merge_sorted([], [1])"
+expect = "[1]"
+
+[[problem.tests]]
+call = "merge_sorted([5], [1, 2])"
+expect = "[1, 2, 5]"
+
+[[problem]]
+id = "rank_players"
+title = "Rank the players"
+level = "Medium"
+story = "Write rank_players(players), where each player is a (name, score) tuple. Return the names, highest score first. Players with the same score go in alphabetical order."
+hint = "sorted with key=lambda p: (-p[1], p[0]) sorts by score descending, then by name."
+starter = '''
+def rank_players(players):
+    return [name for name, score in players]
+'''
+solution = '''
+def rank_players(players):
+    ordered = sorted(players, key=lambda p: (-p[1], p[0]))
+    return [name for name, score in ordered]
+'''
+demo = '''
+print(rank_players([('Bo', 7), ('Ann', 9), ('Cy', 7)]))
+'''
+
+[[problem.tests]]
+call = "rank_players([('Bo', 7), ('Ann', 9), ('Cy', 7)])"
+expect = "['Ann', 'Bo', 'Cy']"
+
+[[problem.tests]]
+call = "rank_players([('Zed', 1), ('Amy', 1)])"
+expect = "['Amy', 'Zed']"

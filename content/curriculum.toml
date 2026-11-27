@@ -274,6 +274,65 @@ level = "Level 3: Professional"
 subs = ["SOLID in Python", "Strategy pattern", "Factory pattern"]
 book = "Ramalho ch. 10"
 
+[[py]]
+n = "25"
+t = "Searching and Big-O"
+level = "Level 4: Senior"
+subs = [
+  "How many checks does a linear search make?",
+  "How does binary search halve the work?",
+  "Why are two nested loops so slow?",
+  "Why is in faster on a set than on a list?",
+]
+book = "Grokking Algorithms ch. 1; Bhargava"
+
+[[py]]
+n = "26"
+t = "Sorting"
+level = "Level 4: Senior"
+subs = [
+  "How does one pass of bubble sort move the biggest item?",
+  "How does insertion sort slide an item into place?",
+  "How do you merge two sorted lists?",
+  "What does key= do in sorted?",
+]
+book = "Grokking Algorithms ch. 2 and 4"
+
+[[py]]
+n = "27"
+t = "Data structures"
+level = "Level 4: Senior"
+subs = [
+  "How does a stack undo the last thing first?",
+  "How does a linked list connect its nodes?",
+  "How does a binary search tree decide left or right?",
+  "How does a heap always know the smallest item?",
+]
+book = "Problem Solving with Algorithms and Data Structures (Miller and Ranum)"
+
+[[py]]
+n = "28"
+t = "Recursion and dynamic programming"
+level = "Level 4: Senior"
+subs = [
+  "Why is the plain recursive Fibonacci so slow?",
+  "How does memoization stop repeated work?",
+  "How does a table solve the problem from the bottom up?",
+]
+book = "Grokking Algorithms ch. 3 and 9"
+
+[[py]]
+n = "29"
+t = "Python gotchas"
+level = "Level 4: Senior"
+subs = [
+  "Why did changing one row change every row?",
+  "Why do all my lambdas give the same answer?",
+  "Why does removing items in a for loop skip some?",
+  "What do and and or really give back?",
+]
+book = "Fluent Python; Effective Python"
+
 [[java]]
 n = "01"
 t = "Primitives and references"

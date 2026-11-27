@@ -1,0 +1,240 @@
+# Python 29: Python gotchas
+# One [[lesson]] block per lesson, in the order students see them.
+# Line numbers in lines, predict.line and pline count from 1.
+
+topic = "29"
+
+[[lesson]]
+id = "got_grid"
+topic = "Python gotchas"
+title = "Why did changing one row change every row?"
+recap = "[[0] * 3] * 3 does not make three rows. It makes one row and three references to it, so a change through any of them shows in all. Build each row separately with a comprehension: [[0] * 3 for _ in range(3)]."
+dec = "How many list objects are there? Count the objects, not the names."
+code = '''
+grid = [[0] * 3] * 3
+grid[0][0] = 9
+print(grid)
+'''
+pseudo = [
+  "Make one row of three zeros, then a list holding that same row three times.",
+  "Change the first cell of row 0.",
+  "Show the grid.",
+]
+
+[lesson.lines.1]
+t = "One row, three references"
+b = "* 3 on the outer list copies the reference, not the row. All three slots point at the same inner list."
+look = "Three arrows point at one list."
+
+[lesson.lines.2]
+t = "Change through one reference"
+b = "grid[0] is the shared row. Changing it changes what grid[1] and grid[2] see too, because they are the same object."
+look = "The single inner list changes."
+
+[lesson.predict]
+line = 3
+q = "What does print(grid) show?"
+target = { out = true }
+opts = ["[[9, 0, 0], [9, 0, 0], [9, 0, 0]]", "[[9, 0, 0], [0, 0, 0], [0, 0, 0]]", "An error"]
+
+[lesson.predict.fb]
+"[[9, 0, 0], [0, 0, 0], [0, 0, 0]]" = "Not quite. There is only one row object. All three slots refer to it."
+
+[[lesson.variants]]
+label = "[[0] * 3] * 3"
+
+[[lesson.variants]]
+label = "comprehension"
+from = "grid = [[0] * 3] * 3"
+to = "grid = [[0] * 3 for _ in range(3)]"
+opts = ["[[9, 0, 0], [0, 0, 0], [0, 0, 0]]", "[[9, 0, 0], [9, 0, 0], [9, 0, 0]]", "An error"]
+
+[lesson.check]
+code = '''
+a = [[]] * 2
+a[0].append(1)'''
+q = "What is a?"
+opts = ["[[1], [1]]", "[[1], []]"]
+right = 0
+fb = [
+  "Right. Both slots refer to the same empty list.",
+  "Not quite. * 2 copied the reference, so there is only one inner list.",
+]
+
+[[lesson]]
+id = "got_lambda_loop"
+topic = "Python gotchas"
+title = "Why do all my lambdas give the same answer?"
+recap = "A lambda (or any inner function) looks up a variable when it runs, not when it is made. After the loop, i is 2, so every lambda sees 2. Bind the current value with a default argument: lambda i=i: i * 10."
+dec = "When the lambda runs, what is i right now?"
+code = '''
+fns = []
+for i in range(3):
+    fns.append(lambda: i * 10)
+print([f() for f in fns])
+'''
+pseudo = [
+  "An empty list of functions.",
+  "For i = 0, 1, 2:",
+  "store a function that will work out i * 10 later.",
+  "Call every stored function and show the results.",
+]
+
+[lesson.lines.3]
+t = "Store a function, not a value"
+b = "The lambda's body does not run yet. It keeps a link to the name i, not to i's current value."
+look = "fns gains a function object."
+
+[lesson.lines.4]
+t = "Run them later"
+b = "By now the loop has finished and i is 2. Every lambda looks up i and finds 2."
+look = "The output box."
+
+[lesson.predict]
+line = 4
+q = "What does the last line show?"
+target = { out = true }
+opts = ["[20, 20, 20]", "[0, 10, 20]", "An error"]
+
+[lesson.predict.fb]
+"[0, 10, 20]" = "Not quite. The lambdas look up i when they are called. By then the loop is over and i is 2."
+
+[[lesson.variants]]
+label = "lambda: i * 10"
+
+[[lesson.variants]]
+label = "lambda i=i: i * 10"
+from = "lambda: i * 10"
+to = "lambda i=i: i * 10"
+opts = ["[0, 10, 20]", "[20, 20, 20]", "An error"]
+
+[lesson.check]
+code = '''
+x = 1
+f = lambda: x
+x = 5'''
+q = "What does f() give?"
+opts = ["5", "1"]
+right = 0
+fb = [
+  "Right. f looks x up when it is called, and x is 5 by then.",
+  "Not quite. A lambda does not copy x when it is made.",
+]
+
+[[lesson]]
+id = "got_remove_loop"
+topic = "Python gotchas"
+title = "Why does removing items in a for loop skip some?"
+recap = "Removing from a list while looping over it shifts the items left, so the loop jumps over the item that slid into the current position. Loop over a copy, or build a new list: [n for n in nums if n % 2]."
+dec = "After a removal, which item now sits at the next position the loop will read?"
+code = '''
+nums = [2, 4, 5, 6]
+for n in nums:
+    if n % 2 == 0:
+        nums.remove(n)
+print(nums)
+'''
+pseudo = [
+  "A list with three even numbers.",
+  "For each number in the list (the loop counts positions),",
+  "if it is even,",
+  "remove it from the same list.",
+  "Show what is left.",
+]
+
+[lesson.lines.4]
+t = "The list shifts"
+b = "Removing 2 slides every item one place left. 4 is now at position 0, but the loop moves on to position 1, so 4 is never checked."
+look = "The list gets shorter."
+
+[lesson.predict]
+line = 5
+q = "What is left in nums?"
+target = { out = true }
+opts = ["[4, 5]", "[5]", "[2, 4, 5, 6]"]
+
+[lesson.predict.fb]
+"[5]" = "Not quite. That is what you would want, but after 2 is removed, 4 slides into a spot the loop has already passed."
+
+[[lesson.variants]]
+label = "remove in the loop"
+
+[[lesson.variants]]
+label = "loop over a copy"
+from = "for n in nums:"
+to = "for n in nums[:]:"
+opts = ["[5]", "[4, 5]", "[2, 4, 5, 6]"]
+
+[lesson.check]
+code = '''
+nums = [1, 2, 3, 4]
+odd = [n for n in nums if n % 2]'''
+q = "Why is this safe?"
+opts = ["It builds a new list and never changes nums", "Comprehensions loop backwards"]
+right = 0
+fb = [
+  "Right. nums is only read, never changed, so nothing shifts.",
+  "Not quite. They loop forwards. They are safe because they build a new list.",
+]
+
+[[lesson]]
+id = "got_and_or"
+topic = "Python gotchas"
+title = "What do and and or really give back?"
+recap = "and and or do not always give True or False. They give back one of their operands. a or b gives a if a is truthy, otherwise b. a and b gives a if a is falsy, otherwise b. That is why name or 'guest' works as a default, and also why 0 or 10 gives 10 when 0 was a real value."
+dec = "Is the left side truthy? or keeps it, and moves on."
+code = '''
+name = ''
+shown = name or 'guest'
+count = 0
+total = count or 10
+print(shown, total)
+'''
+pseudo = [
+  "An empty name.",
+  "Use name, or 'guest' if name is empty.",
+  "A count that really is zero.",
+  "Use count, or 10 if count is falsy.",
+  "Show both.",
+]
+
+[lesson.lines.2]
+t = "or gives an operand"
+b = "An empty string is falsy, so or gives back the right side, 'guest'."
+look = "shown is 'guest'."
+
+[lesson.lines.4]
+t = "The trap"
+b = "0 is also falsy, so or throws the real value away and gives 10. If 0 is a valid count, write: total = 10 if count is None else count."
+look = "total is 10, not 0."
+
+[lesson.predict]
+line = 4
+q = "What is total?"
+target = { v = "total" }
+opts = ["10", "0", "True"]
+
+[lesson.predict.fb]
+0 = "Not quite. 0 is falsy, so or skips it and gives back 10."
+True = "Not quite. or gives back one of its operands, not a bool."
+
+[[lesson.variants]]
+label = "count = 0"
+
+[[lesson.variants]]
+label = "count = 3"
+from = "count = 0"
+to = "count = 3"
+opts = ["3", "10", "True"]
+
+[lesson.check]
+code = '''
+x = [] and 'full' '''
+q = "What is x?"
+opts = ["[]", "'full'", "False"]
+right = 0
+fb = [
+  "Right. [] is falsy, so and stops and gives back the left side.",
+  "Not quite. and stops at the first falsy operand.",
+  "Not quite. and gives back an operand, here [].",
+]

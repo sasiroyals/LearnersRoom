@@ -1,0 +1,114 @@
+topic = "28"
+
+[[problem]]
+id = "stairs"
+title = "Climbing stairs"
+level = "Medium"
+story = "You climb a staircase 1 or 2 steps at a time. Write stairs(n) that returns how many different ways there are to reach step n. It must handle n = 40 quickly."
+hint = "ways(n) = ways(n - 1) + ways(n - 2). Fill a list from the bottom up, or keep just the last two values."
+starter = '''
+def stairs(n):
+    if n < 2:
+        return 1
+    return stairs(n - 1)
+'''
+solution = '''
+def stairs(n):
+    a, b = 1, 1
+    for _ in range(n - 1):
+        a, b = b, a + b
+    return b if n > 0 else 1
+'''
+demo = '''
+print(stairs(5))
+'''
+
+[[problem.tests]]
+call = "stairs(1)"
+expect = "1"
+
+[[problem.tests]]
+call = "stairs(5)"
+expect = "8"
+
+[[problem.tests]]
+call = "stairs(40)"
+expect = "165580141"
+
+[[problem]]
+id = "grid_paths"
+title = "Paths across a grid"
+level = "Medium"
+story = "A robot starts at the top-left of a grid with rows × cols cells and can only move right or down. Write grid_paths(rows, cols) that returns how many different paths reach the bottom-right cell."
+hint = "Paths to a cell = paths to the cell above + paths to the cell on the left. The top row and left column have 1 path each."
+starter = '''
+def grid_paths(rows, cols):
+    return rows + cols
+'''
+solution = '''
+def grid_paths(rows, cols):
+    row = [1] * cols
+    for _ in range(rows - 1):
+        for c in range(1, cols):
+            row[c] += row[c - 1]
+    return row[-1]
+'''
+demo = '''
+print(grid_paths(3, 3))
+'''
+
+[[problem.tests]]
+call = "grid_paths(1, 5)"
+expect = "1"
+
+[[problem.tests]]
+call = "grid_paths(3, 3)"
+expect = "6"
+
+[[problem.tests]]
+call = "grid_paths(10, 10)"
+expect = "48620"
+
+[[problem]]
+id = "fewest_coins"
+title = "Fewest coins"
+level = "Hard"
+story = "Write fewest_coins(coins, amount) that returns the smallest number of coins that add up to amount, using any coin as often as you like. Return -1 if it cannot be done. Being greedy (always the biggest coin) is not always right."
+hint = "Make a list best where best[a] is the fewest coins for amount a. best[0] is 0. For each amount, try every coin c: best[a - c] + 1."
+starter = '''
+def fewest_coins(coins, amount):
+    count = 0
+    for c in sorted(coins, reverse=True):
+        count += amount // c
+        amount %= c
+    return count if amount == 0 else -1
+'''
+solution = '''
+def fewest_coins(coins, amount):
+    big = amount + 1
+    best = [0] + [big] * amount
+    for a in range(1, amount + 1):
+        for c in coins:
+            if c <= a and best[a - c] + 1 < best[a]:
+                best[a] = best[a - c] + 1
+    return best[amount] if best[amount] <= amount else -1
+'''
+demo = '''
+print(fewest_coins([1, 3, 4], 6))
+'''
+
+[[problem.tests]]
+call = "fewest_coins([1, 3, 4], 6)"
+expect = "2"
+
+[[problem.tests]]
+call = "fewest_coins([2], 3)"
+expect = "-1"
+
+[[problem.tests]]
+call = "fewest_coins([1, 5, 10], 27)"
+expect = "5"
+
+[[problem.tests]]
+call = "fewest_coins([5], 0)"
+expect = "0"

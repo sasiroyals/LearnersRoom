@@ -1,0 +1,294 @@
+# Python 25: Searching and Big-O
+# One [[lesson]] block per lesson, in the order students see them.
+# Line numbers in lines, predict.line and pline count from 1.
+
+topic = "25"
+
+[[lesson]]
+id = "big_linear"
+topic = "Searching and Big-O"
+title = "How many checks does a linear search make?"
+recap = "A linear search checks items one by one from the start. In the worst case it checks every item, so the work grows in step with the list: n items, up to n checks. That growth is written O(n)."
+dec = "At each item: is it the target? Yes: stop. No: move to the next item."
+code = '''
+nums = [7, 3, 9, 4, 8]
+target = 4
+checks = 0
+for n in nums:
+    checks += 1
+    if n == target:
+        break
+print(checks)
+'''
+pseudo = [
+  "A list of 5 numbers.",
+  "The number we want.",
+  "Count the checks.",
+  "Take each number in turn:",
+  "count one check,",
+  "and if it is the target,",
+  "stop looking.",
+  "Show how many checks it took.",
+]
+
+[lesson.lines.4]
+t = "Start at the front"
+b = "A linear search has no shortcut. It looks at the first item, then the next, and so on."
+look = "n takes each value in turn."
+
+[lesson.lines.5]
+t = "Count the work"
+b = "Each time round the loop is one comparison. Counting them is how we measure how much work a search does."
+look = "checks goes up by one."
+
+[lesson.lines.7]
+t = "Found it"
+b = "break leaves the loop at once. The items after 4 are never looked at."
+look = "The loop ends early."
+
+[lesson.predict]
+line = 8
+q = "How many checks did it take to find 4?"
+target = { out = true }
+opts = ["4", "5", "1"]
+
+[lesson.predict.fb]
+5 = "Not quite. 4 is the 4th item, and break stops the loop as soon as it is found."
+1 = "Not quite. A linear search cannot jump to the answer. It starts at the first item."
+
+[[lesson.variants]]
+label = "target = 4"
+
+[[lesson.variants]]
+label = "target = 6 (missing)"
+from = "target = 4"
+to = "target = 6"
+q = "6 is not in the list. How many checks?"
+opts = ["5", "0", "6"]
+
+[lesson.check]
+code = '''
+# a list of 1,000 names, the name you want is last
+names = [...]
+'''
+q = "How many checks does a linear search make?"
+opts = ["1,000", "10", "1"]
+right = 0
+fb = [
+  "Right. The worst case checks every item: n items, n checks. That is O(n).",
+  "Not quite. Halving only works on a sorted list with binary search. Linear search checks one by one.",
+  "Not quite. Linear search starts at the front, so the last item is found last.",
+]
+
+[[lesson]]
+id = "big_binary"
+topic = "Searching and Big-O"
+title = "How does binary search halve the work?"
+recap = "Binary search only works on a sorted list. It checks the middle item and throws away the half that cannot hold the target. Each check halves what is left, so 1,000 items need about 10 checks. That growth is written O(log n)."
+dec = "Is the middle item the target? Yes: done. Too small: keep the right half. Too big: keep the left half."
+code = '''
+nums = [2, 5, 8, 12, 16, 23, 38]
+target = 23
+lo, hi = 0, len(nums) - 1
+checks = 0
+while lo <= hi:
+    mid = (lo + hi) // 2
+    checks += 1
+    if nums[mid] == target:
+        break
+    elif nums[mid] < target:
+        lo = mid + 1
+    else:
+        hi = mid - 1
+print(checks)
+'''
+pseudo = [
+  "A sorted list of 7 numbers.",
+  "The number we want.",
+  "lo and hi mark the part still to search: all of it.",
+  "Count the checks.",
+  "While there is still a part to search:",
+  "find its middle position,",
+  "count one check,",
+  "and if the middle item is the target,",
+  "stop.",
+  "If the middle item is too small,",
+  "keep only the right half.",
+  "Otherwise it is too big,",
+  "so keep only the left half.",
+  "Show how many checks it took.",
+]
+
+[lesson.lines.3]
+t = "The search window"
+b = "lo and hi are positions. Everything between them could still hold the target. At the start that is the whole list, positions 0 to 6."
+look = "lo is 0 and hi is 6."
+
+[lesson.lines.6]
+t = "Check the middle"
+b = "// divides and drops the remainder, so mid is a whole position halfway between lo and hi."
+look = "mid is the middle position."
+
+[lesson.lines.11]
+t = "Throw away the left half"
+b = "The list is sorted, so if the middle item is too small, every item to its left is too small as well. None of them can be the target."
+look = "lo jumps past mid."
+
+[lesson.lines.13]
+t = "Throw away the right half"
+b = "The middle item is too big, so everything to its right is too big as well."
+look = "hi moves before mid."
+
+[lesson.predict]
+line = 14
+q = "How many checks did binary search need to find 23?"
+target = { out = true }
+opts = ["2", "6", "7"]
+
+[lesson.predict.fb]
+6 = "Not quite. That is how many a linear search would need. Binary search jumps to the middle first."
+7 = "Not quite. Binary search never needs to check every item in a list this size."
+
+[[lesson.variants]]
+label = "target = 23"
+
+[[lesson.variants]]
+label = "target = 2"
+from = "target = 23"
+to = "target = 2"
+q = "How many checks to find 2, the first item?"
+opts = ["3", "1", "7"]
+
+[lesson.check]
+code = '''
+# a sorted list of 1,000,000 numbers
+'''
+q = "About how many checks does binary search need in the worst case?"
+opts = ["About 20", "About 1,000", "About 500,000"]
+right = 0
+fb = [
+  "Right. Halving 1,000,000 about 20 times gets down to 1 item. That is O(log n).",
+  "Not quite. Each check halves what is left, which shrinks much faster than that.",
+  "Not quite. That is a linear search on average. Halving is far faster.",
+]
+
+[[lesson]]
+id = "big_nested"
+topic = "Searching and Big-O"
+title = "Why are two nested loops so slow?"
+recap = "A loop inside a loop runs the inner body once for every pair. With n items that is n × n steps, written O(n²). Double the list and the work goes up four times."
+dec = "For each a, go through every b. Count every pair."
+code = '''
+items = [1, 2, 3]
+steps = 0
+for a in items:
+    for b in items:
+        steps += 1
+print(steps)
+'''
+pseudo = [
+  "A list of 3 items.",
+  "Count the work.",
+  "For each item a,",
+  "go through every item b,",
+  "and count one step.",
+  "Show how many steps it took.",
+]
+
+[lesson.lines.3]
+t = "The outer loop"
+b = "The outer loop runs once for each of the 3 items."
+look = "a takes each value."
+
+[lesson.lines.4]
+t = "The inner loop starts again"
+b = "Every time the outer loop moves on, the inner loop runs through all the items again from the start."
+look = "b goes back to 1 each time a changes."
+
+[lesson.predict]
+line = 6
+q = "How many steps does a list of 3 items take?"
+target = { out = true }
+opts = ["9", "6", "3"]
+
+[lesson.predict.fb]
+6 = "Not quite. The loops multiply, not add: 3 values of a, each with 3 values of b."
+3 = "Not quite. The inner loop runs 3 times for each of the 3 outer items."
+
+[[lesson.variants]]
+label = "3 items"
+
+[[lesson.variants]]
+label = "4 items"
+from = "items = [1, 2, 3]"
+to = "items = [1, 2, 3, 4]"
+q = "With 4 items, how many steps?"
+opts = ["16", "8", "12"]
+
+[lesson.check]
+code = '''
+# the same nested loops on 1,000 items
+'''
+q = "How many steps?"
+opts = ["1,000,000", "2,000", "1,000"]
+right = 0
+fb = [
+  "Right. 1,000 × 1,000 is a million. That is why O(n²) code gets slow on big inputs.",
+  "Not quite. The loops multiply: 1,000 × 1,000.",
+  "Not quite. The inner loop runs fully for every outer item.",
+]
+
+[[lesson]]
+id = "big_set"
+topic = "Searching and Big-O"
+title = "Why is in faster on a set than on a list?"
+recap = "x in a_list checks items one by one: O(n). x in a_set jumps straight to where x would be stored, using its hash: about one step, O(1), however big the set is. When you check membership many times, turn the list into a set first."
+dec = "For each guest, is the name on the banned list? The set answers in one step."
+code = '''
+banned = ['ann', 'bo', 'cy', 'di']
+fast = set(banned)
+guests = ['eve', 'cy']
+for g in guests:
+    print(g, g in fast)
+'''
+pseudo = [
+  "A list of banned names.",
+  "The same names as a set.",
+  "Today's guests.",
+  "For each guest,",
+  "show the name and whether it is banned.",
+]
+
+[lesson.lines.2]
+t = "Build a set once"
+b = "A set stores each item at a place worked out from its hash. Building it takes one pass over the list."
+look = "fast refers to a set with the same 4 names."
+
+[lesson.lines.5]
+t = "One-step lookups"
+b = "g in fast does not scan. It works out where g would be and looks only there. A list would compare g with every name."
+look = "The output box."
+
+[lesson.predict]
+line = 5
+q = "What does the first guest print?"
+target = { out = true, first = true }
+opts = ["eve False", "eve True", "An error"]
+
+[lesson.predict.fb]
+"eve True" = "Not quite. eve is not in banned, so in gives False."
+
+[[lesson.variants]]
+label = "set"
+
+[lesson.check]
+code = '''
+# 10,000 guests, checked against 10,000 banned names
+'''
+q = "Which is far faster?"
+opts = ["g in set(banned)", "g in banned (the list)"]
+right = 0
+fb = [
+  "Right. About 10,000 one-step lookups, instead of up to 100,000,000 comparisons.",
+  "Not quite. Each list check scans up to 10,000 names, so 10,000 guests means up to 100 million comparisons.",
+]

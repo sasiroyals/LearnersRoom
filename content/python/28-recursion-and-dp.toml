@@ -1,0 +1,223 @@
+# Python 28: Recursion and dynamic programming
+# One [[lesson]] block per lesson, in the order students see them.
+# Line numbers in lines, predict.line and pline count from 1.
+
+topic = "28"
+
+[[lesson]]
+id = "dp_fib_calls"
+topic = "Recursion and dynamic programming"
+title = "Why is the plain recursive Fibonacci so slow?"
+recap = "fib(n) calls fib(n - 1) and fib(n - 2), and each of those calls two more. The same values are worked out again and again, so the number of calls roughly doubles with each step up in n: O(2ⁿ). fib(30) makes over a million calls."
+dec = "Is n below 2? Return it. Otherwise make two more calls and add their answers."
+code = '''
+calls = 0
+
+def fib(n):
+    global calls
+    calls += 1
+    if n < 2:
+        return n
+    return fib(n - 1) + fib(n - 2)
+
+print(fib(4), calls)
+'''
+pseudo = [
+  "Count every call.",
+  "(blank)",
+  "Define fib(n):",
+  "(use the global counter)",
+  "count this call,",
+  "if n is 0 or 1,",
+  "that is the answer.",
+  "Otherwise add the two Fibonacci numbers before it.",
+  "(blank)",
+  "Show fib(4) and how many calls it took.",
+]
+
+[lesson.lines.5]
+t = "Count the call"
+b = "Every time fib starts, the counter goes up. Watch how many frames stack up in the canvas."
+look = "calls grows."
+
+[lesson.lines.8]
+t = "Two calls each time"
+b = "Each call that is not a base case starts two more. fib(2) is worked out twice for fib(4), and fib(1) three times."
+look = "A new fib() frame appears."
+
+[lesson.predict]
+line = 10
+q = "What does print(fib(4), calls) show?"
+target = { out = true }
+opts = ["3 9", "3 4", "3 5"]
+
+[lesson.predict.fb]
+"3 4" = "Not quite. fib does not call each n once. It repeats the same work: fib(2) runs twice and fib(1) three times."
+"3 5" = "Not quite. Count every call, including the base cases fib(1) and fib(0)."
+
+[[lesson.variants]]
+label = "fib(4)"
+
+[[lesson.variants]]
+label = "fib(5)"
+from = "print(fib(4), calls)"
+to = "print(fib(5), calls)"
+q = "What does print(fib(5), calls) show?"
+opts = ["5 15", "5 10", "5 6"]
+
+[lesson.check]
+code = '''
+fib(4) made 9 calls
+fib(5) made 15 calls'''
+q = "Roughly how does the number of calls grow?"
+opts = ["It almost doubles each time n goes up by 1", "It goes up by 6 each time", "It stays about the same"]
+right = 0
+fb = [
+  "Right. That is exponential growth, O(2ⁿ). fib(40) would make hundreds of millions of calls.",
+  "Not quite. fib(6) makes 25 calls and fib(7) makes 41. The gap keeps growing.",
+  "Not quite. Each extra level adds a whole extra tree of calls.",
+]
+
+[[lesson]]
+id = "dp_memo"
+topic = "Recursion and dynamic programming"
+title = "How does memoization stop repeated work?"
+recap = "Memoization saves each answer the first time it is worked out, in a dict. Later calls with the same n return the saved answer at once. fib becomes O(n): each value is computed once. functools.lru_cache does the same thing for you."
+dec = "Is n already in memo? Return the saved answer. Otherwise work it out, save it, then return it."
+code = '''
+memo = {}
+calls = 0
+
+def fib(n):
+    global calls
+    calls += 1
+    if n in memo:
+        return memo[n]
+    if n < 2:
+        return n
+    memo[n] = fib(n - 1) + fib(n - 2)
+    return memo[n]
+
+print(fib(5), calls)
+'''
+pseudo = [
+  "A dict of answers already worked out.",
+  "Count every call.",
+  "(blank)",
+  "Define fib(n):",
+  "(use the global counter)",
+  "count this call,",
+  "if the answer is saved,",
+  "return it straight away.",
+  "If n is 0 or 1,",
+  "that is the answer.",
+  "Otherwise work it out once and save it,",
+  "then return it.",
+  "(blank)",
+  "Show fib(5) and how many calls it took.",
+]
+
+[lesson.lines.7]
+t = "Check the notebook"
+b = "A dict lookup is O(1). If the answer was saved earlier, no more calls are needed."
+look = "memo is checked."
+
+[lesson.lines.11]
+t = "Save the answer"
+b = "The answer goes in memo under the key n. The next time anyone asks for fib(n), it is already there."
+look = "memo gains a key."
+
+[lesson.predict]
+line = 14
+q = "What does print(fib(5), calls) show?"
+target = { out = true }
+opts = ["5 9", "5 15", "5 5"]
+
+[lesson.predict.fb]
+"5 15" = "Not quite. That is the plain version. Saved answers stop the repeated calls."
+"5 5" = "Not quite. Each n from 5 down to 0 is called, and a few calls return a saved answer straight away."
+
+[[lesson.variants]]
+label = "memo"
+
+[lesson.check]
+code = '''
+from functools import lru_cache
+
+@lru_cache
+def fib(n): ...'''
+q = "What does @lru_cache do here?"
+opts = ["Saves answers like memo does", "Makes fib run in a thread", "Limits fib to small numbers"]
+right = 0
+fb = [
+  "Right. It wraps fib with a dict of saved answers, keyed by the arguments.",
+  "Not quite. It has nothing to do with threads. It caches results.",
+  "Not quite. It caches results so repeated calls are instant.",
+]
+
+[[lesson]]
+id = "dp_table"
+topic = "Recursion and dynamic programming"
+title = "How does a table solve the problem from the bottom up?"
+recap = "Bottom-up dynamic programming fills a table from the smallest case upward, so every answer it needs is already there. No recursion, no call stack limit. Climbing stairs one or two at a time: ways[i] = ways[i - 1] + ways[i - 2]."
+dec = "To reach step i, you came from step i - 1 or step i - 2. Add the ways to reach those."
+code = '''
+n = 5
+ways = [0] * (n + 1)
+ways[0] = 1
+ways[1] = 1
+for i in range(2, n + 1):
+    ways[i] = ways[i - 1] + ways[i - 2]
+print(ways[n])
+'''
+pseudo = [
+  "A staircase of 5 steps. You climb 1 or 2 steps at a time.",
+  "A table with one cell for each step, 0 to 5.",
+  "One way to stand at the bottom.",
+  "One way to reach step 1.",
+  "For each step from 2 up,",
+  "add the ways to reach the two steps below it.",
+  "Show the ways to reach the top.",
+]
+
+[lesson.lines.2]
+t = "Make the table"
+b = "[0] * 6 makes a list of six zeros. Each cell will hold the number of ways to reach that step."
+look = "ways is a list of 6 zeros."
+
+[lesson.lines.6]
+t = "Use earlier answers"
+b = "The two cells to the left were filled on earlier passes, so the new cell is one addition. Each cell is filled once: O(n)."
+look = "One cell of ways fills in."
+
+[lesson.predict]
+line = 7
+q = "How many ways are there to climb 5 steps?"
+target = { out = true }
+opts = ["8", "5", "10"]
+
+[lesson.predict.fb]
+5 = "Not quite. Each step's ways is the sum of the two before it: 1, 1, 2, 3, 5, 8."
+10 = "Not quite. Follow the table: 1, 1, 2, 3, 5, 8."
+
+[[lesson.variants]]
+label = "n = 5"
+
+[[lesson.variants]]
+label = "n = 6"
+from = "n = 5"
+to = "n = 6"
+q = "How many ways are there to climb 6 steps?"
+opts = ["13", "12", "21"]
+
+[lesson.check]
+code = '''
+# the recursive fib and this table both give the same answers'''
+q = "What does the table version avoid?"
+opts = ["Deep recursion and repeated work", "Using any memory", "Loops"]
+right = 0
+fb = [
+  "Right. It works upward, so it never recomputes and never hits the recursion limit.",
+  "Not quite. It uses a list, which is memory. It trades memory for speed.",
+  "Not quite. It is a loop. That is the point: no recursion.",
+]

@@ -1,0 +1,133 @@
+topic = "27"
+
+[[problem]]
+id = "brackets_match"
+title = "Matching brackets"
+level = "Medium"
+story = "Write brackets_match(text) that returns True if every (, [ and { is closed by the right bracket, in the right order. Other characters are ignored."
+hint = "Push each opening bracket onto a stack. On a closing bracket, the top of the stack must be its partner."
+starter = '''
+def brackets_match(text):
+    return text.count('(') == text.count(')')
+'''
+solution = '''
+def brackets_match(text):
+    pairs = {')': '(', ']': '[', '}': '{'}
+    stack = []
+    for ch in text:
+        if ch in '([{':
+            stack.append(ch)
+        elif ch in pairs:
+            if not stack or stack.pop() != pairs[ch]:
+                return False
+    return not stack
+'''
+demo = '''
+print(brackets_match('{a[b(c)]}'))
+'''
+
+[[problem.tests]]
+call = "brackets_match('{a[b(c)]}')"
+expect = "True"
+
+[[problem.tests]]
+call = "brackets_match('([)]')"
+expect = "False"
+
+[[problem.tests]]
+call = "brackets_match('(()')"
+expect = "False"
+
+[[problem.tests]]
+call = "brackets_match('')"
+expect = "True"
+
+[[problem]]
+id = "reverse_linked"
+title = "Reverse a linked list"
+level = "Hard"
+story = "Write reverse(head) that reverses a linked list of Node objects in place and returns the new head. The Node class and a to_list helper are given."
+hint = "Walk the list with prev = None. For each node: remember its next, point it at prev, then move prev and the node one step on."
+starter = '''
+class Node:
+    def __init__(self, value, next=None):
+        self.value = value
+        self.next = next
+
+def to_list(head):
+    out = []
+    while head is not None:
+        out.append(head.value)
+        head = head.next
+    return out
+
+def reverse(head):
+    return head
+'''
+solution = '''
+class Node:
+    def __init__(self, value, next=None):
+        self.value = value
+        self.next = next
+
+def to_list(head):
+    out = []
+    while head is not None:
+        out.append(head.value)
+        head = head.next
+    return out
+
+def reverse(head):
+    prev = None
+    while head is not None:
+        nxt = head.next
+        head.next = prev
+        prev = head
+        head = nxt
+    return prev
+'''
+demo = '''
+print(to_list(reverse(Node(1, Node(2, Node(3))))))
+'''
+
+[[problem.tests]]
+call = "to_list(reverse(Node(1, Node(2, Node(3)))))"
+expect = "[3, 2, 1]"
+
+[[problem.tests]]
+call = "to_list(reverse(Node(7)))"
+expect = "[7]"
+
+[[problem.tests]]
+call = "to_list(reverse(None))"
+expect = "[]"
+
+[[problem]]
+id = "k_smallest"
+title = "The k smallest"
+level = "Easy"
+story = "Write k_smallest(nums, k) that returns the k smallest numbers, smallest first. Use the heapq module."
+hint = "heapq.nsmallest(k, nums) does exactly this."
+starter = '''
+import heapq
+
+def k_smallest(nums, k):
+    return nums[:k]
+'''
+solution = '''
+import heapq
+
+def k_smallest(nums, k):
+    return heapq.nsmallest(k, nums)
+'''
+demo = '''
+print(k_smallest([9, 4, 7, 1, 8], 2))
+'''
+
+[[problem.tests]]
+call = "k_smallest([9, 4, 7, 1, 8], 2)"
+expect = "[1, 4]"
+
+[[problem.tests]]
+call = "k_smallest([5, 3], 5)"
+expect = "[3, 5]"

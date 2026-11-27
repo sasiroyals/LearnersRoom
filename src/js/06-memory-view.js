@@ -67,13 +67,16 @@ function renderMemInto(cv, T, idx){
   for(let l=2; l<=maxLvl; l++){ const prevW = objs.filter(o=>o.lvl===l-1).reduce((m,o)=>Math.max(m, widthOf(o)), 100); colX[l] = stacked ? OX : colX[l-1] + prevW + 70; }
   let oy = 14, maxOy = 14;
   const nonCls = objs.filter(o=>o.kind!=='class');
-  const classX = stacked ? OX : Math.max(OX, ...nonCls.map(o=>colX[o.lvl] + widthOf(o) + 100));
+  let classX = stacked ? OX : Math.max(OX, ...nonCls.map(o=>colX[o.lvl] + widthOf(o) + 100));
+  /* A deep chain of objects (a linked list, a tree) is already wide: put the classes underneath instead of further right, so the picture stays readable. */
+  const clsBelow = !stacked && classX + 240 > 960;
+  if(clsBelow) classX = colX[2] || OX;
   objs.sort((a,b)=>(a.kind==='class') - (b.kind==='class') || a.id - b.id);
   const objR = {};
   const fmtCell = (x)=> x ? (x.p!==undefined ? short(x.p,6) : '') : '';
   objs.forEach(o=>{
     const isCls = o.kind==='class';
-    const OX = isCls ? classX : colX[o.lvl]; oy = stacked ? (colY.all || leftH + 24) : isCls ? (colY.cls || 14) : (colY[o.lvl] || 14);
+    const OX = isCls ? classX : colX[o.lvl]; oy = stacked ? (colY.all || leftH + 24) : isCls ? (colY.cls || (clsBelow ? maxOy + 16 : 14)) : (colY[o.lvl] || 14);
     const isNew = prev && !prev.heap[o.id];
     const pobj = prev && prev.heap[o.id];
     let g = '', H;
@@ -132,7 +135,8 @@ function renderMemInto(cv, T, idx){
       arrows += `<path class="pconn rel" d="${d}" marker-end="url(#pah)"/><text class="rel-t" x="${(L.x+a.x)/2}" y="${(L.y+a.y)/2-6}" text-anchor="middle">${L.lab}</text>`; return;
     }
     if(a.top){ d = `M${L.x},${L.y} C${L.x+70},${L.y} ${a.x},${a.y-70} ${a.x},${a.y}`; }
-    else if(L.inner){ const k = Math.max(30,(a.x-L.x)*.45); d = `M${L.x},${L.y} C${L.x+k},${L.y} ${a.x-k},${a.y} ${a.x},${a.y}`; }
+    /* From a list cell, arc up and over so arrows from neighbouring cells to the same object stay visible. */
+    else if(L.inner){ const lift = 34 + Math.min(60, Math.abs(a.x-L.x)*.12); d = `M${L.x},${L.y} C${L.x},${L.y-lift} ${a.x-50},${a.y-lift*.6} ${a.x},${a.y}`; }
     else { const k = Math.max(40,(a.x-L.x)*.5); d = `M${L.x},${L.y} C${L.x+k},${L.y} ${a.x-k},${a.y} ${a.x},${a.y}`; }
     arrows += `<path class="pconn${L.chg?' new':''}" d="${d}" marker-end="url(#pah)"/>`;
   });

@@ -1,0 +1,255 @@
+# Python 26: Sorting
+# One [[lesson]] block per lesson, in the order students see them.
+# Line numbers in lines, predict.line and pline count from 1.
+
+topic = "26"
+
+[[lesson]]
+id = "sort_bubble"
+topic = "Sorting"
+title = "How does one pass of bubble sort move the biggest item?"
+recap = "Bubble sort compares neighbours and swaps them when they are in the wrong order. One pass carries the biggest item to the end. n items need up to n - 1 passes, each of up to n comparisons, so bubble sort is O(n²)."
+dec = "Is the left neighbour bigger than the right one? Yes: swap them. No: leave them."
+code = '''
+nums = [5, 1, 4, 2]
+for i in range(len(nums) - 1):
+    if nums[i] > nums[i + 1]:
+        nums[i], nums[i + 1] = nums[i + 1], nums[i]
+print(nums)
+'''
+pseudo = [
+  "An unsorted list.",
+  "For each pair of neighbours, left to right:",
+  "if the left one is bigger,",
+  "swap the two.",
+  "Show the list after one pass.",
+]
+
+[lesson.lines.2]
+t = "Walk the pairs"
+b = "i goes 0, 1, 2: the pairs (0, 1), (1, 2) and (2, 3). A list of 4 items has 3 pairs of neighbours."
+look = "i takes each position."
+
+[lesson.lines.4]
+t = "Swap in one line"
+b = "The right side is worked out first, as a tuple of the two values. Then they are unpacked back in the opposite order."
+look = "Two cells of the list change places."
+
+[lesson.predict]
+line = 5
+q = "What is the list after one pass?"
+target = { out = true }
+opts = ["[1, 4, 2, 5]", "[1, 2, 4, 5]", "[5, 1, 4, 2]"]
+
+[lesson.predict.fb]
+"[1, 2, 4, 5]" = "Not quite. One pass only carries the biggest item, 5, to the end. 4 and 2 are never compared with each other in this pass, so they stay out of order."
+"[5, 1, 4, 2]" = "Not quite. 5 is bigger than 1, so the very first comparison swaps them."
+
+[[lesson.variants]]
+label = "[5, 1, 4, 2]"
+
+[[lesson.variants]]
+label = "[3, 9, 2, 7]"
+from = "nums = [5, 1, 4, 2]"
+to = "nums = [3, 9, 2, 7]"
+opts = ["[3, 2, 7, 9]", "[2, 3, 7, 9]", "[3, 9, 2, 7]"]
+
+[lesson.check]
+code = '''
+nums = [4, 3, 2, 1]
+# after one pass of bubble sort'''
+q = "Which item is now certainly in its final place?"
+opts = ["4, at the end", "1, at the start", "None of them"]
+right = 0
+fb = [
+  "Right. Each pass carries the biggest remaining item to the end.",
+  "Not quite. 1 only moves one step left per pass.",
+  "Not quite. One pass always settles the biggest item at the end.",
+]
+
+[[lesson]]
+id = "sort_insertion"
+topic = "Sorting"
+title = "How does insertion sort slide an item into place?"
+recap = "Insertion sort keeps the left part of the list sorted. It takes the next item and slides it left past every bigger item. On a list that is already nearly sorted it is very fast, but in the worst case it is O(n²)."
+dec = "Is the item to the left bigger than the one we hold? Yes: move it right one place. No: drop our item here."
+code = '''
+nums = [2, 5, 7, 3]
+key = nums[3]
+j = 2
+while j >= 0 and nums[j] > key:
+    nums[j + 1] = nums[j]
+    j -= 1
+nums[j + 1] = key
+print(nums)
+'''
+pseudo = [
+  "The first 3 items are sorted. 3 is not in place yet.",
+  "Pick up the item to place.",
+  "Start comparing with the item to its left.",
+  "While that item is bigger than the one we hold,",
+  "move it one place right,",
+  "and look one further left.",
+  "Drop the held item into the gap.",
+  "Show the list.",
+]
+
+[lesson.lines.2]
+t = "Pick up the item"
+b = "key holds the value 3. Its old cell can now be written over, because we have a copy."
+look = "key is 3."
+
+[lesson.lines.5]
+t = "Shift right"
+b = "A bigger item moves one place right, leaving a gap where it was."
+look = "One value is copied one cell to the right."
+
+[lesson.lines.7]
+t = "Drop it in the gap"
+b = "The loop stopped at an item smaller than key (or ran off the front), so key belongs just after it."
+look = "3 lands in its place."
+
+[lesson.predict]
+line = 7
+q = "What is j when the while loop stops?"
+target = { v = "j" }
+opts = ["0", "1", "2"]
+
+[lesson.predict.fb]
+1 = "Not quite. j moves left past 7 and 5, then stops at 2, which is at position 0. 3 then lands at j + 1."
+2 = "Not quite. 7 and 5 are both bigger than 3, so j moves left twice."
+
+[[lesson.variants]]
+label = "insert 3"
+
+[lesson.check]
+code = '''
+nums = [1, 2, 3, 4, 0]
+# insert the last item, 0'''
+q = "How many items have to shift right?"
+opts = ["4", "1", "0"]
+right = 0
+fb = [
+  "Right. Every item is bigger than 0, so all 4 shift. That is the worst case.",
+  "Not quite. The loop keeps going while the item to the left is bigger, and all of them are.",
+  "Not quite. 0 is smaller than everything, so everything must make room.",
+]
+
+[[lesson]]
+id = "sort_merge"
+topic = "Sorting"
+title = "How do you merge two sorted lists?"
+recap = "Merging two sorted lists compares their fronts and takes the smaller one each time. It touches every item once, so it is O(n). Merge sort splits a list in half again and again, then merges the halves: O(n log n), much faster than O(n²) sorts on big lists."
+dec = "Which front item is smaller? Take that one and move that list's pointer on."
+code = '''
+a = [1, 4, 9]
+b = [2, 3, 10]
+out = []
+i = j = 0
+while i < len(a) and j < len(b):
+    if a[i] <= b[j]:
+        out.append(a[i])
+        i += 1
+    else:
+        out.append(b[j])
+        j += 1
+out += a[i:] + b[j:]
+print(out)
+'''
+pseudo = [
+  "A sorted list.",
+  "Another sorted list.",
+  "The merged result starts empty.",
+  "i points at the front of a, j at the front of b.",
+  "While both lists still have items:",
+  "if a's front item is smaller (or equal),",
+  "take it,",
+  "and move along a.",
+  "Otherwise,",
+  "take b's front item,",
+  "and move along b.",
+  "Add whatever is left in either list.",
+  "Show the merged list.",
+]
+
+[lesson.lines.6]
+t = "Compare the fronts"
+b = "Both lists are sorted, so the smallest item left must be at one of the two fronts."
+look = "a[i] and b[j] are compared."
+
+[lesson.lines.12]
+t = "Add the leftovers"
+b = "One list ran out. Everything left in the other is bigger than all of out, and already sorted, so it goes on the end."
+look = "out gets its last items."
+
+[lesson.predict]
+line = 12
+q = "What is out after line 12 adds the leftovers?"
+target = { v = "out" }
+opts = ["[1, 2, 3, 4, 9, 10]", "[1, 2, 3, 4, 9]", "[1, 4, 9, 2, 3, 10]"]
+
+[lesson.predict.fb]
+"[1, 2, 3, 4, 9]" = "Not quite. That is out when the loop stops. Line 12 then adds 10, which was left over in b."
+"[1, 4, 9, 2, 3, 10]" = "Not quite. That is a + b. Merging takes the smaller front item each time."
+
+[[lesson.variants]]
+label = "merge two lists"
+
+[lesson.check]
+code = '''
+a = [5, 6]
+b = [1, 2, 3]'''
+q = "Which list runs out first while merging?"
+opts = ["b", "a"]
+right = 0
+fb = [
+  "Right. 1, 2 and 3 are all smaller than 5, so b is used up first.",
+  "Not quite. b's items are all smaller, so they are taken first.",
+]
+
+[[lesson]]
+id = "sort_key"
+topic = "Sorting"
+title = "What does key= do in sorted?"
+recap = "sorted(items, key=f) sorts by f(item) instead of by the item itself. Python's sort is stable: items with equal keys keep their original order. In real code, use sorted or .sort(). They run in O(n log n)."
+dec = "Sort by the value key gives back, not by the item."
+code = '''
+words = ['pear', 'fig', 'banana', 'kiwi']
+by_len = sorted(words, key=len)
+print(by_len)
+'''
+pseudo = [
+  "Four words.",
+  "Sort them by their length, shortest first.",
+  "Show the result.",
+]
+
+[lesson.lines.2]
+t = "Sort by a key"
+b = "Python works out len(word) for each word: 4, 3, 6, 4. It sorts by those numbers. pear and kiwi tie at 4, so they keep their original order: pear first."
+look = "by_len is a new list. words is unchanged."
+
+[lesson.predict]
+line = 3
+q = "What does print(by_len) show?"
+target = { out = true }
+opts = ["['fig', 'pear', 'kiwi', 'banana']", "['fig', 'kiwi', 'pear', 'banana']", "['banana', 'fig', 'kiwi', 'pear']"]
+
+[lesson.predict.fb]
+"['fig', 'kiwi', 'pear', 'banana']" = "Not quite. pear and kiwi have the same length, and a stable sort keeps them in their original order."
+"['banana', 'fig', 'kiwi', 'pear']" = "Not quite. That is alphabetical order. key=len sorts by length."
+
+[[lesson.variants]]
+label = "key=len"
+
+[lesson.check]
+code = '''
+people = [('Ann', 30), ('Bo', 25)]
+sorted(people, key=lambda p: p[1])'''
+q = "Who comes first?"
+opts = ["Bo", "Ann"]
+right = 0
+fb = [
+  "Right. The key is p[1], the age, and 25 comes before 30.",
+  "Not quite. The key is the age, not the name.",
+]
