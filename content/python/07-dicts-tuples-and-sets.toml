@@ -1,0 +1,313 @@
+# Python 07: Dicts, tuples and sets
+# One [[lesson]] block per lesson, in the order students see them.
+# Line numbers in lines, predict.line and pline count from 1.
+
+topic = "07"
+
+[[lesson]]
+id = "dict_lookup"
+topic = "Dicts, tuples and sets"
+title = "How does a dict find a value by key?"
+recap = "A dict maps keys to values. d[key] = value adds a pair, or replaces the value if the key already exists. Each key appears at most once."
+code = '''
+ages = {'Ana': 9, 'Ben': 11}
+ages['Cy'] = 7
+b = ages['Ben']
+print(b, len(ages))
+'''
+pseudo = [
+  "A dict from names to ages.",
+  "Add a new key Cy.",
+  "Look up Ben.",
+  "Show it and the size.",
+]
+
+[lesson.lines.1]
+t = "Keys and values"
+b = "A dict stores pairs. You look things up by key, not by position."
+look = "The dict object with two rows."
+
+[lesson.lines.2]
+t = "Add a pair"
+b = "Assigning to a new key adds a row. Assigning to an existing key would replace its value."
+look = "A new row Cy appears."
+
+[lesson.lines.3]
+t = "Look up"
+b = "ages['Ben'] goes straight to the key Ben and gives its value."
+look = "b holds 11."
+
+[lesson.predict]
+line = 3
+q = "What will b = ages['Ben'] hold?"
+target = { v = "b" }
+opts = ["11", "1", "'Ben'"]
+
+[lesson.predict.fb]  # feedback for specific wrong answers
+1 = "Not quite. Dicts are looked up by key, not by position."
+
+[[lesson.variants]]
+label = "ages['Ben']"
+
+[[lesson.variants]]
+label = "ages['Ben'] = 7"
+from = "ages['Cy'] = 7"
+to = "ages['Ben'] = 7"
+q = "After ages['Ben'] = 7, what will b hold?"
+opts = ["7", "11", "An error"]
+
+[lesson.check]  # the final unfamiliar-input question
+code = '''
+d = {'a': 1}
+d['a'] = 5
+n = len(d)'''
+q = "What is n?"
+opts = ["1", "2"]
+right = 0
+fb = [
+  "Right. a was replaced, not added again.",
+  "Not quite. Keys are unique; the value of a was replaced.",
+]
+
+[[lesson]]
+id = "dict_get"
+topic = "Dicts, tuples and sets"
+title = "What happens with a missing key?"
+recap = "Use d[key] when the key must be there (a missing key is a bug you want to see). Use d.get(key, default) when a missing key is normal."
+code = '''
+stock = {'apple': 3}
+n = stock.get('pear', 0)
+m = stock['pear']
+print(n, m)
+'''
+pseudo = [
+  "A dict with one key.",
+  "Get pear, or 0 if it is missing.",
+  "Look up pear directly.",
+  "Show both.",
+]
+
+[lesson.lines.2]
+t = "get with a default"
+b = "get returns the value if the key exists, and the default you give otherwise. It never raises an error."
+look = "n holds 0."
+
+[lesson.lines.3]
+t = "Square brackets"
+b = "d[key] insists that the key exists. A missing key raises KeyError."
+look = "Watch for an error."
+
+[lesson.predict]
+line = 3
+q = "What happens on m = stock['pear']?"
+target = { v = "m" }
+opts = ["An error", "0", "None"]
+
+[lesson.predict.fb]  # feedback for specific wrong answers
+0 = "Not quite. Only get uses a default. Square brackets raise KeyError."
+None = "Not quite. A missing key with [] is an error, not None."
+
+[[lesson.variants]]
+label = "'pear'"
+
+[[lesson.variants]]
+label = "'apple'"
+from = "stock['pear']"
+to = "stock['apple']"
+q = "What will m = stock['apple'] hold?"
+opts = ["3", "An error", "0"]
+
+[lesson.check]  # the final unfamiliar-input question
+code = '''
+d = {}
+x = d.get('k')'''
+q = "What is x?"
+opts = ["None", "An error", "0"]
+right = 0
+fb = [
+  "Right. Without a default, get returns None.",
+  "Not quite. get never raises KeyError.",
+  "Not quite. 0 only if you pass it as the default.",
+]
+
+[[lesson]]
+id = "dict_count"
+topic = "Dicts, tuples and sets"
+title = "How do I count things with a dict?"
+recap = "counts[v] = counts.get(v, 0) + 1 is the standard counting pattern. With counts[v] instead of get, the very first vote fails with KeyError because there is no old count yet."
+dec = "For each vote: seen before? Add 1 to its count. Not seen? Start it at 0 + 1."
+code = '''
+votes = ['red', 'blue', 'red', 'red']
+counts = {}
+for v in votes:
+    counts[v] = counts.get(v, 0) + 1
+print(counts)
+'''
+pseudo = [
+  "Four votes.",
+  "An empty tally.",
+  "For each vote v:",
+  "its count is the old count (or 0) plus one.",
+  "Show the tally.",
+]
+
+[lesson.lines.2]
+t = "An empty tally"
+b = "The dict will map each colour to how many times it was seen."
+look = "counts is empty."
+
+[lesson.lines.4]
+t = "Update the tally"
+b = "get(v, 0) gives the old count, or 0 the first time a colour is seen. Then 1 is added and stored back."
+look = "One row changes or appears."
+
+[lesson.predict]
+line = 5
+q = "What will print(counts) show?"
+target = { out = true }
+opts = ["{'red': 3, 'blue': 1}", "{'red': 1, 'blue': 1}", "{'red': 4}"]
+
+[lesson.predict.fb]  # feedback for specific wrong answers
+"{'red': 1, 'blue': 1}" = "Not quite. The old count is read each time, so red keeps growing."
+
+[[lesson.variants]]
+label = "get(v, 0)"
+
+[[lesson.variants]]
+label = "counts[v]"
+from = "counts.get(v, 0)"
+to = "counts[v]"
+pline = 4
+q = "What happens the first time counts[v] + 1 runs?"
+opts = ["counts becomes {'red': 1}", "An error"]
+
+[lesson.check]  # the final unfamiliar-input question
+code = '''
+c = {}
+for ch in 'aba':
+    c[ch] = c.get(ch, 0) + 1'''
+q = "What is c['a']?"
+opts = ["2", "1", "3"]
+right = 0
+fb = [
+  "Right. a appears twice.",
+  "Not quite. The count is updated, not replaced.",
+  "Not quite. There are only two a characters.",
+]
+
+[[lesson]]
+id = "tup_unpack"
+topic = "Dicts, tuples and sets"
+title = "How does tuple unpacking work?"
+recap = "Unpacking gives each part of a tuple its own name, and the counts must match: three values into two names raises ValueError. x, y = y, x swaps safely because the right side is finished first."
+code = '''
+point = (3, 8)
+x, y = point
+x, y = y, x
+print(x, y)
+'''
+pseudo = [
+  "A pair of numbers.",
+  "Give each part its own name.",
+  "Swap the two names.",
+  "Show them.",
+]
+
+[lesson.lines.1]
+t = "A tuple"
+b = "A tuple is an ordered group of values that cannot be changed after it is made."
+look = "point refers to a tuple."
+
+[lesson.lines.2]
+t = "Unpack"
+b = "The names on the left get the parts on the right, in order. The counts must match."
+look = "x is 3 and y is 8."
+
+[lesson.lines.3]
+t = "Swap"
+b = "The right side y, x is built first, as a new tuple (8, 3). Then it is unpacked into x and y. No temporary name is needed."
+look = "x and y trade values."
+
+[lesson.predict]
+line = 3
+q = "What will x hold after x, y = y, x?"
+target = { v = "x" }
+opts = ["8", "3", "An error"]
+
+[lesson.predict.fb]  # feedback for specific wrong answers
+3 = "Not quite. The right side (8, 3) is built before anything is assigned."
+
+[[lesson.variants]]
+label = "(3, 8)"
+
+[[lesson.variants]]
+label = "(3, 8, 1)"
+from = "(3, 8)"
+to = "(3, 8, 1)"
+pline = 2
+q = "With point = (3, 8, 1), what happens on x, y = point?"
+opts = ["x is 3, y is 8", "An error"]
+
+[lesson.check]  # the final unfamiliar-input question
+code = "a, b = 'hi'"
+q = "What is b?"
+opts = ["'i'", "'h'", "An error"]
+right = 0
+fb = [
+  "Right. Any sequence can be unpacked, even a string.",
+  "Not quite. b gets the second item.",
+  "Not quite. The string has exactly two characters, so it works.",
+]
+
+[[lesson]]
+id = "set_dedupe"
+topic = "Dicts, tuples and sets"
+title = "How does a set drop duplicates?"
+recap = "set(tags) kept py, web and ai once each, so its length is 3. Use a set when you need unique values or fast \"is it in here?\" checks. If you need order or positions, use a list."
+code = '''
+tags = ['py', 'web', 'py', 'ai', 'web']
+unique = set(tags)
+n = len(unique)
+print(n, 'ai' in unique)
+'''
+pseudo = [
+  "Five tags with repeats.",
+  "Build a set: each value kept once.",
+  "Count them.",
+  "Show the count and whether ai is in it.",
+]
+
+[lesson.lines.2]
+t = "Build a set"
+b = "A set keeps each value at most once. Adding a value that is already there does nothing. A set has no order and no index."
+look = "The set has fewer items than the list."
+
+[lesson.lines.4]
+t = "Fast membership"
+b = "in on a set does not walk the items; it jumps straight to where the value would be."
+look = "The output box."
+
+[lesson.predict]
+line = 3
+q = "What will n hold?"
+target = { v = "n" }
+opts = ["3", "5", "2"]
+
+[lesson.predict.fb]  # feedback for specific wrong answers
+5 = "Not quite. The set keeps py and web only once each."
+
+[[lesson.variants]]
+label = "5 tags"
+
+[lesson.check]  # the final unfamiliar-input question
+code = '''
+s = {1, 2}
+s.add(2)
+k = len(s)'''
+q = "What is k?"
+opts = ["2", "3"]
+right = 0
+fb = [
+  "Right. 2 was already in the set.",
+  "Not quite. Adding an existing value does nothing.",
+]

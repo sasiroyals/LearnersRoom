@@ -1,0 +1,412 @@
+# Python 09: Functions in depth
+# One [[lesson]] block per lesson, in the order students see them.
+# Line numbers in lines, predict.line and pline count from 1.
+
+topic = "09"
+
+[[lesson]]
+id = "fd_legb"
+topic = "Functions in depth"
+title = "Where does Python look up a name?"
+recap = "Python looks a name up in four places, in order: Local, Enclosing function, Global, Built-in (LEGB). The first match wins. Remove outer’s x and the search continues out to the global x."
+dec = "Looking up x: is it local to inner? No. Is it in outer? Yes: use it. (If not, try global, then built-in.)"
+code = '''
+x = 'global'
+
+def outer():
+    x = 'enclosing'
+    def inner():
+        return x
+    return inner()
+
+r = outer()
+print(r, x)
+'''
+pseudo = [
+  "A global x.",
+  "(blank)",
+  "Define outer:",
+  "it has its own x.",
+  "Define inner inside it:",
+  "inner returns x (it has no x of its own).",
+  "outer returns what inner gives.",
+  "(blank)",
+  "Call outer.",
+  "Show r and the global x.",
+]
+
+[lesson.lines.4]
+t = "An enclosing name"
+b = "This x is local to outer. It does not touch the global x."
+look = "The outer() frame has its own x."
+
+[lesson.lines.6]
+t = "Look up x"
+b = "inner has no x. Python searches outward: Local, then Enclosing (outer), then Global, then Built-in. That order is called LEGB. It finds outer’s x first."
+look = "The inner() frame has no names at all."
+
+[lesson.lines.10]
+t = "The global is untouched"
+b = "The global x was never changed."
+look = "The output box."
+
+[lesson.predict]
+line = 9
+q = "What will r hold?"
+target = { v = "r" }
+opts = ["'enclosing'", "'global'", "An error"]
+
+[lesson.predict.fb]  # feedback for specific wrong answers
+"'global'" = "Not quite. The enclosing function’s x is found before the global one."
+
+[[lesson.variants]]
+label = "outer has x"
+
+[[lesson.variants]]
+label = "outer has no x"
+from = '''
+    x = 'enclosing'
+'''
+to = '''
+    pass
+'''
+opts = ["'global'", "'enclosing'", "An error"]
+
+[lesson.check]  # the final unfamiliar-input question
+code = '''
+len = 3
+n = len('abc')'''
+q = "What happens?"
+opts = ["An error", "n is 3"]
+right = 0
+fb = [
+  "Right. The global len (an int) hides the built-in len, so calling it fails.",
+  "Not quite. The global name len is found before the built-in, and 3 cannot be called.",
+]
+
+[[lesson]]
+id = "fd_default"
+topic = "Functions in depth"
+title = "Why does my default list remember old calls?"
+recap = "A mutable default (a list or dict) is shared by every call. The fix is bag=None, then make a new list inside the function when bag is None."
+code = '''
+def add(item, bag=[]):
+    bag.append(item)
+    return bag
+
+a = add('pen')
+b = add('cup')
+print(b)
+'''
+pseudo = [
+  "Define add, with a default bag made ONCE, when def runs.",
+  "Put the item in the bag.",
+  "Return the bag.",
+  "(blank)",
+  "Call without a bag.",
+  "Call again without a bag.",
+  "Show b.",
+]
+
+[lesson.lines.1]
+t = "The default is made once"
+b = "Default values are created when def runs, not on each call. Every call that leaves bag out shares that one list."
+look = "The function object is created."
+
+[lesson.lines.2]
+t = "Change the shared list"
+b = "append changes the default list itself."
+look = "The list grows."
+
+[lesson.lines.6]
+t = "Second call"
+b = "bag again refers to the same default list, which already holds pen."
+look = "bag points at the same list as a."
+
+[lesson.predict]
+line = 7
+q = "What will print(b) show?"
+target = { out = true }
+opts = ["['pen', 'cup']", "['cup']", "['pen']"]
+
+[lesson.predict.fb]  # feedback for specific wrong answers
+"['cup']" = "Not quite. Both calls used the same default list, created once."
+
+[[lesson.variants]]
+label = "bag=[]"
+
+[[lesson.variants]]
+label = "bag=None"
+from = '''
+def add(item, bag=[]):
+    bag.append(item)
+'''
+to = '''
+def add(item, bag=None):
+    bag = bag or []; bag.append(item)
+'''
+opts = ["['cup']", "['pen', 'cup']", "None"]
+
+[lesson.check]  # the final unfamiliar-input question
+code = '''
+def f(d={}):
+    d['n'] = d.get('n', 0) + 1
+    return d['n']
+f()
+x = f()'''
+q = "What is x?"
+opts = ["2", "1"]
+right = 0
+fb = [
+  "Right. The same dict is reused.",
+  "Not quite. The default dict is shared, so n keeps counting.",
+]
+
+[[lesson]]
+id = "fd_args"
+topic = "Functions in depth"
+title = "What do *args and **kwargs collect?"
+recap = "*args packs extra positional arguments into a tuple; **kwargs packs extra keyword arguments into a dict. The same stars unpack when calling: f(*xs, **opts)."
+code = '''
+def report(title, *args, **kwargs):
+    return title, args, kwargs
+
+r = report('Q1', 5, 9, unit='kg', round=True)
+print(r[1], r[2])
+'''
+pseudo = [
+  "Define report: one named parameter, then a catch-all for extra positions and one for extra keywords.",
+  "Return all three.",
+  "(blank)",
+  "Call it with 2 extra values and 2 keywords.",
+  "Show what was collected.",
+]
+
+[lesson.lines.4]
+t = "Collect the extras"
+b = "title takes 'Q1'. *args gathers every extra positional value into a tuple. **kwargs gathers every extra keyword into a dict."
+look = "The report() frame shows args and kwargs."
+
+[lesson.predict]
+line = 5
+q = "What will print(r[1], r[2]) show?"
+target = { out = true }
+opts = [
+  "(5, 9) {'unit': 'kg', 'round': True}",
+  "[5, 9] {'unit': 'kg', 'round': True}",
+  "5 9",
+]
+
+[lesson.predict.fb]  # feedback for specific wrong answers
+"[5, 9] {'unit': 'kg', 'round': True}" = "Not quite. *args is always a tuple, not a list."
+
+[[lesson.variants]]
+label = "2 extras"
+
+[lesson.check]  # the final unfamiliar-input question
+code = '''
+def f(*a):
+    return len(a)
+n = f()'''
+q = "What is n?"
+opts = ["0", "An error", "None"]
+right = 0
+fb = [
+  "Right. args is just an empty tuple.",
+  "Not quite. *args accepts zero values too.",
+  "Not quite. len of an empty tuple is 0.",
+]
+
+[[lesson]]
+id = "fd_kwonly"
+topic = "Functions in depth"
+title = "What does a bare * in the parameters do?"
+recap = "Parameters after a bare * are keyword-only. area(2, 3, unit='cm') works; area(2, 3, 'cm') raises TypeError. Use it for options that would be confusing as a bare value."
+code = '''
+def area(w, h, *, unit='m'):
+    return str(w * h) + unit
+
+a = area(2, 3, unit='cm')
+b = area(2, 3, 'cm')
+'''
+pseudo = [
+  "Define area: w and h by position; unit only by name.",
+  "Return the area with its unit.",
+  "(blank)",
+  "Call with unit by name.",
+  "Try to pass unit by position.",
+]
+
+[lesson.lines.1]
+t = "Keyword-only"
+b = "Every parameter after a bare * must be passed by name. This stops callers mixing up arguments."
+look = "The function is defined."
+
+[lesson.lines.5]
+t = "Passed by position"
+b = "Only w and h can be filled by position. A third positional value has nowhere to go."
+look = "Watch for an error."
+
+[lesson.predict]
+line = 5
+q = "What happens on b = area(2, 3, 'cm')?"
+target = { v = "b" }
+opts = ["An error", "'6cm'", "'6m'"]
+
+[lesson.predict.fb]  # feedback for specific wrong answers
+"'6cm'" = "Not quite. unit comes after *, so it can only be passed as unit=..."
+
+[[lesson.variants]]
+label = "with *"
+
+[[lesson.variants]]
+label = "without *"
+from = "w, h, *, unit"
+to = "w, h, unit"
+opts = ["'6cm'", "An error", "'6m'"]
+
+[lesson.check]  # the final unfamiliar-input question
+code = '''
+def f(a, *, b):
+    return a + b
+x = f(1, b=2)'''
+q = "What is x?"
+opts = ["3", "An error"]
+right = 0
+fb = [
+  "Right. b is passed by name.",
+  "Not quite. Passing b by name is exactly what is required.",
+]
+
+[[lesson]]
+id = "fd_lambda"
+topic = "Functions in depth"
+title = "What is a lambda?"
+recap = "A lambda is a one-expression function written inline. It is handy for small keys and callbacks. For anything longer, a def with a name is clearer."
+code = '''
+words = ['kiwi', 'fig', 'banana']
+by_len = sorted(words, key=lambda w: len(w))
+print(by_len)
+'''
+pseudo = [
+  "Three words.",
+  "Sort them, using each word’s length as its sort key.",
+  "Show the sorted list.",
+]
+
+[lesson.lines.2]
+t = "A small function"
+b = "lambda w: len(w) is a function with no name. sorted calls it on each word and sorts by what it returns."
+look = "by_len is a new list."
+
+[lesson.predict]
+line = 2
+q = "What will by_len hold?"
+target = { v = "by_len" }
+opts = [
+  "['fig', 'kiwi', 'banana']",
+  "['banana', 'fig', 'kiwi']",
+  "['kiwi', 'fig', 'banana']",
+]
+
+[lesson.predict.fb]  # feedback for specific wrong answers
+"['banana', 'fig', 'kiwi']" = "Not quite. That is alphabetical order. The key sorts by length."
+
+[[lesson.variants]]
+label = "key=len"
+
+[[lesson.variants]]
+label = "last letter"
+from = "len(w)"
+to = "w[-1]"
+opts = [
+  "['banana', 'fig', 'kiwi']",
+  "['kiwi', 'fig', 'banana']",
+  "['fig', 'kiwi', 'banana']",
+]
+
+[lesson.check]  # the final unfamiliar-input question
+code = '''
+f = lambda a, b: a * b
+x = f(3, 4)'''
+q = "What is x?"
+opts = ["12", "7"]
+right = 0
+fb = [
+  "Right. The expression after the colon is returned.",
+  "Not quite. The body multiplies.",
+]
+
+[[lesson]]
+id = "fd_recursion"
+topic = "Functions in depth"
+title = "How does recursion use the call stack?"
+recap = "fact(3) waited on fact(2), which waited on fact(1). The base case returned 1, and the answers multiplied on the way back: 1, 2, 6. Without a reachable base case (try fact(0)), the calls never stop: standard Python raises RecursionError after about 1000 frames, and this site stops it after 600 steps."
+dec = "Is n == 1? Yes: return 1. No: call fact(n - 1) and wait, then multiply."
+code = '''
+def fact(n):
+    if n == 1:
+        return 1
+    return n * fact(n - 1)
+
+x = fact(3)
+print(x)
+'''
+pseudo = [
+  "Define fact(n):",
+  "if n is 1,",
+  "the answer is 1 (the base case).",
+  "otherwise n times fact of n - 1.",
+  "(blank)",
+  "Call fact(3).",
+  "Show it.",
+]
+
+[lesson.lines.2]
+t = "Base case?"
+b = "Every recursive function needs a case that stops without calling itself."
+look = "The frame stack on the left."
+
+[lesson.lines.3]
+t = "Bottom reached"
+b = "fact(1) returns 1 directly. Now the waiting frames finish, one by one, in reverse order."
+look = "Frames start to disappear."
+
+[lesson.lines.4]
+t = "Call itself"
+b = "fact(3) cannot finish yet: it needs fact(2) first. A new frame is pushed for every call, each with its own n."
+look = "Frames stack up."
+
+[lesson.predict]
+line = 6
+q = "What will x hold?"
+target = { v = "x" }
+opts = ["6", "3", "1"]
+
+[lesson.predict.fb]  # feedback for specific wrong answers
+1 = "Not quite. 1 is only what the deepest call returns. Each waiting call multiplies it on the way back."
+
+[[lesson.variants]]
+label = "fact(3)"
+
+[[lesson.variants]]
+label = "fact(0)"
+from = "fact(3)"
+to = "fact(0)"
+opts = ["An error", "0", "1"]
+
+[lesson.check]  # the final unfamiliar-input question
+code = '''
+def s(n):
+    if n == 0:
+        return 0
+    return n + s(n - 1)
+x = s(3)'''
+q = "What is x?"
+opts = ["6", "3", "0"]
+right = 0
+fb = [
+  "Right. 3 + 2 + 1 + 0.",
+  "Not quite. The calls add up on the way back.",
+  "Not quite. 0 is only the base case.",
+]

@@ -1,0 +1,259 @@
+# Python 01: Values and names
+# One [[lesson]] block per lesson, in the order students see them.
+# Line numbers in lines, predict.line and pline count from 1.
+
+topic = "01"
+
+[[lesson]]
+id = "val_assign"
+topic = "Values and names"
+title = "What does = do?"
+recap = "= does two things in order: work out the value on the right, then tie the name on the left to it. score = score + 5 is not a contradiction; it reads the old value, makes a new one, and moves the name."
+dec = "There are no branches. At each = ask: what is the value on the right right now?"
+code = '''
+score = 10
+score = score + 5
+print(score)
+'''
+pseudo = [
+  "Make the value 10 and tie the name score to it.",
+  "Work out score + 5 first, then move the name score to the result.",
+  "Show score.",
+]
+
+[lesson.lines.1]
+t = "Make a value, then a name"
+b = "Python makes the value 10 first. Then = ties the name score to it. = is not \"equals\" from maths. It means \"let this name refer to this value\"."
+look = "score appears in the global frame."
+
+[lesson.lines.2]
+t = "Right side first"
+b = "Python always works out the right side first: score + 5 uses the old score, 10, and gives 15. Only then is the name score moved to 15."
+look = "The value next to score changes."
+
+[lesson.lines.3]
+t = "Show it"
+b = "print shows the value the name refers to now."
+look = "The output box."
+
+[lesson.predict]
+line = 2
+q = "What will score hold after score = score + 5?"
+target = { v = "score" }
+opts = ["15", "10", "An error"]
+
+[lesson.predict.fb]  # feedback for specific wrong answers
+10 = "Not quite. The right side gives 15, and = then moves score to that new value."
+"An error" = "Not quite. Using a name on both sides is fine. The right side is worked out first, with the old value."
+
+[[lesson.variants]]
+label = "score + 5"
+
+[[lesson.variants]]
+label = "score * 2"
+from = "score + 5"
+to = "score * 2"
+q = "What will score hold after score = score * 2?"
+opts = ["20", "10", "An error"]
+
+[lesson.check]  # the final unfamiliar-input question
+code = '''
+n = 3
+n = n - 1
+n = n * 10'''
+q = "What is n at the end?"
+opts = ["20", "30", "2"]
+right = 0
+fb = [
+  "Right. 3 becomes 2, then 2 becomes 20.",
+  "Not quite. n was already 2 when the last line ran.",
+  "Not quite. The last line ran too: 2 * 10 is 20.",
+]
+
+[[lesson]]
+id = "val_keep"
+topic = "Values and names"
+title = "Why did total keep its old value?"
+recap = "total = price * qty worked the answer out once, on line 3. Changing price afterwards did not touch total. To get a new total you run the calculation again."
+code = '''
+price = 4
+qty = 3
+total = price * qty
+price = 10
+print(total)
+'''
+pseudo = [
+  "price is 4.",
+  "qty is 3.",
+  "Work out 4 * 3 now and call it total.",
+  "Move price to 10.",
+  "Show total.",
+]
+
+[lesson.lines.3]
+t = "Work it out once"
+b = "Python multiplies right now: 4 * 3 is 12. total refers to the value 12. It does not remember the formula."
+look = "total holds 12."
+
+[lesson.lines.4]
+t = "Move one name"
+b = "price now refers to 10. Nothing else changes, because total holds a finished number, not a link to price."
+look = "Only price changes."
+
+[lesson.lines.5]
+t = "Show total"
+b = "total still refers to 12."
+look = "The output box."
+
+[lesson.predict]
+line = 5
+q = "What will print(total) show?"
+target = { out = true }
+opts = ["12", "30", "An error"]
+
+[lesson.predict.fb]  # feedback for specific wrong answers
+30 = "Not quite. total was worked out on line 3, when price was 4. A spreadsheet would update; Python does not."
+
+[[lesson.variants]]
+label = "price = 10"
+
+[lesson.check]  # the final unfamiliar-input question
+code = '''
+a = 1
+b = a + 1
+a = 100'''
+q = "What is b?"
+opts = ["2", "101"]
+right = 0
+fb = [
+  "Right. b was worked out when a was 1.",
+  "Not quite. b holds the number 2. It does not follow a.",
+]
+
+[[lesson]]
+id = "val_strnum"
+topic = "Values and names"
+title = "Why is \"7\" different from 7?"
+recap = "The same symbol does different things depending on the type. * repeats a string and multiplies a number. + joins two strings or adds two numbers, but cannot mix a string with a number: that is a TypeError."
+code = '''
+a = "7"
+b = 7
+print(a * 3)
+print(b * 3)
+'''
+pseudo = [
+  "a is the text \"7\".",
+  "b is the number 7.",
+  "Repeat the text three times.",
+  "Multiply the number by three.",
+]
+
+[lesson.lines.1]
+t = "A string"
+b = "Quotes make a string: text made of characters. \"7\" is one character that happens to look like a digit."
+look = "a shows '7' with quotes."
+
+[lesson.lines.2]
+t = "A number"
+b = "No quotes, so 7 is an int, a whole number you can do maths with."
+look = "b shows 7 with no quotes."
+
+[lesson.lines.3]
+t = "* on a string"
+b = "For strings, * means repeat. \"7\" * 3 is \"777\"."
+look = "The output box."
+
+[lesson.lines.4]
+t = "* on a number"
+b = "For numbers, * means multiply. 7 * 3 is 21."
+look = "The output box."
+
+[lesson.predict]
+line = 3
+q = "What will print(a * 3) show?"
+target = { out = true }
+opts = ["777", "21", "An error"]
+
+[lesson.predict.fb]  # feedback for specific wrong answers
+21 = "Not quite. a is the string \"7\", so * repeats it."
+
+[[lesson.variants]]
+label = "a * 3"
+
+[[lesson.variants]]
+label = "a + 3"
+from = "print(a * 3)"
+to = "print(a + 3)"
+q = "What will print(a + 3) show?"
+opts = ["73", "10", "An error"]
+
+[lesson.check]  # the final unfamiliar-input question
+code = "x = \"2\" + \"2\""
+q = "What is x?"
+opts = ["'22'", "4", "An error"]
+right = 0
+fb = [
+  "Right. + joins two strings.",
+  "Not quite. Both are strings, so + joins them.",
+  "Not quite. Two strings can be joined with +.",
+]
+
+[[lesson]]
+id = "val_int"
+topic = "Values and names"
+title = "How does int() turn text into a number?"
+recap = "int() builds a new number from text. It ignores spaces around the digits, but text like \"4.5\" is not a whole number, so it raises ValueError. Use float() for decimals."
+code = '''
+text = "42"
+n = int(text)
+print(n + 1)
+'''
+pseudo = [
+  "text is the string \"42\".",
+  "Read it as a whole number and call it n.",
+  "Show n + 1.",
+]
+
+[lesson.lines.2]
+t = "Convert"
+b = "int() reads the characters and builds a brand new int. text is unchanged: it is still a string."
+look = "n holds 42 with no quotes."
+
+[lesson.lines.3]
+t = "Now maths works"
+b = "n is a number, so n + 1 is 43."
+look = "The output box."
+
+[lesson.predict]
+line = 2
+q = "What will n hold?"
+target = { v = "n" }
+opts = ["42", "'42'", "An error"]
+
+[lesson.predict.fb]  # feedback for specific wrong answers
+"'42'" = "Not quite. int() returns a number, so there are no quotes."
+
+[[lesson.variants]]
+label = "\"42\""
+
+[[lesson.variants]]
+label = "\"4.5\""
+from = "\"42\""
+to = "\"4.5\""
+opts = ["4", "4.5", "An error"]
+
+[[lesson.variants]]
+label = "\"  7 \""
+from = "\"42\""
+to = "\"  7 \""
+opts = ["7", "An error", "' 7 '"]
+
+[lesson.check]  # the final unfamiliar-input question
+code = "x = int(\"12\") + int(\"3\")"
+q = "What is x?"
+opts = ["15", "123"]
+right = 0
+fb = [
+  "Right. Both strings became numbers first.",
+  "Not quite. That would be joining strings. Here both were converted to numbers.",
+]

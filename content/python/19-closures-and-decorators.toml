@@ -1,0 +1,302 @@
+# Python 19: Closures and decorators
+# One [[lesson]] block per lesson, in the order students see them.
+# Line numbers in lines, predict.line and pline count from 1.
+
+topic = "19"
+
+[[lesson]]
+id = "clo_keep"
+topic = "Closures and decorators"
+title = "How does a closure keep a variable alive?"
+recap = "Each call to make_multiplier created a new k and a new times that remembers it. double keeps k = 2 and triple keeps k = 3, long after make_multiplier has returned."
+code = '''
+def make_multiplier(k):
+    def times(x):
+        return x * k
+    return times
+
+double = make_multiplier(2)
+triple = make_multiplier(3)
+print(double(5), triple(5))
+'''
+pseudo = [
+  "Define a factory that takes k:",
+  "inside, define times(x), which uses k,",
+  "times returns x * k.",
+  "hand times back.",
+  "(blank)",
+  "Make one with k = 2.",
+  "Make another with k = 3.",
+  "Use both.",
+]
+
+[lesson.lines.3]
+t = "Use the captured k"
+b = "When double runs, k is found in the enclosing scope that was captured, not in the global frame."
+look = "The times() frame has only x."
+
+[lesson.lines.4]
+t = "Return a function"
+b = "make_multiplier returns the inner function. Its frame ends, but times still needs k, so Python keeps k alive alongside times. That pairing is a closure."
+look = "The frame disappears; double now refers to a function."
+
+[lesson.predict]
+line = 8
+q = "What will print(double(5), triple(5)) show?"
+target = { out = true }
+opts = ["10 15", "15 15", "10 10"]
+
+[lesson.predict.fb]  # feedback for specific wrong answers
+"15 15" = "Not quite. Each call to make_multiplier captured its own k."
+
+[[lesson.variants]]
+label = "k = 2 and 3"
+
+[lesson.check]  # the final unfamiliar-input question
+code = '''
+def greet(word):
+    def say(name):
+        return word + ' ' + name
+    return say
+hi = greet('hi')
+x = hi('Bo')'''
+q = "What is x?"
+opts = ["'hi Bo'", "An error"]
+right = 0
+fb = ["Right. say remembers word.", "Not quite. The closure kept word alive."]
+
+[[lesson]]
+id = "clo_nonlocal"
+topic = "Closures and decorators"
+title = "Why does count += 1 fail inside a closure?"
+recap = "Assigning to a name inside a function makes it local, so count += 1 raised UnboundLocalError. In standard Python, the fix is one line, nonlocal count, which tells Python to rebind the enclosing variable. (This site’s runner cannot run nonlocal yet, so the second input shows the older fix: change an object, count[0], instead of rebinding the name.)"
+code = '''
+def counter():
+    count = 0
+    def inc():
+        count += 1
+        return count
+    return inc
+
+c = counter()
+n = c()
+'''
+pseudo = [
+  "Define counter:",
+  "count starts at 0.",
+  "Define inc:",
+  "add one to count,",
+  "return it.",
+  "hand inc back.",
+  "(blank)",
+  "Make a counter.",
+  "Call it.",
+]
+
+[lesson.lines.4]
+t = "Assignment makes it local"
+b = "count += 1 assigns to count, so Python treats count as a local name of inc for the whole function. Reading the local count before it has a value fails."
+look = "Watch for an error."
+
+[lesson.predict]
+line = 9
+q = "What happens on n = c()?"
+target = { v = "n" }
+opts = ["An error", "1", "0"]
+
+[lesson.predict.fb]  # feedback for specific wrong answers
+1 = "Not quite. The assignment inside inc makes count local to inc, and that local count has no value yet."
+
+[[lesson.variants]]
+label = "count += 1"
+
+[[lesson.variants]]
+label = "list cell"
+from = '''
+    count = 0
+    def inc():
+        count += 1
+        return count
+'''
+to = '''
+    count = [0]
+    def inc():
+        count[0] += 1
+        return count[0]
+'''
+opts = ["An error", "1", "0"]
+
+[lesson.check]  # the final unfamiliar-input question
+code = '''
+total = 0
+def add():
+    total = total + 1
+add()'''
+q = "What happens?"
+opts = ["An error", "total becomes 1"]
+right = 0
+fb = [
+  "Right. The same rule: total is local to add because it is assigned there. Fix with global total.",
+  "Not quite. Without global total, the assignment makes total local.",
+]
+
+[[lesson]]
+id = "clo_decorator"
+topic = "Closures and decorators"
+title = "What does a decorator do to a function?"
+recap = "A decorator is a function that takes a function and returns a replacement, usually a wrapper that runs code before or after the original. @shout is exactly greet = shout(greet)."
+code = '''
+def shout(fn):
+    def wrapper(name):
+        return fn(name).upper() + '!'
+    return wrapper
+
+@shout
+def greet(name):
+    return 'hi ' + name
+
+print(greet('ana'))
+'''
+pseudo = [
+  "Define shout: it takes a function,",
+  "builds a wrapper around it,",
+  "the wrapper calls the original and changes the result,",
+  "and returns the wrapper.",
+  "(blank)",
+  "Decorate the next function with shout:",
+  "greet makes a greeting.",
+  "(body)",
+  "(blank)",
+  "Call greet.",
+]
+
+[lesson.lines.6]
+t = "@ is shorthand"
+b = "@shout above def greet means: define greet, then run greet = shout(greet). The name greet now refers to wrapper."
+look = "greet in the global frame."
+
+[lesson.lines.10]
+t = "Call the decorated name"
+b = "greet('ana') actually calls wrapper, which calls the original greet inside."
+look = "Two frames appear: wrapper, then greet."
+
+[lesson.predict]
+line = 10
+q = "What will print(greet('ana')) show?"
+target = { out = true }
+opts = ["HI ANA!", "hi ana", "An error"]
+
+[lesson.predict.fb]  # feedback for specific wrong answers
+"hi ana" = "Not quite. The name greet now refers to the wrapper, which changes the result."
+
+[[lesson.variants]]
+label = "@shout"
+
+[[lesson.variants]]
+label = "no decorator"
+from = '''
+@shout
+'''
+to = '''
+
+'''
+opts = ["hi ana", "HI ANA!", "An error"]
+
+[lesson.check]  # the final unfamiliar-input question
+code = '''
+def twice(f):
+    def w():
+        f()
+        f()
+    return w
+@twice
+def hi():
+    print('hi')
+hi()'''
+q = "How many times is hi printed?"
+opts = ["2", "1"]
+right = 0
+fb = [
+  "Right. The wrapper calls f twice.",
+  "Not quite. hi now refers to w, which calls the original twice.",
+]
+
+[[lesson]]
+id = "clo_wraps"
+topic = "Closures and decorators"
+title = "Why use functools.wraps?"
+recap = "Every decorator should use @functools.wraps(fn) on its wrapper. The behaviour is the same, but the function keeps its real name and docstring, which makes debugging and documentation honest."
+code = '''
+import functools
+
+def logged(fn):
+    @functools.wraps(fn)
+    def wrapper(*args):
+        return fn(*args)
+    return wrapper
+
+@logged
+def area(w, h):
+    return w * h
+
+print(area.__name__, area(2, 3))
+'''
+pseudo = [
+  "Load functools.",
+  "(blank)",
+  "Define a decorator logged:",
+  "copy fn’s name and docs onto the wrapper,",
+  "the wrapper passes all arguments through,",
+  "(body)",
+  "return it.",
+  "(blank)",
+  "Decorate area.",
+  "area multiplies.",
+  "(body)",
+  "(blank)",
+  "Show the name and a result.",
+]
+
+[lesson.lines.4]
+t = "Keep the identity"
+b = "Without wraps, the decorated function would be called wrapper in error messages, help() and logs. wraps copies the original name and docstring onto the wrapper."
+look = "The wrapper is created."
+
+[lesson.lines.13]
+t = "Check the name"
+b = "area.__name__ reports the original name."
+look = "The output box."
+
+[lesson.predict]
+line = 13
+q = "What will print(area.__name__, area(2, 3)) show?"
+target = { out = true }
+opts = ["area 6", "wrapper 6", "An error"]
+
+[lesson.predict.fb]  # feedback for specific wrong answers
+"wrapper 6" = "Not quite. That is what happens without functools.wraps."
+
+[[lesson.variants]]
+label = "with wraps"
+
+[[lesson.variants]]
+label = "without wraps"
+from = '''
+    @functools.wraps(fn)
+'''
+to = '''
+
+'''
+opts = ["wrapper 6", "area 6", "An error"]
+
+[lesson.check]  # the final unfamiliar-input question
+code = '''
+# A decorator without wraps is applied to save().
+# What is save.__name__?'''
+q = "Pick one:"
+opts = ["The wrapper's name", "'save'"]
+right = 0
+fb = [
+  "Right. The name save now refers to the wrapper.",
+  "Not quite. Only wraps copies the original name.",
+]

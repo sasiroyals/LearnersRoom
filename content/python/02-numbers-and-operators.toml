@@ -1,0 +1,251 @@
+# Python 02: Numbers and operators
+# One [[lesson]] block per lesson, in the order students see them.
+# Line numbers in lines, predict.line and pline count from 1.
+
+topic = "02"
+
+[[lesson]]
+id = "num_floordiv"
+topic = "Numbers and operators"
+title = "What does 7 // 2 give?"
+recap = "/ gives the exact answer as a float. // gives the floor: the nearest whole number at or below the exact answer. For negative numbers that is further from zero."
+code = '''
+a = 7 / 2
+b = 7 // 2
+c = -7 // 2
+print(a, b, c)
+'''
+pseudo = [
+  "Divide exactly.",
+  "Divide, then round down to a whole number.",
+  "Same with a negative number.",
+  "Show all three.",
+]
+
+[lesson.lines.1]
+t = "True division"
+b = "/ always gives a float, even when the answer is whole."
+look = "a is 3.5."
+
+[lesson.lines.2]
+t = "Floor division"
+b = "// divides and then rounds down, toward minus infinity."
+look = "b is 3."
+
+[lesson.lines.3]
+t = "Down, not toward zero"
+b = "-3.5 rounded down is -4, not -3. // floors; it does not simply cut off the decimals."
+look = "The value of c."
+
+[lesson.predict]
+line = 3
+q = "What will c = -7 // 2 hold?"
+target = { v = "c" }
+opts = ["-4", "-3", "-3.5"]
+
+[lesson.predict.fb]  # feedback for specific wrong answers
+-3 = "Not quite. // rounds down. Below -3.5, the next whole number is -4."
+"-3.5" = "Not quite. // always gives a whole number."
+
+[[lesson.variants]]
+label = "-7 // 2"
+
+[[lesson.variants]]
+label = "-8 // 3"
+from = "-7 // 2"
+to = "-8 // 3"
+q = "What will c = -8 // 3 hold?"
+opts = ["-3", "-2", "-2.67"]
+
+[lesson.check]  # the final unfamiliar-input question
+code = "x = 9 // 4"
+q = "What is x?"
+opts = ["2", "2.25", "3"]
+right = 0
+fb = [
+  "Right. 2.25 rounded down is 2.",
+  "Not quite. // drops to a whole number.",
+  "Not quite. // rounds down, not to the nearest.",
+]
+
+[[lesson]]
+id = "num_mod"
+topic = "Numbers and operators"
+title = "What does % keep?"
+recap = "// and % are a pair: // counts the full groups and % keeps the remainder. n % 2 is 0 for even numbers and 1 for odd ones, which is why % appears in so many checks."
+code = '''
+minutes = 135
+hours = minutes // 60
+left = minutes % 60
+print(hours, left)
+'''
+pseudo = [
+  "135 minutes.",
+  "How many full hours fit?",
+  "How many minutes are left over?",
+  "Show both.",
+]
+
+[lesson.lines.2]
+t = "Full groups"
+b = "135 // 60 is 2: two full hours fit."
+look = "hours is 2."
+
+[lesson.lines.3]
+t = "The remainder"
+b = "% gives what is left after taking out the full groups: 135 - 120 is 15."
+look = "left is 15."
+
+[lesson.predict]
+line = 3
+q = "What will left = minutes % 60 hold?"
+target = { v = "left" }
+opts = ["15", "2", "2.25"]
+
+[lesson.predict.fb]  # feedback for specific wrong answers
+2 = "Not quite. That is the number of full hours, from //. % gives the leftover minutes."
+"2.25" = "Not quite. % gives a remainder, not a division."
+
+[[lesson.variants]]
+label = "135"
+
+[[lesson.variants]]
+label = "59"
+from = "= 135"
+to = "= 59"
+opts = ["59", "0", "1"]
+
+[[lesson.variants]]
+label = "120"
+from = "= 135"
+to = "= 120"
+opts = ["0", "2", "60"]
+
+[lesson.check]  # the final unfamiliar-input question
+code = "r = 17 % 5"
+q = "What is r?"
+opts = ["2", "3", "3.4"]
+right = 0
+fb = [
+  "Right. 5 fits 3 times (15), leaving 2.",
+  "Not quite. 3 is how many times 5 fits; % gives what is left.",
+  "Not quite. % gives a whole remainder.",
+]
+
+[[lesson]]
+id = "num_float"
+topic = "Numbers and operators"
+title = "Why is 0.1 + 0.2 not 0.3?"
+recap = "0.1 + 0.2 is really 0.30000000000000004 (standard Python prints exactly that) because floats are binary approximations. Never compare floats with == directly; round them or check that the difference is very small. For money, count whole cents."
+code = '''
+x = 0.1 + 0.2
+print(x - 0.3)
+print(x == 0.3)
+print(round(x, 2) == 0.3)
+'''
+pseudo = [
+  "Add two decimals.",
+  "Show how far x is from 0.3.",
+  "Compare it with 0.3.",
+  "Compare after rounding to 2 places.",
+]
+
+[lesson.lines.1]
+t = "Floats are approximate"
+b = "Floats are stored in binary. 0.1 and 0.2 cannot be stored exactly, so their sum is very slightly off. Python may still display it rounded."
+look = "x looks like 0.3."
+
+[lesson.lines.2]
+t = "Measure the error"
+b = "Subtracting 0.3 shows the tiny leftover: about 0.00000000000000005. Not zero."
+look = "The output box. e-17 means \"times 10 to the power -17\"."
+
+[lesson.lines.3]
+t = "Exact comparison"
+b = "== compares the stored values exactly. The tiny error is enough to make them different."
+look = "The output box."
+
+[lesson.lines.4]
+t = "Compare safely"
+b = "Rounding first (or checking that the difference is tiny) is how you compare floats."
+look = "The output box."
+
+[lesson.predict]
+line = 3
+q = "What will print(x == 0.3) show?"
+target = { out = true }
+opts = ["False", "True", "An error"]
+
+[lesson.predict.fb]  # feedback for specific wrong answers
+True = "Not quite. Line 2 showed that x - 0.3 is not zero, so x is not exactly 0.3."
+
+[[lesson.variants]]
+label = "0.1 + 0.2"
+
+[lesson.check]  # the final unfamiliar-input question
+code = "ok = 0.5 + 0.25 == 0.75"
+q = "What is ok?"
+opts = ["True", "False"]
+right = 0
+fb = [
+  "Right. 0.5 and 0.25 are exact in binary (halves and quarters), so this one works.",
+  "Not quite. Halves and quarters are stored exactly, so there is no error here.",
+]
+
+[[lesson]]
+id = "num_order"
+topic = "Numbers and operators"
+title = "Which operator goes first?"
+recap = "Python follows a fixed order: brackets, then **, then * / // %, then + and -. Equal operators go left to right, except ** which goes right to left. When in doubt, add brackets."
+code = '''
+a = 2 + 3 * 4
+b = (2 + 3) * 4
+c = 2 ** 3 ** 2
+print(a, b, c)
+'''
+pseudo = ["* before +.", "Brackets first.", "** groups from the right.", "Show all three."]
+
+[lesson.lines.1]
+t = "* before +"
+b = "Multiplication binds tighter than addition: 3 * 4 is 12, then 2 + 12 is 14."
+look = "a is 14."
+
+[lesson.lines.2]
+t = "Brackets win"
+b = "Brackets are worked out first: 5 * 4 is 20."
+look = "b is 20."
+
+[lesson.lines.3]
+t = "** goes right to left"
+b = "2 ** 3 ** 2 means 2 ** (3 ** 2), which is 2 ** 9, 512. Most operators group left to right; ** is the exception."
+look = "c is 512."
+
+[lesson.predict]
+line = 1
+q = "What will a = 2 + 3 * 4 hold?"
+target = { v = "a" }
+opts = ["14", "20", "24"]
+
+[lesson.predict.fb]  # feedback for specific wrong answers
+20 = "Not quite. That would need brackets: (2 + 3) * 4. * goes before +."
+
+[[lesson.variants]]
+label = "2 + 3 * 4"
+
+[[lesson.variants]]
+label = "10 - 4 - 3"
+from = "2 + 3 * 4"
+to = "10 - 4 - 3"
+q = "What will a = 10 - 4 - 3 hold?"
+opts = ["3", "9", "An error"]
+
+[lesson.check]  # the final unfamiliar-input question
+code = "x = 1 + 2 * 3 - 4"
+q = "What is x?"
+opts = ["3", "5", "-3"]
+right = 0
+fb = [
+  "Right. 2 * 3 is 6, then 1 + 6 - 4 is 3.",
+  "Not quite. Do 2 * 3 first.",
+  "Not quite. Only the * goes first; then work left to right.",
+]

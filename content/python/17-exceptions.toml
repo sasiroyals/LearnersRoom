@@ -1,0 +1,302 @@
+# Python 17: Exceptions
+# One [[lesson]] block per lesson, in the order students see them.
+# Line numbers in lines, predict.line and pline count from 1.
+
+topic = "17"
+
+[[lesson]]
+id = "exc_trace"
+topic = "Exceptions"
+title = "How do I read a traceback?"
+recap = "Read a traceback from the bottom: the last line is the error type and message (ZeroDivisionError), and the line above it is where it happened (inside average). The lines above that show how you got there: line 8 called report, which called average."
+code = '''
+def average(xs):
+    return sum(xs) / len(xs)
+
+def report(xs):
+    return 'avg ' + str(average(xs))
+
+print(report([4, 6]))
+print(report([]))
+'''
+pseudo = [
+  "Define average: total divided by count.",
+  "(body)",
+  "(blank)",
+  "Define report: wraps average in text.",
+  "(body)",
+  "(blank)",
+  "Report on two numbers.",
+  "Report on an empty list.",
+]
+
+[lesson.lines.2]
+t = "Inside average"
+b = "This is the line that actually fails. A traceback lists every frame from the outside in, and the last line names the error and where it happened."
+look = "The red line in the code."
+
+[lesson.lines.7]
+t = "A normal call"
+b = "report calls average; both return normally."
+look = "The frames appear and disappear."
+
+[lesson.lines.8]
+t = "The failing call"
+b = "This time len(xs) is 0, and dividing by zero raises ZeroDivisionError deep inside average."
+look = "Watch the frame stack when it fails."
+
+[lesson.predict]
+line = 8
+q = "What happens on print(report([]))?"
+target = { out = true }
+opts = ["An error", "Print avg 0", "Print avg None"]
+
+[lesson.predict.fb]  # feedback for specific wrong answers
+"Print avg 0" = "Not quite. Nothing checks for an empty list, so len(xs) is 0 and the division fails."
+
+[[lesson.variants]]
+label = "report([])"
+
+[lesson.check]  # the final unfamiliar-input question
+code = '''
+d = {}
+x = d['k']'''
+q = "What does the last line of the traceback name?"
+opts = ["KeyError", "NameError"]
+right = 0
+fb = ["Right.", "Not quite. d exists; the key k does not."]
+
+[[lesson]]
+id = "exc_try"
+topic = "Exceptions"
+title = "Which path does try / except take?"
+recap = "When a line in try raises, Python skips the rest of the try block and looks for a matching except. If none matches (KeyError does not match ValueError), the error keeps travelling up and the program stops."
+dec = "Did int(text) raise? No: finish the try block. Yes, a ValueError: run the except block. Some other error: it is not caught."
+code = '''
+def parse(text):
+    try:
+        n = int(text)
+        status = 'ok'
+    except ValueError:
+        n = 0
+        status = 'bad'
+    return n, status
+
+print(parse('12'))
+print(parse('x'))
+'''
+pseudo = [
+  "Define parse:",
+  "try the risky part:",
+  "convert the text,",
+  "note success.",
+  "if conversion failed with ValueError:",
+  "use 0,",
+  "note failure.",
+  "return both.",
+  "(blank)",
+  "Parse good text.",
+  "Parse bad text.",
+]
+
+[lesson.lines.3]
+t = "The risky line"
+b = "If int() fails here, the rest of the try block is skipped and Python jumps to the matching except."
+look = "Which line runs next."
+
+[lesson.lines.6]
+t = "Handled"
+b = "The except block runs instead of crashing the program."
+look = "n gets a fallback value."
+
+[lesson.predict]
+line = 11
+q = "What will print(parse('x')) show?"
+target = { out = true }
+opts = ["(0, 'bad')", "An error", "(0, 'ok')"]
+
+[lesson.predict.fb]  # feedback for specific wrong answers
+"(0, 'ok')" = "Not quite. status = 'ok' was skipped when int() failed."
+"An error" = "Not quite. except ValueError catches it."
+
+[[lesson.variants]]
+label = "except ValueError"
+
+[[lesson.variants]]
+label = "except KeyError"
+from = "except ValueError"
+to = "except KeyError"
+
+[lesson.check]  # the final unfamiliar-input question
+code = '''
+try:
+    x = 1 / 0
+except ZeroDivisionError:
+    x = -1'''
+q = "What is x?"
+opts = ["-1", "An error"]
+right = 0
+fb = ["Right. The except caught it.", "Not quite. The error matched the except."]
+
+[[lesson]]
+id = "exc_finally"
+topic = "Exceptions"
+title = "When does finally run?"
+recap = "finally always runs on the way out of a try: after a return, after an error, or after normal completion. With job(0) the division fails, cleanup still runs, and then the error continues."
+code = '''
+log = []
+def job(x):
+    try:
+        log.append('start')
+        return 10 / x
+    finally:
+        log.append('cleanup')
+
+r = job(2)
+print(r, log)
+'''
+pseudo = [
+  "An empty log.",
+  "Define job:",
+  "try:",
+  "record start,",
+  "return 10 / x.",
+  "no matter what happens:",
+  "record cleanup.",
+  "(blank)",
+  "Run the job.",
+  "Show the result and the log.",
+]
+
+[lesson.lines.5]
+t = "Return... but first"
+b = "return is about to leave the function, but a finally block must run first."
+look = "Which line runs next."
+
+[lesson.lines.7]
+t = "Always runs"
+b = "finally runs whether the try block returned, finished, or raised. That makes it the place for cleanup."
+look = "cleanup is added."
+
+[lesson.predict]
+line = 10
+q = "What will print(r, log) show?"
+target = { out = true }
+opts = ["5.0 ['start', 'cleanup']", "5.0 ['start']", "An error"]
+
+[lesson.predict.fb]  # feedback for specific wrong answers
+"5.0 ['start']" = "Not quite. finally runs even when try returns."
+
+[[lesson.variants]]
+label = "job(2)"
+
+[[lesson.variants]]
+label = "job(0)"
+from = "job(2)"
+to = "job(0)"
+pline = 9
+q = "What happens on r = job(0)?"
+opts = ["An error", "r is None"]
+
+[lesson.check]  # the final unfamiliar-input question
+code = '''
+def f():
+    try:
+        return 'a'
+    finally:
+        print('b')
+x = f()'''
+q = "What is printed?"
+opts = ["b", "a", "nothing"]
+right = 0
+fb = [
+  "Right. finally prints b; a is returned, not printed.",
+  "Not quite. return does not print.",
+  "Not quite. finally always runs.",
+]
+
+[[lesson]]
+id = "exc_custom"
+topic = "Exceptions"
+title = "How do I write my own exception?"
+recap = "Your own exception class gives a problem a clear name. raise sends it up; except OutOfStock catches only that kind, so unrelated bugs are not hidden."
+dec = "Is n more than stock? Yes: raise OutOfStock, and the caller’s except handles it. No: return the rest."
+code = '''
+class OutOfStock(Exception):
+    pass
+
+def buy(stock, n):
+    if n > stock:
+        raise OutOfStock('only ' + str(stock) + ' left')
+    return stock - n
+
+try:
+    left = buy(3, 5)
+except OutOfStock as e:
+    left = 'sorry: ' + str(e)
+print(left)
+'''
+pseudo = [
+  "A new kind of error, built on Exception.",
+  "(body)",
+  "(blank)",
+  "Define buy:",
+  "not enough?",
+  "raise our own error with a message.",
+  "otherwise return what is left.",
+  "(blank)",
+  "try:",
+  "buy 5 of 3.",
+  "if OutOfStock was raised, keep it as e:",
+  "build a polite message.",
+  "Show the result.",
+]
+
+[lesson.lines.1]
+t = "A custom exception"
+b = "Subclassing Exception creates a named error type. Callers can catch exactly this one."
+look = "A new class appears."
+
+[lesson.lines.6]
+t = "raise"
+b = "raise stops buy immediately and sends the error up to the caller."
+look = "The buy() frame disappears."
+
+[lesson.lines.12]
+t = "Caught by type"
+b = "except OutOfStock matches because the raised object is an OutOfStock. e is the error object, and str(e) is its message."
+look = "left gets the message."
+
+[lesson.predict]
+line = 13
+q = "What will print(left) show?"
+target = { out = true }
+opts = ["sorry: only 3 left", "-2", "An error"]
+
+[lesson.predict.fb]  # feedback for specific wrong answers
+-2 = "Not quite. raise stopped buy before the subtraction."
+
+[[lesson.variants]]
+label = "buy(3, 5)"
+
+[[lesson.variants]]
+label = "buy(3, 2)"
+from = "buy(3, 5)"
+to = "buy(3, 2)"
+opts = ["1", "sorry: only 3 left", "An error"]
+
+[lesson.check]  # the final unfamiliar-input question
+code = '''
+class E(ValueError):
+    pass
+try:
+    raise E()
+except ValueError:
+    r = 'caught''''
+q = "Is it caught?"
+opts = ["Yes", "No"]
+right = 0
+fb = [
+  "Right. E is a ValueError, so except ValueError catches it.",
+  "Not quite. except matches subclasses too.",
+]

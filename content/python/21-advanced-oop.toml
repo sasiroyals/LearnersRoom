@@ -1,0 +1,392 @@
+# Python 21: Advanced OOP
+# One [[lesson]] block per lesson, in the order students see them.
+# Line numbers in lines, predict.line and pline count from 1.
+
+topic = "21"
+
+[[lesson]]
+id = "adv_classmethod"
+topic = "Advanced OOP"
+title = "When do I use @classmethod and @staticmethod?"
+recap = "Use @classmethod when the method needs the class, usually to build objects in another way (from_f). Use @staticmethod for a helper that needs neither the object nor the class. Plain methods get self, the object."
+code = '''
+class Temp:
+    def __init__(self, c):
+        self.c = c
+
+    @classmethod
+    def from_f(cls, f):
+        return cls((f - 32) * 5 / 9)
+
+    @staticmethod
+    def is_valid(c):
+        return c >= -273
+
+t = Temp.from_f(212)
+ok = Temp.is_valid(t.c)
+print(t.c, ok)
+'''
+pseudo = [
+  "Define Temp.",
+  "Build from Celsius:",
+  "store it.",
+  "(blank)",
+  "A class method: gets the class, not an object.",
+  "another way to build a Temp, from Fahrenheit.",
+  "(body)",
+  "(blank)",
+  "A static method: gets neither.",
+  "a plain helper that lives in the class.",
+  "(body)",
+  "(blank)",
+  "Build a Temp from 212 °F.",
+  "Check it.",
+  "Show both.",
+]
+
+[lesson.lines.13]
+t = "Call on the class"
+b = "Temp.from_f(212) passes the class itself as cls. from_f then calls cls(...) to build a new object. This is an alternative constructor."
+look = "A from_f frame with cls."
+
+[lesson.lines.14]
+t = "A static method"
+b = "is_valid receives no self and no cls. It is an ordinary function kept in the class because it belongs with it."
+look = "An is_valid frame with only c."
+
+[lesson.predict]
+line = 15
+q = "What will print(t.c, ok) show?"
+target = { out = true }
+opts = ["100.0 True", "212 True", "An error"]
+
+[lesson.predict.fb]  # feedback for specific wrong answers
+"212 True" = "Not quite. from_f converts: (212 - 32) * 5 / 9 is 100.0."
+
+[[lesson.variants]]
+label = "212 °F"
+
+[lesson.check]  # the final unfamiliar-input question
+code = '''
+class A:
+    @classmethod
+    def make(cls):
+        return cls()
+class B(A):
+    pass
+x = B.make()'''
+q = "What type is x?"
+opts = ["B", "A"]
+right = 0
+fb = [
+  "Right. cls is whichever class the method was called on.",
+  "Not quite. B.make() passes B as cls.",
+]
+
+[[lesson]]
+id = "adv_mro"
+topic = "Advanced OOP"
+title = "Which parent wins in multiple inheritance?"
+recap = "With several parents, Python builds one ordered list (Child.__mro__) and every super() call moves one step along it. That is how each class gets called exactly once. Change the order of parents and the order of calls changes too."
+code = '''
+class Base:
+    def hello(self):
+        return 'Base'
+
+class Left(Base):
+    def hello(self):
+        return 'Left>' + super().hello()
+
+class Right(Base):
+    def hello(self):
+        return 'Right>' + super().hello()
+
+class Child(Left, Right):
+    pass
+
+print(Child().hello())
+'''
+pseudo = [
+  "Base says Base.",
+  "(body)",
+  "(body)",
+  "(blank)",
+  "Left adds its name, then asks super().",
+  "(body)",
+  "(body)",
+  "(blank)",
+  "Right adds its name, then asks super().",
+  "(body)",
+  "(body)",
+  "(blank)",
+  "Child inherits from Left, then Right.",
+  "(body)",
+  "(blank)",
+  "Ask a Child to say hello.",
+]
+
+[lesson.lines.7]
+t = "super() means next in line"
+b = "super() in Left does not mean Base. It means the next class in the MRO, which for a Child is Right."
+look = "The next frame is Right.hello."
+
+[lesson.lines.16]
+t = "Method resolution order"
+b = "Python lines up the classes in one order, the MRO: Child, Left, Right, Base, object. A method is looked up along that line."
+look = "Which hello frame appears first."
+
+[lesson.predict]
+line = 16
+q = "What will print(Child().hello()) show?"
+target = { out = true }
+opts = ["Left>Right>Base", "Left>Base", "Right>Left>Base"]
+
+[lesson.predict.fb]  # feedback for specific wrong answers
+"Left>Base" = "Not quite. super() follows the MRO of the actual object, Child, so after Left comes Right."
+
+[[lesson.variants]]
+label = "(Left, Right)"
+
+[[lesson.variants]]
+label = "(Right, Left)"
+from = "Child(Left, Right)"
+to = "Child(Right, Left)"
+opts = ["Right>Left>Base", "Left>Right>Base", "Right>Base"]
+
+[lesson.check]  # the final unfamiliar-input question
+code = '''
+class A: pass
+class B(A): pass
+class C(A): pass
+class D(B, C): pass
+m = [k.__name__ for k in D.__mro__]'''
+q = "What is m?"
+opts = ["['D', 'B', 'C', 'A', 'object']", "['D', 'B', 'A', 'C', 'object']"]
+right = 0
+fb = [
+  "Right. A shared parent comes after all its children.",
+  "Not quite. A comes only after both B and C.",
+]
+
+[[lesson]]
+id = "adv_mixin"
+topic = "Advanced OOP"
+title = "What is a mixin?"
+recap = "A mixin is a small class that adds one focused ability and is meant to be combined with other classes. It does not stand alone and does not represent an \"is a\" relationship; it is a reusable add-on."
+code = '''
+class ReprMixin:
+    def __repr__(self):
+        pairs = [k + '=' + repr(v) for k, v in self.__dict__.items()]
+        return type(self).__name__ + '(' + ', '.join(pairs) + ')'
+
+class Point(ReprMixin):
+    def __init__(self, x, y):
+        self.x = x
+        self.y = y
+
+print(Point(1, 2))
+'''
+pseudo = [
+  "A small class that only adds one ability:",
+  "a readable text form,",
+  "built from the object’s attributes,",
+  "with the real class name.",
+  "(blank)",
+  "Point gets that ability by inheriting it.",
+  "Build a point:",
+  "(body)",
+  "(body)",
+  "(blank)",
+  "Show a point.",
+]
+
+[lesson.lines.11]
+t = "Borrowed behaviour"
+b = "Point does not define __repr__. Python finds it in ReprMixin. Inside it, self is the Point, so self.__dict__ holds x and y."
+look = "The __repr__ frame belongs to ReprMixin."
+
+[lesson.predict]
+line = 11
+q = "What will print(Point(1, 2)) show?"
+target = { out = true }
+opts = ["Point(x=1, y=2)", "ReprMixin(x=1, y=2)", "<__main__.Point object>"]
+
+[lesson.predict.fb]  # feedback for specific wrong answers
+"ReprMixin(x=1, y=2)" = "Not quite. type(self) is Point, the object’s real class."
+
+[[lesson.variants]]
+label = "with mixin"
+
+[lesson.check]  # the final unfamiliar-input question
+code = '''
+class Loud:
+    def shout(self):
+        return self.name.upper()
+class Dog(Loud):
+    name = 'rex'
+x = Dog().shout()'''
+q = "What is x?"
+opts = ["'REX'", "An error"]
+right = 0
+fb = [
+  "Right. self is the Dog, which has name.",
+  "Not quite. Loud uses self.name, and the Dog provides it.",
+]
+
+[[lesson]]
+id = "adv_dataclass"
+topic = "Advanced OOP"
+title = "What does @dataclass write for me?"
+recap = "@dataclass turns a list of typed fields into a full class: constructor, readable repr, and field-by-field equality. Fields without a default are required, so Item() fails. Add frozen=True to make the objects read-only."
+code = '''
+from dataclasses import dataclass
+
+@dataclass
+class Item:
+    name: str
+    price: float = 1.0
+
+a = Item('pen')
+b = Item('pen', 1.0)
+print(a, a == b)
+'''
+pseudo = [
+  "Load dataclass.",
+  "(blank)",
+  "Generate the boring methods for the class below.",
+  "class Item, listing its fields:",
+  "Item has a name,",
+  "and a price, 1.0 by default.",
+  "(blank)",
+  "Build one with the default price.",
+  "Build another, same values.",
+  "Show one and compare.",
+]
+
+[lesson.lines.3]
+t = "A class generator"
+b = "@dataclass reads the fields listed in the class and writes __init__, __repr__ and __eq__ for you."
+look = "The Item class is created."
+
+[lesson.lines.10]
+t = "Value equality"
+b = "The generated __eq__ compares the fields, so two items with the same values are equal."
+look = "The output box."
+
+[lesson.predict]
+line = 10
+q = "What will print(a, a == b) show?"
+target = { out = true }
+opts = [
+  "Item(name='pen', price=1.0) True",
+  "Item(name='pen', price=1.0) False",
+  "<__main__.Item object> False",
+]
+
+[lesson.predict.fb]  # feedback for specific wrong answers
+"Item(name='pen', price=1.0) False" = "Not quite. Without @dataclass, == would compare identity. The generated __eq__ compares fields."
+
+[[lesson.variants]]
+label = "Item('pen')"
+
+[[lesson.variants]]
+label = "Item()"
+from = '''
+Item('pen')
+'''
+to = '''
+Item()
+'''
+opts = ["An error", "Item(name='', price=1.0)"]
+pline = 8
+q = "What happens on a = Item()?"
+
+[lesson.check]  # the final unfamiliar-input question
+code = '''
+# @dataclass
+# class P:
+#     x: int
+#     y: int
+# P(1, 2) == P(1, 2)'''
+q = "True or False?"
+opts = ["True", "False"]
+right = 0
+fb = [
+  "Right. Same fields, so equal.",
+  "Not quite. @dataclass generates __eq__ that compares fields.",
+]
+
+[[lesson]]
+id = "adv_descriptor"
+topic = "Advanced OOP"
+title = "How does @property actually work?"
+recap = "A descriptor is an object on a class with __get__ and/or __set__. Attribute access on instances is routed through it. @property is a ready-made descriptor; writing your own lets you reuse one validation rule across many attributes and classes."
+code = '''
+class Positive:
+    def __init__(self, key):
+        self.key = key
+
+    def __get__(self, obj, objtype=None):
+        return getattr(obj, self.key)
+
+    def __set__(self, obj, value):
+        if value <= 0:
+            raise ValueError('must be positive')
+        setattr(obj, self.key, value)
+
+class Box:
+    width = Positive('_width')
+
+b = Box()
+b.width = 5
+b.width = -1
+'''
+pseudo = [
+  "A descriptor class:",
+  "when created, remember where to store the real value,",
+  "(body)",
+  "(blank)",
+  "reading the attribute calls __get__,",
+  "(body)",
+  "(blank)",
+  "writing it calls __set__,",
+  "which checks the value,",
+  "(body)",
+  "then stores it.",
+  "(blank)",
+  "Box uses it for width:",
+  "(body)",
+  "(blank)",
+  "Build a box.",
+  "Set a good width.",
+  "Set a bad width.",
+]
+
+[lesson.lines.17]
+t = "Assignment calls __set__"
+b = "width is a descriptor object stored on the class. b.width = 5 does not simply store 5; Python calls Positive.__set__(descriptor, b, 5)."
+look = "A __set__ frame appears."
+
+[lesson.lines.18]
+t = "Validation"
+b = "The same check runs on every assignment, for every Box."
+look = "Watch for an error."
+
+[lesson.predict]
+line = 18
+q = "What happens on b.width = -1?"
+target = { v = "b" }
+opts = ["An error", "width becomes -1"]
+
+[lesson.predict.fb]  # feedback for specific wrong answers
+"width becomes -1" = "Not quite. The assignment goes through __set__, which rejects values that are not positive."
+
+[[lesson.variants]]
+label = "-1"
+
+[lesson.check]  # the final unfamiliar-input question
+code = "# Which method runs for  print(b.width)  ?"
+q = "Pick one:"
+opts = ["__get__", "__set__"]
+right = 0
+fb = ["Right. Reading calls __get__.", "Not quite. __set__ is for assignment."]

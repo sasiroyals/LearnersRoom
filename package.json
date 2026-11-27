@@ -1,0 +1,11 @@
+{
+  "name": "learnersroom",
+  "private": true,
+  "description": "Build and browser checks for the Learners Room site",
+  "scripts": {
+    "test:e2e": "node tests/e2e/check_answers.cjs"
+  },
+  "devDependencies": {
+    "playwright": "1.47.2"
+  }
+}

@@ -1,0 +1,140 @@
+# Python 11: Comprehensions
+# One [[lesson]] block per lesson, in the order students see them.
+# Line numbers in lines, predict.line and pline count from 1.
+
+topic = "11"
+
+[[lesson]]
+id = "comp_loop"
+topic = "Comprehensions"
+title = "How is a comprehension like a loop?"
+recap = "[expression for item in iterable] builds a new list by running the expression once per item. It is shorter than the loop-and-append version and does exactly the same thing."
+code = '''
+nums = [1, 2, 3]
+squares = [n * n for n in nums]
+print(squares)
+'''
+pseudo = ["Three numbers.", "Make a new list: n * n for each n in nums.", "Show it."]
+
+[lesson.lines.2]
+t = "A loop in one line"
+b = "Read it as: for each n in nums, put n * n into a new list. It does the same work as an empty list plus a for loop with append."
+look = "squares is a new list."
+
+[lesson.predict]
+line = 2
+q = "What will squares hold?"
+target = { v = "squares" }
+opts = ["[1, 4, 9]", "[1, 2, 3]", "14"]
+
+[lesson.predict.fb]  # feedback for specific wrong answers
+14 = "Not quite. A list comprehension builds a list, not a sum."
+
+[[lesson.variants]]
+label = "n * n"
+
+[[lesson.variants]]
+label = "n + 10"
+from = "n * n"
+to = "n + 10"
+opts = ["[11, 12, 13]", "[1, 2, 3]", "36"]
+
+[lesson.check]  # the final unfamiliar-input question
+code = "xs = [c.upper() for c in 'hi']"
+q = "What is xs?"
+opts = ["['H', 'I']", "'HI'"]
+right = 0
+fb = ["Right. One item per character.", "Not quite. Square brackets make a list."]
+
+[[lesson]]
+id = "comp_filter"
+topic = "Comprehensions"
+title = "How does if filter inside a comprehension?"
+recap = "[x for x in items if test] keeps only the items that pass the test. It is the one-line version of the filtering loop."
+code = '''
+temps = [18, 25, 31, 12]
+warm = [t for t in temps if t > 20]
+print(warm)
+'''
+pseudo = ["Four temperatures.", "Keep each t only if it is above 20.", "Show them."]
+
+[lesson.lines.2]
+t = "Filter"
+b = "The if at the end decides which items go into the new list. Items that fail are skipped."
+look = "warm has fewer items."
+
+[lesson.predict]
+line = 2
+q = "What will warm hold?"
+target = { v = "warm" }
+opts = ["[25, 31]", "[18, 25, 31, 12]", "[True, True]"]
+
+[lesson.predict.fb]  # feedback for specific wrong answers
+"[True, True]" = "Not quite. The if filters; the items themselves are kept."
+
+[[lesson.variants]]
+label = "t > 20"
+
+[[lesson.variants]]
+label = "t % 2 == 0"
+from = "t > 20"
+to = "t % 2 == 0"
+opts = ["[18, 12]", "[25, 31]", "[18]"]
+
+[lesson.check]  # the final unfamiliar-input question
+code = "xs = [n for n in range(6) if n % 3 == 0]"
+q = "What is xs?"
+opts = ["[0, 3]", "[3]", "[0, 3, 6]"]
+right = 0
+fb = [
+  "Right. range(6) is 0 to 5.",
+  "Not quite. 0 % 3 is 0 too.",
+  "Not quite. range(6) stops before 6.",
+]
+
+[[lesson]]
+id = "comp_dictset"
+topic = "Comprehensions"
+title = "How do dict and set comprehensions work?"
+recap = "Curly braces with key: value make a dict comprehension; curly braces with just a value make a set comprehension. Both drop duplicates by key or value."
+code = '''
+names = ['ana', 'ben', 'ana']
+lengths = {n: len(n) for n in names}
+firsts = {n[0] for n in names}
+print(lengths, len(firsts))
+'''
+pseudo = [
+  "Three names, one repeated.",
+  "Build a dict: name to length.",
+  "Build a set of first letters.",
+  "Show both.",
+]
+
+[lesson.lines.2]
+t = "Dict comprehension"
+b = "{key: value for ...} builds a dict. A repeated key just overwrites itself."
+look = "lengths has 2 keys."
+
+[lesson.lines.3]
+t = "Set comprehension"
+b = "{value for ...} builds a set, so duplicates disappear."
+look = "firsts has 2 items."
+
+[lesson.predict]
+line = 2
+q = "What will lengths hold?"
+target = { v = "lengths" }
+opts = ["{'ana': 3, 'ben': 3}", "{'ana': 3, 'ben': 3, 'ana': 3}", "[3, 3, 3]"]
+
+[lesson.predict.fb]  # feedback for specific wrong answers
+"{'ana': 3, 'ben': 3, 'ana': 3}" = "Not quite. A dict cannot hold the same key twice."
+
+[[lesson.variants]]
+label = "3 names"
+
+[lesson.check]  # the final unfamiliar-input question
+code = "d = {k: k * 2 for k in [1, 2]}"
+q = "What is d?"
+opts = ["{1: 2, 2: 4}", "[2, 4]"]
+right = 0
+fb = ["Right.", "Not quite. key: value inside braces makes a dict."]

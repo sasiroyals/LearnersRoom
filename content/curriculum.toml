@@ -1,0 +1,468 @@
+# The full course map for both tracks (from the curriculum doc).
+# A topic shows its built lessons first, then the remaining titles as "planned".
+
+[[py]]
+n = "01"
+t = "Values and names"
+level = "Level 1: Beginner"
+subs = [
+  "What does = do?",
+  "Why did x keep its old value?",
+  "\"7\" vs 7",
+  "Converting with int()",
+]
+book = "Crash Course ch. 2; Lutz Part II"
+
+[[py]]
+n = "02"
+t = "Numbers and operators"
+level = "Level 1: Beginner"
+subs = ["7 // 2", "What % keeps", "0.1 + 0.2", "Operator order"]
+book = "Crash Course ch. 2; Lutz ch. 5"
+
+[[py]]
+n = "03"
+t = "Strings"
+level = "Level 1: Beginner"
+subs = ["Index 0", "Slicing", "Why can't I change a letter?", "find on a miss", "f-strings"]
+book = "Crash Course ch. 2; Lutz ch. 7"
+
+[[py]]
+n = "04"
+t = "Conditions and logic"
+level = "Level 1: Beginner"
+subs = ["Which branch runs?", "Boundaries with >=", "When and stops early", "elif chains"]
+book = "Crash Course ch. 5; Lutz ch. 12"
+
+[[py]]
+n = "05"
+t = "Lists"
+level = "Level 1: Beginner"
+subs = [
+  "Index -1",
+  "Slices",
+  "append vs insert",
+  "in",
+  "Out of range",
+  "Why did both lists change?",
+]
+book = "Crash Course ch. 3 and 4"
+
+[[py]]
+n = "06"
+t = "Loops"
+level = "Level 1: Beginner"
+subs = [
+  "How for takes each item",
+  "Running total",
+  "Counting matches",
+  "Filtering",
+  "while and its exit",
+  "break and continue",
+]
+book = "Crash Course ch. 4 and 7; Lutz ch. 13"
+
+[[py]]
+n = "07"
+t = "Dicts, tuples and sets"
+level = "Level 1: Beginner"
+subs = [
+  "Key lookup",
+  "Missing key: [] vs .get",
+  "Counting with a dict",
+  "Tuple unpacking",
+  "Sets drop duplicates",
+]
+book = "Crash Course ch. 6; Lutz ch. 8 and 9"
+
+[[py]]
+n = "08"
+t = "Functions: the basics"
+level = "Level 1: Beginner"
+subs = [
+  "Arguments enter a call frame",
+  "return vs print",
+  "Parameters vs arguments",
+  "No return gives None",
+]
+book = "Crash Course ch. 8; Lutz ch. 16"
+
+[[py]]
+n = "09"
+t = "Functions in depth"
+level = "Level 2: Intermediate"
+subs = [
+  "Scope and the LEGB rule",
+  "The shared default list trap",
+  "*args and **kwargs",
+  "Keyword-only arguments",
+  "lambda",
+  "Recursion and the call stack",
+]
+book = "Lutz ch. 17 to 19"
+
+[[py]]
+n = "10"
+t = "Mutability and copying"
+level = "Level 2: Intermediate"
+subs = [
+  "Mutable vs immutable",
+  "copy() is shallow",
+  "deepcopy",
+  "Passing a list into a function",
+]
+book = "Ramalho ch. 6"
+
+[[py]]
+n = "11"
+t = "Comprehensions"
+level = "Level 2: Intermediate"
+subs = [
+  "A comprehension is a loop",
+  "Filtering inside it",
+  "Dict and set comprehensions",
+]
+book = "Lutz ch. 14 and 20"
+
+[[py]]
+n = "12"
+t = "Classes and objects"
+level = "Level 2: Intermediate"
+subs = [
+  "Class vs object",
+  "__init__ and self",
+  "Instance vs class attributes",
+  "Methods change state",
+  "__repr__ and __str__",
+]
+book = "Crash Course ch. 9; Lutz ch. 26 to 28"
+
+[[py]]
+n = "13"
+t = "Encapsulation"
+level = "Level 2: Intermediate"
+subs = [
+  "The _private convention",
+  "Name mangling with __",
+  "@property getters and setters with validation",
+]
+book = "Lutz ch. 38; Ramalho ch. 11"
+
+[[py]]
+n = "14"
+t = "Inheritance"
+level = "Level 2: Intermediate"
+subs = [
+  "A subclass reuses code",
+  "Overriding a method",
+  "super().__init__",
+  "isinstance and issubclass",
+]
+book = "Crash Course ch. 9; Lutz ch. 29; Ramalho ch. 14"
+
+[[py]]
+n = "15"
+t = "Polymorphism"
+level = "Level 2: Intermediate"
+subs = [
+  "One call, different classes",
+  "Duck typing",
+  "Operator overloading with __add__, __eq__, __len__",
+]
+book = "Lutz ch. 30; Ramalho ch. 13 and 16"
+
+[[py]]
+n = "16"
+t = "Abstraction and composition"
+level = "Level 2: Intermediate"
+subs = [
+  "Abstract base classes with @abstractmethod",
+  "Composition: has-a vs is-a",
+  "Choosing between them",
+]
+book = "Lutz ch. 31; Ramalho ch. 13"
+
+[[py]]
+n = "17"
+t = "Exceptions"
+level = "Level 2: Intermediate"
+subs = [
+  "Reading a traceback",
+  "try / except path",
+  "finally",
+  "Writing your own exception class",
+]
+book = "Crash Course ch. 10; Lutz Part VII"
+
+[[py]]
+n = "18"
+t = "Modules and files"
+level = "Level 2: Intermediate"
+subs = [
+  "How import works",
+  "if __name__ == \"__main__\"",
+  "Reading and writing files with with",
+]
+book = "Crash Course ch. 10; Lutz Part V"
+
+[[py]]
+n = "19"
+t = "Closures and decorators"
+level = "Level 3: Professional"
+subs = [
+  "A closure keeps a variable alive",
+  "nonlocal",
+  "A decorator wraps a function",
+  "functools.wraps",
+]
+book = "Ramalho ch. 9; Lutz ch. 39"
+
+[[py]]
+n = "20"
+t = "Iterators and generators"
+level = "Level 3: Professional"
+subs = [
+  "The iter / next protocol",
+  "A generator pauses at yield",
+  "A used-up generator",
+  "Generator pipelines",
+]
+book = "Ramalho ch. 17; Lutz ch. 20"
+
+[[py]]
+n = "21"
+t = "Advanced OOP"
+level = "Level 3: Professional"
+subs = [
+  "@classmethod and @staticmethod",
+  "Multiple inheritance and the MRO",
+  "Mixins",
+  "@dataclass",
+  "How @property works (descriptors)",
+]
+book = "Ramalho ch. 5, 14 and 23; Lutz ch. 32 and 38"
+
+[[py]]
+n = "22"
+t = "Context managers"
+level = "Level 3: Professional"
+subs = ["The with protocol: __enter__ and __exit__", "contextlib.contextmanager"]
+book = "Ramalho ch. 18"
+
+[[py]]
+n = "23"
+t = "Typing and testing"
+level = "Level 3: Professional"
+subs = ["Type hints", "Protocols", "Writing a test with assert"]
+book = "Ramalho ch. 8 and 13"
+
+[[py]]
+n = "24"
+t = "Design"
+level = "Level 3: Professional"
+subs = ["SOLID in Python", "Strategy pattern", "Factory pattern"]
+book = "Ramalho ch. 10"
+
+[[java]]
+n = "01"
+t = "Primitives and references"
+level = "Level 1: Beginner"
+subs = [
+  "Why does int copy but an array share?",
+  "What new creates",
+  "null",
+  "Stack vs heap",
+]
+book = "Head First ch. 3; Core Java ch. 3"
+
+[[java]]
+n = "02"
+t = "Operators and casting"
+level = "Level 1: Beginner"
+subs = ["7 / 2 is 3", "% with negatives", "Widening vs narrowing casts", "int overflow"]
+book = "Core Java ch. 3"
+
+[[java]]
+n = "03"
+t = "Strings"
+level = "Level 1: Beginner"
+subs = [
+  "Why a String is immutable",
+  "== vs .equals",
+  "substring end index",
+  "StringBuilder",
+]
+book = "Head First ch. 10; Core Java ch. 3"
+
+[[java]]
+n = "04"
+t = "Conditions and loops"
+level = "Level 1: Beginner"
+subs = ["if / else path", "switch", "for vs enhanced for", "while exit", "Off-by-one in i <= n"]
+book = "Head First ch. 5; Core Java ch. 3"
+
+[[java]]
+n = "05"
+t = "Arrays"
+level = "Level 1: Beginner"
+subs = ["Fixed length", "Index out of bounds", "Arrays.copyOf", "Two variables, one array"]
+book = "Head First ch. 3; Core Java ch. 3"
+
+[[java]]
+n = "06"
+t = "Methods"
+level = "Level 1: Beginner"
+subs = [
+  "Arguments are copied into the frame",
+  "Why a method can change my array but not my int",
+  "Return values",
+  "Recursion",
+]
+book = "Head First ch. 4; Core Java ch. 4"
+
+[[java]]
+n = "07"
+t = "Classes and objects"
+level = "Level 2: Intermediate, the OOP core"
+subs = [
+  "Fields per object",
+  "Constructors and constructor overloading",
+  "this",
+  "static vs instance members",
+  "toString",
+]
+book = "Head First ch. 2 and 9; Core Java ch. 4"
+
+[[java]]
+n = "08"
+t = "Encapsulation"
+level = "Level 2: Intermediate, the OOP core"
+subs = [
+  "Private fields with getters and setters",
+  "Validation in a setter",
+  "Access modifiers: public, protected, package, private",
+]
+book = "Head First ch. 4; Core Java ch. 4"
+
+[[java]]
+n = "09"
+t = "Inheritance"
+level = "Level 2: Intermediate, the OOP core"
+subs = [
+  "extends",
+  "super() in constructors",
+  "Overriding with @Override",
+  "final classes and methods",
+]
+book = "Head First ch. 7; Core Java ch. 5"
+
+[[java]]
+n = "10"
+t = "Polymorphism"
+level = "Level 2: Intermediate, the OOP core"
+subs = [
+  "Superclass variable, subclass object",
+  "Dynamic dispatch: which method runs?",
+  "Overloading vs overriding",
+  "Casting and instanceof",
+]
+book = "Head First ch. 7 and 8; Core Java ch. 5"
+
+[[java]]
+n = "11"
+t = "Abstraction"
+level = "Level 2: Intermediate, the OOP core"
+subs = ["Abstract classes", "Interfaces", "Default methods", "Abstract class or interface?"]
+book = "Head First ch. 8; Core Java ch. 6; Effective Java item 20"
+
+[[java]]
+n = "12"
+t = "The Object contract"
+level = "Level 2: Intermediate, the OOP core"
+subs = [
+  "equals and hashCode together",
+  "== vs equals on objects",
+  "Comparable and Comparator",
+]
+book = "Core Java ch. 5; Effective Java items 10 to 14"
+
+[[java]]
+n = "13"
+t = "Collections"
+level = "Level 2: Intermediate, the OOP core"
+subs = [
+  "Why did both lists change?",
+  "ArrayList growth",
+  "HashMap lookups",
+  "HashSet duplicates",
+  "Removing while looping",
+]
+book = "Head First ch. 11; Core Java ch. 9"
+
+[[java]]
+n = "14"
+t = "Generics"
+level = "Level 2: Intermediate, the OOP core"
+subs = [
+  "Why List<Integer> and not List<int>",
+  "Autoboxing",
+  "Generic methods and bounded types",
+]
+book = "Core Java ch. 8; Effective Java ch. 5"
+
+[[java]]
+n = "15"
+t = "Exceptions"
+level = "Level 2: Intermediate, the OOP core"
+subs = [
+  "Reading a stack trace",
+  "try / catch / finally",
+  "Checked vs unchecked",
+  "Custom exceptions",
+]
+book = "Head First ch. 13; Core Java ch. 7"
+
+[[java]]
+n = "16"
+t = "Immutability and records"
+level = "Level 3: Professional"
+subs = ["final fields", "Defensive copies", "Records"]
+book = "Effective Java items 17 and 50"
+
+[[java]]
+n = "17"
+t = "Enums and nested classes"
+level = "Level 3: Professional"
+subs = [
+  "Enums with fields and methods",
+  "Inner vs static nested classes",
+  "Anonymous classes",
+]
+book = "Core Java ch. 5 and 6"
+
+[[java]]
+n = "18"
+t = "Lambdas and streams"
+level = "Level 3: Professional"
+subs = [
+  "Functional interfaces",
+  "Lambdas",
+  "Method references",
+  "filter / map / collect",
+  "Optional",
+]
+book = "Head First ch. 12; Core Java ch. 6 and Volume II ch. 1"
+
+[[java]]
+n = "19"
+t = "Composition and design"
+level = "Level 3: Professional"
+subs = ["Composition over inheritance", "SOLID", "Strategy pattern", "Builder pattern"]
+book = "Effective Java items 2 and 18"
+
+[[java]]
+n = "20"
+t = "Files and concurrency"
+level = "Level 3: Professional"
+subs = ["try-with-resources", "Reading a file", "Threads and a race on shared state"]
+book = "Head First ch. 16 and 17; Core Java ch. 12"

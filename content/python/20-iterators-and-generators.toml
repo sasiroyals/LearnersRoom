@@ -1,0 +1,262 @@
+# Python 20: Iterators and generators
+# One [[lesson]] block per lesson, in the order students see them.
+# Line numbers in lines, predict.line and pline count from 1.
+
+topic = "20"
+
+[[lesson]]
+id = "gen_iter"
+topic = "Iterators and generators"
+title = "What do iter and next do?"
+recap = "for x in items is really: it = iter(items), then call next(it) until StopIteration. An iterator moves only forward and cannot be restarted; ask the list for a fresh iterator to go again."
+code = '''
+letters = ['a', 'b']
+it = iter(letters)
+first = next(it)
+second = next(it)
+third = next(it)
+'''
+pseudo = [
+  "A list of two letters.",
+  "Ask the list for an iterator: a bookmark that walks it.",
+  "Take the next item.",
+  "Take the next item.",
+  "Take the next item.",
+]
+
+[lesson.lines.2]
+t = "An iterator"
+b = "iter() returns an object that remembers how far it has got. A for loop does exactly this behind the scenes."
+look = "it is a new object."
+
+[lesson.lines.3]
+t = "next"
+b = "next() returns the current item and moves the bookmark on."
+look = "first holds 'a'."
+
+[lesson.lines.5]
+t = "Run out"
+b = "With no items left, next raises StopIteration. A for loop catches this and simply ends."
+look = "Watch for an error."
+
+[lesson.predict]
+line = 5
+q = "What happens on third = next(it)?"
+target = { v = "third" }
+opts = ["An error", "'a'", "None"]
+
+[lesson.predict.fb]  # feedback for specific wrong answers
+"'a'" = "Not quite. An iterator does not start over. It is used up."
+None = "Not quite. next raises StopIteration instead of returning None."
+
+[[lesson.variants]]
+label = "two items"
+
+[lesson.check]  # the final unfamiliar-input question
+code = '''
+it = iter('xy')
+next(it)
+r = next(it)'''
+q = "What is r?"
+opts = ["'y'", "'x'"]
+right = 0
+fb = [
+  "Right. The first next took x.",
+  "Not quite. The iterator had already moved past x.",
+]
+
+[[lesson]]
+id = "gen_yield"
+topic = "Iterators and generators"
+title = "How does a generator pause at yield?"
+recap = "Calling countdown(3) did not run its body; it made a generator. Each loop step resumed the body until the next yield. When the body finished (after liftoff), the generator raised StopIteration and the for loop ended. Values are produced one at a time, never stored as a full list."
+code = '''
+def countdown(n):
+    while n > 0:
+        yield n
+        n = n - 1
+    print('liftoff')
+
+for x in countdown(3):
+    print(x)
+'''
+pseudo = [
+  "Define countdown: a generator because it contains yield.",
+  "while n is above 0:",
+  "hand n out and pause here,",
+  "when resumed, decrease n.",
+  "after the loop, print liftoff.",
+  "(blank)",
+  "Take values from countdown(3) one at a time,",
+  "and print each.",
+]
+
+[lesson.lines.3]
+t = "yield pauses"
+b = "yield hands a value to the for loop and freezes the generator right here, with n remembered."
+look = "The countdown frame stays alive between values."
+
+[lesson.lines.4]
+t = "Resume"
+b = "The for loop asks for the next value, so the generator continues from just after yield."
+look = "n decreases."
+
+[lesson.lines.8]
+t = "Use the value"
+b = "The loop body runs with the value that was yielded."
+look = "The output box."
+
+[lesson.predict]
+line = 8
+q = "What does the first print(x) show?"
+target = { out = true, first = true }
+opts = ["3", "1", "None"]
+
+[lesson.predict.fb]  # feedback for specific wrong answers
+1 = "Not quite. The first value yielded is n itself, 3."
+
+[[lesson.variants]]
+label = "countdown(3)"
+
+[lesson.check]  # the final unfamiliar-input question
+code = '''
+def g():
+    yield 'a'
+    yield 'b'
+x = list(g())'''
+q = "What is x?"
+opts = ["['a', 'b']", "'a'"]
+right = 0
+fb = [
+  "Right. list() runs the generator to the end.",
+  "Not quite. list() keeps asking for values until it is used up.",
+]
+
+[[lesson]]
+id = "gen_usedup"
+topic = "Iterators and generators"
+title = "Why is my generator empty the second time?"
+recap = "A generator can be read only once. If you need the values twice, build a list (square brackets) or create a new generator. The trade-off: a list holds everything in memory, a generator holds only one value at a time."
+code = '''
+squares = (n * n for n in [1, 2, 3])
+total = sum(squares)
+again = list(squares)
+print(total, again)
+'''
+pseudo = [
+  "A generator expression: squares made on demand.",
+  "Add them up (this uses every value).",
+  "Try to read them again.",
+  "Show both.",
+]
+
+[lesson.lines.1]
+t = "A generator expression"
+b = "Round brackets make a generator, not a list. No squares are computed yet."
+look = "squares is a generator object."
+
+[lesson.lines.2]
+t = "Consume it"
+b = "sum pulls every value out of the generator."
+look = "total is 14."
+
+[lesson.lines.3]
+t = "Nothing left"
+b = "A generator runs once. It is now exhausted, so list() gets no values."
+look = "again is empty."
+
+[lesson.predict]
+line = 3
+q = "What will again hold?"
+target = { v = "again" }
+opts = ["[]", "[1, 4, 9]", "An error"]
+
+[lesson.predict.fb]  # feedback for specific wrong answers
+"[1, 4, 9]" = "Not quite. sum already used up every value."
+
+[[lesson.variants]]
+label = "( ) generator"
+
+[[lesson.variants]]
+label = "[ ] list"
+from = "(n * n for n in [1, 2, 3])"
+to = "[n * n for n in [1, 2, 3]]"
+opts = ["[1, 4, 9]", "[]", "An error"]
+
+[lesson.check]  # the final unfamiliar-input question
+code = '''
+g = (c for c in 'ab')
+n = len(list(g)) + len(list(g))'''
+q = "What is n?"
+opts = ["2", "4"]
+right = 0
+fb = [
+  "Right. The second list() gets nothing.",
+  "Not quite. The generator is empty after the first list().",
+]
+
+[[lesson]]
+id = "gen_pipeline"
+topic = "Iterators and generators"
+title = "How do generators chain into a pipeline?"
+recap = "Generator stages pass one item at a time: read strips a line, hands it to non_empty, which keeps or drops it, then the next line starts. This works on huge inputs because no stage builds a full list."
+code = '''
+def read(lines):
+    for line in lines:
+        yield line.strip()
+
+def non_empty(items):
+    for s in items:
+        if s:
+            yield s
+
+raw = [' a ', '', ' b']
+clean = list(non_empty(read(raw)))
+print(clean)
+'''
+pseudo = [
+  "Stage 1: strip each line,",
+  "(body)",
+  "(body)",
+  "(blank)",
+  "Stage 2: drop empty strings,",
+  "(body)",
+  "(body)",
+  "(body)",
+  "(blank)",
+  "Raw input.",
+  "Connect the stages and collect the results.",
+  "Show them.",
+]
+
+[lesson.lines.11]
+t = "Connect the stages"
+b = "read(raw) and non_empty(...) are generators. Nothing runs until list() asks for values. Then each value flows through both stages, one at a time."
+look = "Frames for read and non_empty take turns."
+
+[lesson.predict]
+line = 11
+q = "What will clean hold?"
+target = { v = "clean" }
+opts = ["['a', 'b']", "[' a ', ' b']", "['a', '', 'b']"]
+
+[lesson.predict.fb]  # feedback for specific wrong answers
+"[' a ', ' b']" = "Not quite. read strips each line first."
+"['a', '', 'b']" = "Not quite. non_empty drops the empty string."
+
+[[lesson.variants]]
+label = "two stages"
+
+[lesson.check]  # the final unfamiliar-input question
+code = '''
+def dbl(xs):
+    for x in xs:
+        yield x * 2
+r = sum(dbl(dbl([1, 2])))'''
+q = "What is r?"
+opts = ["12", "6"]
+right = 0
+fb = [
+  "Right. 1 and 2 become 4 and 8.",
+  "Not quite. The values pass through dbl twice.",
+]

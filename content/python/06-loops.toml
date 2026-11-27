@@ -1,0 +1,411 @@
+# Python 06: Loops
+# One [[lesson]] block per lesson, in the order students see them.
+# Line numbers in lines, predict.line and pline count from 1.
+
+topic = "06"
+
+[[lesson]]
+id = "loop_for"
+topic = "Loops"
+title = "How does for take each item?"
+recap = "for p in pets moved p to each item in turn: cat, then dog, then eel. The body ran once per item. After the last item, p still refers to 'eel', and the program continued after the loop."
+dec = "Each time round: is there another item? Yes: move p to it and run the body. No: leave the loop."
+code = '''
+pets = ['cat', 'dog', 'eel']
+for p in pets:
+    print(p.upper())
+print('done')
+'''
+pseudo = [
+  "pets is a list of three names.",
+  "For each item in pets, call it p:",
+  "show p in capitals.",
+  "After the loop, show done.",
+]
+
+[lesson.lines.2]
+t = "Take the next item"
+b = "for moves the name p to the next item of the list. When there are no items left, the loop ends and Python jumps past the indented block."
+look = "p in the global frame changes each time."
+
+[lesson.lines.3]
+t = "Run the body"
+b = "The indented block runs once for the current p."
+look = "One new line in the output."
+
+[lesson.lines.4]
+t = "After the loop"
+b = "The list ran out of items, so Python left the loop."
+look = "The output box."
+
+[lesson.predict]
+line = 4
+q = "After the loop, what does p refer to?"
+target = { v = "p" }
+opts = ["'eel'", "'cat'", "An error"]
+
+[[lesson.variants]]
+label = "3 pets"
+
+[lesson.check]  # the final unfamiliar-input question
+code = '''
+for c in 'hi':
+    print(c)'''
+q = "What is printed?"
+opts = ["h then i", "hi", "An error"]
+right = 0
+fb = [
+  "Right. A string gives its characters one at a time.",
+  "Not quite. for walks through a string one character at a time.",
+  "Not quite. Strings can be looped over.",
+]
+
+[[lesson]]
+id = "loop_total"
+topic = "Loops"
+title = "How does a running total grow?"
+recap = "A running total needs three parts: start it before the loop, update it inside with old + value, and read it after the loop. Resetting it inside the loop throws away the progress each time."
+dec = "Another price left? Yes: add it to total and ask again. No: print total."
+code = '''
+prices = [4, 10, 6]
+total = 0
+for x in prices:
+    total = total + x
+print(total)
+'''
+pseudo = [
+  "Three prices.",
+  "Start the total at 0.",
+  "For each price x:",
+  "new total = old total + x.",
+  "Show the total.",
+]
+
+[lesson.lines.2]
+t = "Start at zero"
+b = "The accumulator must exist before the loop, starting at a value that changes nothing: 0 for adding."
+look = "total is 0."
+
+[lesson.lines.3]
+t = "Next price"
+b = "x moves to the next price."
+look = "x changes."
+
+[lesson.lines.4]
+t = "Old + value = new"
+b = "The right side uses the old total, adds x, and then total moves to the new value."
+look = "total grows by x."
+
+[lesson.lines.5]
+t = "Show the result"
+b = "After the last price, total holds the sum."
+look = "The output box."
+
+[lesson.predict]
+line = 5
+q = "What will print(total) show?"
+target = { out = true }
+opts = ["20", "6", "0"]
+
+[lesson.predict.fb]  # feedback for specific wrong answers
+0 = "Not quite. The loop body ran three times and changed total."
+6 = "Not quite. total kept growing: each pass added to the old total, it did not replace it."
+
+[[lesson.variants]]
+label = "[4, 10, 6]"
+
+[[lesson.variants]]
+label = "[]"
+from = "[4, 10, 6]"
+to = "[]"
+opts = ["0", "An error", "None"]
+
+[[lesson.variants]]
+label = "total inside"
+from = '''
+total = 0
+for x in prices:
+'''
+to = '''
+for x in prices:
+    total = 0
+'''
+opts = ["6", "20", "0"]
+
+[lesson.check]  # the final unfamiliar-input question
+code = '''
+n = 1
+for k in [2, 3]:
+    n = n * k'''
+q = "What is n?"
+opts = ["6", "5", "3"]
+right = 0
+fb = [
+  "Right. 1 * 2 * 3.",
+  "Not quite. The update multiplies.",
+  "Not quite. n kept the result from the first pass too.",
+]
+
+[[lesson]]
+id = "loop_count"
+topic = "Loops"
+title = "How do I count matches?"
+recap = "Counting is a running total that adds 1 only when a condition is True. The if inside the loop decides, item by item, whether to count."
+dec = "For each word: starts with a? Yes: count it. No: skip to the next word."
+code = '''
+words = ['ant', 'bee', 'ape', 'cat']
+count = 0
+for w in words:
+    if w.startswith('a'):
+        count = count + 1
+print(count)
+'''
+pseudo = [
+  "Four words.",
+  "No matches yet.",
+  "For each word w:",
+  "does it start with a?",
+  "yes: add one to count.",
+  "Show count.",
+]
+
+[lesson.lines.4]
+t = "Check this item"
+b = "The if runs once per word. Only matching words reach the next line."
+look = "Which line runs next."
+
+[lesson.lines.5]
+t = "Count it"
+b = "A match: count goes up by one."
+look = "count changes."
+
+[lesson.predict]
+line = 6
+q = "What will print(count) show?"
+target = { out = true }
+opts = ["2", "4", "1"]
+
+[lesson.predict.fb]  # feedback for specific wrong answers
+1 = "Not quite. ape starts with a too."
+4 = "Not quite. count only goes up when the if is True."
+
+[[lesson.variants]]
+label = "starts with 'a'"
+
+[[lesson.variants]]
+label = "contains 'e'"
+from = "w.startswith('a')"
+to = "'e' in w"
+opts = ["2", "4", "1"]
+
+[lesson.check]  # the final unfamiliar-input question
+code = '''
+c = 0
+for n in [3, 8, 5, 10]:
+    if n > 4:
+        c = c + 1'''
+q = "What is c?"
+opts = ["3", "2", "4"]
+right = 0
+fb = [
+  "Right. 8, 5 and 10.",
+  "Not quite. 5 > 4 is True too.",
+  "Not quite. 3 is not more than 4.",
+]
+
+[[lesson]]
+id = "loop_filter"
+topic = "Loops"
+title = "How do I keep only some items?"
+recap = "Filtering builds a new list: start empty, loop over the original, and append only the items that pass the test. nums itself is never changed."
+dec = "For each number: positive? Yes: append it. No: move on."
+code = '''
+nums = [5, -2, 8, -1]
+positives = []
+for n in nums:
+    if n > 0:
+        positives.append(n)
+print(positives)
+'''
+pseudo = [
+  "Four numbers.",
+  "Start an empty result list.",
+  "For each n:",
+  "is it positive?",
+  "yes: add it to the result.",
+  "Show the result.",
+]
+
+[lesson.lines.2]
+t = "An empty result"
+b = "The filtered items go into a new list. The original list is not changed."
+look = "positives is an empty list."
+
+[lesson.lines.5]
+t = "Keep it"
+b = "append adds n to the end of positives."
+look = "A new cell appears in positives."
+
+[lesson.predict]
+line = 6
+q = "What will print(positives) show?"
+target = { out = true }
+opts = ["[5, 8]", "[5, -2, 8, -1]", "[-2, -1]"]
+
+[lesson.predict.fb]  # feedback for specific wrong answers
+"[5, -2, 8, -1]" = "Not quite. Only items that pass the if are appended."
+
+[[lesson.variants]]
+label = "n > 0"
+
+[[lesson.variants]]
+label = "n % 2 == 0"
+from = "n > 0"
+to = "n % 2 == 0"
+opts = ["[-2, 8]", "[8]", "[5, -1]"]
+
+[lesson.check]  # the final unfamiliar-input question
+code = '''
+out = []
+for s in ['a', '', 'b']:
+    if s:
+        out.append(s)'''
+q = "What is out?"
+opts = ["['a', 'b']", "['a', '', 'b']", "['']"]
+right = 0
+fb = [
+  "Right. An empty string counts as False.",
+  "Not quite. The empty string fails the if.",
+  "Not quite. That is the one that was left out.",
+]
+
+[[lesson]]
+id = "loop_while"
+topic = "Loops"
+title = "When does a while loop stop?"
+recap = "A while loop checks before each pass, so the value that finally fails the check is the one left behind: 27. If the condition is False at the start, the body never runs at all."
+dec = "Is n < 20? Yes: triple n and ask again. No: leave the loop and print."
+code = '''
+n = 1
+while n < 20:
+    n = n * 3
+print(n)
+'''
+pseudo = ["n is 1.", "While n is below 20:", "triple n.", "Show n."]
+
+[lesson.lines.2]
+t = "Check first"
+b = "while checks its condition before every pass. True: run the body. False: leave the loop."
+look = "Which line runs next."
+
+[lesson.lines.3]
+t = "Change the condition"
+b = "The body must move n toward the exit, or the loop never ends."
+look = "n grows."
+
+[lesson.lines.4]
+t = "After the loop"
+b = "The check was False, so the loop stopped."
+look = "The output box."
+
+[lesson.predict]
+line = 4
+q = "What will print(n) show?"
+target = { out = true }
+opts = ["27", "9", "20"]
+
+[lesson.predict.fb]  # feedback for specific wrong answers
+9 = "Not quite. 9 < 20 is still True, so the body ran once more."
+20 = "Not quite. n only takes values 1, 3, 9, 27."
+
+[[lesson.variants]]
+label = "n < 20"
+
+[[lesson.variants]]
+label = "n < 9"
+from = "n < 20"
+to = "n < 9"
+opts = ["9", "27", "3"]
+
+[[lesson.variants]]
+label = "n = 50"
+from = '''
+n = 1
+'''
+to = '''
+n = 50
+'''
+opts = ["50", "150", "An error"]
+
+[lesson.check]  # the final unfamiliar-input question
+code = '''
+k = 10
+while k > 0:
+    k = k - 4'''
+q = "What is k at the end?"
+opts = ["-2", "2", "0"]
+right = 0
+fb = [
+  "Right. 10, 6, 2, then -2 fails the check.",
+  "Not quite. 2 > 0 is True, so it ran once more.",
+  "Not quite. k skips over 0: 2 - 4 is -2.",
+]
+
+[[lesson]]
+id = "loop_break"
+topic = "Loops"
+title = "What do break and continue skip?"
+recap = "Output was 1, 3, end. continue skipped printing 2 but kept looping. break stopped the loop at 4, so 4 and 5 were never printed, and n was left at 4."
+dec = "For each n: is it 2? Skip to the next n. Is it 4? Leave the loop. Otherwise print it."
+code = '''
+for n in [1, 2, 3, 4, 5]:
+    if n == 2:
+        continue
+    if n == 4:
+        break
+    print(n)
+print('end')
+'''
+pseudo = [
+  "For each n from 1 to 5:",
+  "if n is 2,",
+  "skip the rest of this pass.",
+  "if n is 4,",
+  "leave the loop completely.",
+  "show n.",
+  "Show end.",
+]
+
+[lesson.lines.3]
+t = "continue"
+b = "continue skips the rest of this pass and goes straight back to take the next item."
+look = "print(n) is skipped for 2."
+
+[lesson.lines.5]
+t = "break"
+b = "break leaves the loop at once. The remaining items are never taken."
+look = "The next line is after the loop."
+
+[lesson.predict]
+line = 7
+q = "After the loop, what is n?"
+target = { v = "n" }
+opts = ["4", "5", "2"]
+
+[[lesson.variants]]
+label = "continue at 2, break at 4"
+
+[lesson.check]  # the final unfamiliar-input question
+code = '''
+for c in 'abc':
+    if c == 'b':
+        break
+    print(c)'''
+q = "What is printed?"
+opts = ["a", "a c", "a b"]
+right = 0
+fb = [
+  "Right. break stops before c.",
+  "Not quite. That would be continue.",
+  "Not quite. break runs before print(c) for b.",
+]

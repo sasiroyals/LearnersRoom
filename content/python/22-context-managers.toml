@@ -1,0 +1,144 @@
+# Python 22: Context managers
+# One [[lesson]] block per lesson, in the order students see them.
+# Line numbers in lines, predict.line and pline count from 1.
+
+topic = "22"
+
+[[lesson]]
+id = "ctx_protocol"
+topic = "Context managers"
+title = "What do __enter__ and __exit__ do?"
+recap = "with X() as t: calls X().__enter__(), runs the block, then calls __exit__ no matter how the block ends. That is why files, locks and timers use with: cleanup cannot be forgotten."
+code = '''
+class Timer:
+    def __enter__(self):
+        print('start')
+        return self
+
+    def __exit__(self, kind, value, tb):
+        print('stop')
+        return False
+
+with Timer() as t:
+    print('working')
+print('after')
+'''
+pseudo = [
+  "A context manager class:",
+  "on entering the with block,",
+  "announce start,",
+  "hand back the object (this becomes t).",
+  "(blank)",
+  "on leaving the block, for any reason,",
+  "announce stop,",
+  "do not hide errors.",
+  "(blank)",
+  "Enter the block with a Timer,",
+  "do the work,",
+  "continue after the block.",
+]
+
+[lesson.lines.7]
+t = "Exit"
+b = "Leaving the block calls __exit__. If an error happened, its details arrive in kind, value and tb; returning False lets the error continue."
+look = "stop is printed."
+
+[lesson.lines.10]
+t = "Enter"
+b = "with calls __enter__. Whatever it returns is bound to the name after as."
+look = "An __enter__ frame appears."
+
+[lesson.predict]
+line = 10
+q = "What is printed when the with line runs?"
+target = { out = true }
+opts = ["start", "start and working", "Nothing yet"]
+
+[lesson.predict.fb]  # feedback for specific wrong answers
+"Nothing yet" = "Not quite. Entering the with block calls __enter__ right away, which prints start."
+
+[[lesson.variants]]
+label = "no error"
+
+[lesson.check]  # the final unfamiliar-input question
+code = '''
+with Timer():
+    raise ValueError()'''
+q = "Is stop printed?"
+opts = ["Yes", "No"]
+right = 0
+fb = [
+  "Right. __exit__ runs even when the block raises.",
+  "Not quite. __exit__ always runs.",
+]
+
+[[lesson]]
+id = "ctx_contextmanager"
+topic = "Context managers"
+title = "How does a generator become a context manager?"
+recap = "contextmanager splits one generator into setup (before yield) and cleanup (after yield). It is the quickest way to write a small context manager. In real code, put yield inside try/finally so the cleanup also runs when the block raises."
+code = '''
+from contextlib import contextmanager
+
+def tag(label):
+    print('<' + label + '>')
+    yield label
+    print('</' + label + '>')
+
+tag = contextmanager(tag)
+
+with tag('b') as t:
+    print('bold text')
+'''
+pseudo = [
+  "Load the helper.",
+  "(blank)",
+  "A generator with one yield:",
+  "setup: print the opening tag,",
+  "pause here and hand name to the with block,",
+  "cleanup: print the closing tag.",
+  "(blank)",
+  "Wrap it (the same as writing @contextmanager above def).",
+  "(blank)",
+  "Use it in a with block:",
+  "the block runs while the generator is paused.",
+]
+
+[lesson.lines.6]
+t = "Resume after yield"
+b = "Leaving the block resumes the generator after yield: the cleanup part."
+look = "The closing tag is printed."
+
+[lesson.lines.8]
+t = "The decorator, written out"
+b = "@contextmanager above def tag would do exactly this: tag = contextmanager(tag)."
+look = "tag now refers to a wrapper."
+
+[lesson.lines.10]
+t = "Run up to yield"
+b = "Entering the block runs the generator up to yield. The yielded value becomes t."
+look = "The opening tag is printed."
+
+[lesson.predict]
+line = 10
+q = "What is printed when the with line runs?"
+target = { out = true }
+opts = ["<b>", "bold text", "</b>"]
+
+[lesson.predict.fb]  # feedback for specific wrong answers
+"</b>" = "Not quite. Entering runs the generator only up to yield."
+
+[[lesson.variants]]
+label = "tag('b')"
+
+[lesson.check]  # the final unfamiliar-input question
+code = '''
+# setup ... yield ... cleanup
+# Where does the with block run?'''
+q = "Pick one:"
+opts = ["At the yield", "After the cleanup"]
+right = 0
+fb = [
+  "Right. The generator is paused at yield while the block runs.",
+  "Not quite. Cleanup runs after the block.",
+]

@@ -1,0 +1,316 @@
+# Python 08: Functions: the basics
+# One [[lesson]] block per lesson, in the order students see them.
+# Line numbers in lines, predict.line and pline count from 1.
+
+topic = "08"
+
+[[lesson]]
+id = "fn_frame"
+topic = "Functions"
+title = "Where do arguments go when a function is called?"
+recap = "Calling area made a fresh frame. The arguments went into the parameters by position, result lived only in that frame, and return carried the value back to a. When the call ended, its frame was thrown away."
+dec = "There are no branches here. The key question at each line is: which frame am I in?"
+code = '''
+def area(width, height):
+    result = width * height
+    return result
+
+a = area(3, 4)
+print(a)
+'''
+pseudo = [
+  "Define area: it takes a width and a height.",
+  "Inside: multiply them and call it result.",
+  "Send result back to whoever called.",
+  "(blank)",
+  "Call area with 3 and 4. Store the answer in a.",
+  "Show a.",
+]
+
+[lesson.lines.1]
+t = "Define the function"
+b = "def stores the function under the name area. Its body does not run yet."
+look = "The global frame now holds area. Nothing else happened."
+
+[lesson.lines.2]
+t = "Work inside the frame"
+b = "result is a local name. It lives in the call’s frame, not in the global frame."
+look = "result appears inside the area() frame only."
+
+[lesson.lines.3]
+t = "Return"
+b = "return sends the value back to the line that called area. The frame and its local names disappear."
+look = "The area() frame is gone, and a holds the returned value."
+
+[lesson.lines.5]
+t = "Call the function"
+b = "Python creates a new frame for this call. The parameters width and height receive the argument values, in order."
+look = "A second frame appears below the global one."
+
+[lesson.lines.6]
+t = "Print"
+b = "a is an ordinary global name now."
+look = "The output box."
+
+[lesson.predict]
+line = 5
+q = "What will a hold after the call?"
+target = { v = "a" }
+opts = ["12", "7", "None"]
+
+[lesson.predict.fb]  # feedback for specific wrong answers
+7 = "Not quite. The body multiplies: width * height."
+None = "Not quite. area ends with return result, so the call hands back a value."
+
+[[lesson.variants]]
+label = "area(3, 4)"
+
+[[lesson.variants]]
+label = "area(5, 2)"
+from = "area(3, 4)"
+to = "area(5, 2)"
+opts = ["10", "7", "None"]
+
+[[lesson.variants]]
+label = "area(0, 9)"
+from = "area(3, 4)"
+to = "area(0, 9)"
+opts = ["0", "9", "None"]
+
+[lesson.check]  # the final unfamiliar-input question
+code = '''
+def half(n):
+    h = n / 2
+    return h
+
+x = half(10)
+print(h)'''
+q = "What happens on the last line?"
+opts = ["It prints 5.0", "A NameError"]
+right = 1
+fb = [
+  "Not quite. h was local to half. Its frame is gone once the call returns.",
+  "Right. h existed only inside the call’s frame, so the global frame has no h.",
+]
+
+[[lesson]]
+id = "fn_return"
+topic = "Functions"
+title = "Why did my function print but give back None?"
+recap = "show_double printed 10 and then gave back None, because it had no return. double printed nothing and gave back 10. Use print to show something to a person, and return to give a value to the code that called you."
+code = '''
+def show_double(n):
+    print(n * 2)
+
+def double(n):
+    return n * 2
+
+x = show_double(5)
+y = double(5)
+print(x, y)
+'''
+pseudo = [
+  "Define show_double: it prints twice n.",
+  "(its body)",
+  "(blank)",
+  "Define double: it returns twice n.",
+  "(its body)",
+  "(blank)",
+  "Call show_double(5) and store what it gives back in x.",
+  "Call double(5) and store what it gives back in y.",
+  "Show x and y.",
+]
+
+[lesson.lines.2]
+t = "print shows a value"
+b = "print writes to the output. It does not hand anything back to the caller."
+look = "10 appears in the output, but no value is returned yet."
+
+[lesson.lines.5]
+t = "return hands back a value"
+b = "return gives 10 to the caller. Nothing is printed."
+look = "The output did not change."
+
+[lesson.lines.7]
+t = "Call show_double"
+b = "A frame is created with n = 5."
+look = "The show_double() frame."
+
+[lesson.lines.8]
+t = "Back with nothing"
+b = "show_double ended without a return statement, so Python handed back None."
+look = "x holds None."
+
+[lesson.lines.9]
+t = "Print both"
+b = "x is None and y is 10."
+look = "The output box."
+
+[lesson.predict]
+line = 7
+q = "What will x hold after show_double(5)?"
+target = { v = "x" }
+opts = ["10", "None", "An error"]
+
+[lesson.predict.fb]  # feedback for specific wrong answers
+10 = "Not quite. 10 is printed, but print does not give a value back. A function with no return gives back None."
+"An error" = "No error. Calling a function with no return is fine. It just gives back None."
+
+[[lesson.variants]]
+label = "n = 5"
+
+[lesson.check]  # the final unfamiliar-input question
+code = '''
+def f():
+    print('hi')
+
+r = f()'''
+q = "What is r?"
+opts = ["'hi'", "None"]
+right = 1
+fb = [
+  "Not quite. hi is printed, but f has no return.",
+  "Right. A function without return gives back None.",
+]
+
+[[lesson]]
+id = "fn_params"
+topic = "Functions"
+title = "How do default and keyword arguments fill the parameters?"
+recap = "greet('Ana') used the default greeting. greet('Ben', 'Hi') filled the parameters by position. greet(greeting='Yo', name='Cy') matched by name, so the order of the keywords did not matter."
+code = '''
+def greet(name, greeting='Hello'):
+    return greeting + ', ' + name
+
+a = greet('Ana')
+b = greet('Ben', 'Hi')
+c = greet(greeting='Yo', name='Cy')
+print(a)
+print(b)
+print(c)
+'''
+pseudo = [
+  "Define greet. greeting is optional and defaults to Hello.",
+  "Join greeting and name.",
+  "(blank)",
+  "Call with one argument: the default fills greeting.",
+  "Call with two: they fill name, then greeting.",
+  "Call with keywords: each value goes to the parameter it names.",
+  "Show a.",
+  "Show b.",
+  "Show c.",
+]
+
+[lesson.lines.4]
+t = "Use the default"
+b = "Only name was given, so greeting takes its default value."
+look = "The frame shows both parameters filled."
+
+[lesson.lines.5]
+t = "Positional arguments"
+b = "Arguments fill parameters left to right."
+look = "name and greeting in the new frame."
+
+[lesson.lines.6]
+t = "Keyword arguments"
+b = "With name=value, order does not matter. Each value goes to the parameter with that name."
+look = "Compare the order in the call with the frame."
+
+[lesson.predict]
+line = 6
+q = "What will c hold?"
+target = { v = "c" }
+opts = ["'Yo, Cy'", "'Cy, Yo'", "An error"]
+
+[lesson.predict.fb]  # feedback for specific wrong answers
+"'Cy, Yo'" = "Not quite. Keywords match by name, not position: greeting is Yo and name is Cy."
+"An error" = "No error. Keyword arguments may come in any order."
+
+[[lesson.variants]]
+label = "keywords"
+
+[lesson.check]  # the final unfamiliar-input question
+code = '''
+def box(w, h=1):
+    return w * h
+
+v = box(h=3, w=2)'''
+q = "What is v?"
+opts = ["6", "2", "An error"]
+right = 0
+fb = [
+  "Right. w is 2 and h is 3, matched by name.",
+  "Not quite. h was given as 3, so the default 1 is not used.",
+  "No error. Keywords can be in any order.",
+]
+
+[[lesson]]
+id = "fn_scope"
+topic = "Functions"
+title = "Why did the global count stay the same?"
+recap = "Two names called count existed at once: a global one holding 10 and a local one holding 1. Inside bump, Python found the local one first. When bump finished, the local name vanished and the global count was untouched."
+dec = "Name lookup asks, in order: is the name local? If not, is it in an enclosing function? If not, is it global? If not, is it built in? (the LEGB rule)"
+code = '''
+count = 10
+
+def bump():
+    count = 1
+    return count + 1
+
+r = bump()
+print(r, count)
+'''
+pseudo = [
+  "Make a global name count = 10.",
+  "(blank)",
+  "Define bump.",
+  "Inside bump: make a local name count = 1.",
+  "Return local count + 1.",
+  "(blank)",
+  "Call bump; store the result in r.",
+  "Show r and the global count.",
+]
+
+[lesson.lines.4]
+t = "A local name with the same spelling"
+b = "Assigning inside a function creates a local name. It does not touch the global count."
+look = "Two different count names: one per frame."
+
+[lesson.lines.5]
+t = "Return"
+b = "Python looks up count in the nearest frame first: the local one."
+look = "The local count, not the global one."
+
+[lesson.lines.8]
+t = "Print"
+b = "Outside bump, count means the global name again."
+look = "The output box."
+
+[lesson.predict]
+line = 8
+q = "What will print(r, count) show?"
+target = { out = true }
+opts = ["2 10", "2 1", "11 10"]
+
+[lesson.predict.fb]  # feedback for specific wrong answers
+"2 1" = "Not quite. count = 1 made a local name inside bump. The global count is still 10."
+"11 10" = "Not quite. Inside bump, count means the local one, which is 1."
+
+[[lesson.variants]]
+label = "count = 1 inside"
+
+[lesson.check]  # the final unfamiliar-input question
+code = '''
+x = 5
+
+def f():
+    return x * 2
+
+print(f())'''
+q = "What is printed?"
+opts = ["10", "An error"]
+right = 0
+fb = [
+  "Right. f has no local x, so Python looks outward and finds the global x.",
+  "Not quite. Reading a global inside a function is fine. Only assigning creates a local.",
+]
