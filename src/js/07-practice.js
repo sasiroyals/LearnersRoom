@@ -78,6 +78,10 @@ const PROB_BY_ID = {}; Object.entries(PROBLEMS).forEach(([n, ps])=> ps.forEach(p
 const solvedKey = id => 'cs.solved.py.' + id;
 const isSolved = id => store.get(solvedKey(id)) === '1';
 const draftKey = id => 'cs.draft.py.' + id;
+const isOutProb = p => p && p.kind==='output';
+const normOut = t => String(t||'').split('\n').map(l=>l.replace(/\s+$/,'')).join('\n').replace(/^\n+|\n+$/g,'');
+/* Function problems in topics before 08 use def before it is taught: label them so beginners start with the others. */
+const needsDef = p => !isOutProb(p) && +p.topic < 8;
 function problemCount(n){ return (PROBLEMS[n] || []).length; }
 function solvedCount(n){ return (PROBLEMS[n] || []).filter(p=>isSolved(p.id)).length; }
 const libOpen = new Set();
@@ -101,7 +105,7 @@ function renderLib(){
         const ps = PROBLEMS[t.n] || []; if(!ps.length) return;
         const open = libOpen.has(t.n), sc = solvedCount(t.n);
         h += `<div class="lib-topic"><button class="lib-tbtn" data-ltopic="${t.n}" aria-expanded="${open}"><span class="tnum">${t.n}</span><span>${esc(t.t)}</span><span class="lib-cnt${sc===ps.length?' full':''}">${sc}/${ps.length}</span></button><ul${open?'':' hidden'}>` +
-          ps.map(p=>`<li><button class="lib-item${sel.kind==='problem' && sel.id===p.id?' active':''}" data-prob="${p.id}"><span class="lvl lvl-${p.level.toLowerCase()}">${p.level}</span><span class="lib-t">${esc(p.title)}</span>${isSolved(p.id)?'<span class="tick" aria-label="solved">✓</span>':''}</button></li>`).join('') +
+          ps.map(p=>`<li><button class="lib-item${sel.kind==='problem' && sel.id===p.id?' active':''}" data-prob="${p.id}"><span class="lvl lvl-${p.level.toLowerCase()}">${p.level}</span><span class="lib-t">${esc(p.title)}</span>${needsDef(p)?'<span class="lib-def" title="Uses def from topic 08">def</span>':''}${isSolved(p.id)?'<span class="tick" aria-label="solved">✓</span>':''}</button></li>`).join('') +
           `<li><a class="gfg" href="${gfgFor(t.n)}" target="_blank" rel="noopener">More on GeeksforGeeks ↗</a></li></ul></div>`;
       });
     }
@@ -122,7 +126,7 @@ function renderLib(){
   $('#lib-list').querySelectorAll('[data-ex]').forEach(b=> b.onclick = ()=>{ const e = EXAMPLES[lang].find(x=>x.id===b.dataset.ex); $('#pr-input').value = e.inp || ''; prOpenCode(e.c, e.t, {kind:'example', id:e.id}, true); closeLibIfNarrow(); });
 }
 function setLibOpen(open){ document.querySelector('.practice').classList.toggle('lib-open', open); $('#lib-toggle').setAttribute('aria-expanded', open); }
-function closeLibIfNarrow(){ if(innerWidth <= 1360) setLibOpen(false); }
+function closeLibIfNarrow(){ if(innerWidth <= 1440) setLibOpen(false); }
 $('#lib-toggle').onclick = ()=> setLibOpen(!document.querySelector('.practice').classList.contains('lib-open'));
 $('#lib-scrim').onclick = ()=> setLibOpen(false);
 document.querySelectorAll('[data-lib]').forEach(b=> b.onclick = ()=>{ pr.lib = b.dataset.lib; renderLib(); });
@@ -144,17 +148,19 @@ function openProblem(id){
   libOpen.add(p.topic);
   if(mode==='practice') renderPractice(); else setMode('practice');
 }
-function openTopicProblems(n){ const ps = PROBLEMS[n] || []; if(!ps.length) return; const p = ps.find(x=>!isSolved(x.id)) || ps[0]; openProblem(p.id); }
+function openTopicProblems(n){ const ps = PROBLEMS[n] || []; if(!ps.length) return; const p = ps.find(x=>!isSolved(x.id) && !needsDef(Object.assign({topic:n}, x))) || ps.find(x=>!isSolved(x.id)) || ps[0]; openProblem(p.id); }
 
 function renderProblemCard(){
   const p = curProblem(), box = $('#pr-prob');
   if(!p){ box.hidden = true; box.innerHTML = ''; return; }
   const t = CURRICULUM.py.find(x=>x.n===p.topic);
-  const ex = p.tests.filter(x=>!x.setup).slice(0,2);
+  const ex = isOutProb(p) ? [] : p.tests.filter(x=>!x.setup).slice(0,2);
   box.hidden = false;
   box.innerHTML = `<div class="prob-meta"><span class="lvl lvl-${p.level.toLowerCase()}">${p.level}</span><span>${esc(p.topic+' '+(t?t.t:''))}</span>${isSolved(p.id)?'<span class="solved-pill">✓ Solved</span>':''}</div>
     <p class="prob-story">${esc(p.story)}</p>
     ${ex.length ? `<div class="prob-ex">${ex.map(x=>`<code>${esc(x.call)}</code><span>→</span><code>${esc(x.expect)}</code>`).join('')}</div>` : ''}
+    ${isOutProb(p) ? `<div class="prob-want"><span>Your program should print</span><pre>${esc(p.tests[0].output)}</pre></div>` : ''}
+    ${needsDef(p) ? `<p class="prob-note">This one uses <code>def</code>, which is taught in topic 08 Functions. Try the other problems in this topic first.</p>` : ''}
     <details class="prob-hint"><summary>Show a hint</summary><p>${esc(p.hint)}</p></details>`;
 }
 
@@ -163,7 +169,7 @@ function setEditing(on){
   $('#pr-edit').hidden = !on; $('#pr-view').hidden = on;
   $('#pr-edit-btn').hidden = on; $('#pr-debug').hidden = !on; $('#pr-run').hidden = !on;
   const prob = !!curProblem();
-  $('#pr-test').hidden = !on || !prob; $('#pr-reset').hidden = !on || !prob; $('#pr-sol').hidden = !on || !prob;
+  $('#pr-test').hidden = !on || !prob; $('#pr-test').textContent = isOutProb(curProblem()) ? 'Check my answer' : 'Run tests'; $('#pr-reset').hidden = !on || !prob; $('#pr-sol').hidden = !on || !prob;
   $('#pr-solbar').hidden = !pr.watching || on;
   if(on){ pr.watching = false; pr.trace = null; $('#pr-solbar').hidden = true; $('#pr-canvas').innerHTML = `<div class="pv-empty">Press <b>Step through</b> to watch your program run one line at a time. Each name appears on the left, each object on the right, and an arrow shows which object a name refers to.</div>`; renderSideIdle(); }
 }
@@ -171,13 +177,16 @@ function renderSideIdle(){
   const p = curProblem(), box = $('#pr-dbg');
   if(p){
     const R = pr.results;
-    let h = `<div class="meta"><span>${R ? (R.pass===R.total ? 'All tests pass' : R.pass+' of '+R.total+' tests pass') : 'Not run yet'}</span></div><h2 class="step-title">Tests</h2>`;
+    const out = isOutProb(p);
+    let h = `<div class="meta"><span>${!R ? (out ? 'Not checked yet' : 'Not run yet') : out ? (R.pass===R.total ? 'Correct' : 'Not right yet') : R.pass===R.total ? 'All tests pass' : R.pass+' of '+R.total+' test'+(R.total>1?'s':'')+' pass'}</span></div><h2 class="step-title">${out ? 'Your answer' : 'Tests'}</h2>`;
     h += `<ul class="tests">` + p.tests.map((t,i)=>{
       const r = R && R.items[i];
       const st = !r ? 'idle' : r.ok ? 'ok' : 'bad';
+      if(isOutProb(p)) return `<li class="t-${st}"><span class="t-ico">${st==='ok'?'✓':st==='bad'?'✗':'○'}</span><div>The output should be<pre class="t-setup">${esc(t.output)}</pre>${r && !r.ok ? `<div class="t-got">${r.error ? esc(r.error) : 'Your program printed<pre class="t-setup">'+esc(r.got || '(nothing)')+'</pre>'}</div>${r.help ? `<div class="t-help">${esc(r.help)}</div>` : ''}` : ''}</div></li>`;
       return `<li class="t-${st}"><span class="t-ico">${st==='ok'?'✓':st==='bad'?'✗':'○'}</span><div>${t.setup ? `<pre class="t-setup">${esc(t.setup.trim())}</pre>` : ''}<code>${esc(t.call)}</code> should give <code>${esc(t.expect)}</code>${r && !r.ok ? `<div class="t-got">${r.error ? esc(r.error) : 'got <code>'+esc(r.got)+'</code>'}</div>${r.help ? `<div class="t-help">${esc(r.help)}</div>` : ''}` : ''}</div></li>`;
     }).join('') + `</ul>`;
-    if(R && R.pass===R.total) h += `<div class="win-box"><b>Solved!</b> Press <b>Step through</b> to watch your code run on the example, or pick the next problem.</div><button class="btn primary" id="pr-next">Next problem →</button>`;
+    if(R && R.pass===R.total) h += `<div class="win-box"><b>Solved!</b> Press <b>Step through</b> to watch your code run line by line, or pick the next problem.</div><button class="btn primary" id="pr-next">Next problem →</button>`;
+    else if(isOutProb(p)) h += `<p class="dbg-tip">Change the code, then press <b>Check my answer</b>. <b>Step through</b> runs it one line at a time so you can see what each line does.</p>`;
     else h += `<p class="dbg-tip">Write your code, then press <b>Run tests</b>. <b>Step through</b> runs your code on the example below it, one line at a time.</p><pre class="t-setup">${esc(p.demo.trim())}</pre>`;
     box.innerHTML = h;
     const nx = $('#pr-next'); if(nx) nx.onclick = ()=>{ const all = ALL_PROBLEMS; const i = all.findIndex(x=>x.id===p.id); const nxt = all.slice(i+1).find(x=>!isSolved(x.id)) || all[(i+1)%all.length]; openProblem(nxt.id); };
@@ -187,7 +196,7 @@ function renderSideIdle(){
 }
 function codeToRun(){
   const p = curProblem(), code = $('#pr-code').value;
-  return p ? code.replace(/\s*$/,'\n') + '\n# example\n' + p.demo : code;
+  return p && !isOutProb(p) ? code.replace(/\s*$/,'\n') + '\n# example\n' + p.demo : code;
 }
 async function prStart(runAll, src){
   if(pr.busy) return;
@@ -207,6 +216,16 @@ async function prStart(runAll, src){
   }
   pr.busy = false;
 }
+/* Why the printed output differs, in plain words. */
+function outputHelp(got, want){
+  if(!got) return 'Nothing was printed. Use print(...) to show the answer.';
+  const g = got.split('\n'), w = want.split('\n');
+  if(g.length !== w.length) return `Your program printed ${g.length} line${g.length>1?'s':''}, but ${w.length} ${w.length>1?'are':'is'} expected. Each print(...) makes one line.`;
+  const i = g.findIndex((l,k)=>l!==w[k]);
+  if(g[i].toLowerCase()===w[i].toLowerCase()) return `Line ${i+1} is nearly right: check the capital letters.`;
+  if(g[i].replace(/\s/g,'')===w[i].replace(/\s/g,'')) return `Line ${i+1} is nearly right: check the spaces.`;
+  return `Line ${i+1} should be ${w[i]}, but your program printed ${g[i]}.`;
+}
 /* Why a test gave the wrong value, in plain words, when we can tell. */
 function wrongResultHelp(got, expect, code){
   const todo = unfinishedFns(code);
@@ -223,7 +242,13 @@ async function prRunTests(){
   const code = $('#pr-code').value.replace(/\s*$/,'\n');
   const items = [];
   try{
-    for(const t of p.tests){
+    if(isOutProb(p)) for(const t of p.tests){
+      const r = await runPy((t.before || '') + code);
+      const got = normOut(r.out), want = normOut(t.output);
+      if(r.error) items.push({ok:false, error:r.errorType + ': ' + r.error.replace(/^\w+:\s*/,''), help: explainError(r.errorType, r.error, code)});
+      else items.push({ok: got===want, got, help: got===want ? '' : outputHelp(got, want)});
+    }
+    else for(const t of p.tests){
       const r = await runPy(code + '\n' + (t.setup || '') + '\nprint("@@R" + repr(' + t.call + '))\n');
       const m = (r.out || '').match(/@@R(.*)\n?$/);
       if(r.error) items.push({ok:false, error:r.errorType + ': ' + r.error.replace(/^\w+:\s*/,''), help: explainError(r.errorType, r.error, code)});
@@ -265,7 +290,7 @@ $('#pr-run').onclick = ()=>prStart(true);
 $('#pr-test').onclick = prRunTests;
 $('#pr-edit-btn').onclick = ()=>{ setEditing(true); $('#pr-code').focus(); };
 $('#pr-solback').onclick = ()=>{ setEditing(true); $('#pr-code').focus(); };
-$('#pr-sol').onclick = ()=>{ const p = curProblem(); if(p) prStart(false, p.solution.replace(/\s*$/,'\n') + '\n# example\n' + p.demo); };
+$('#pr-sol').onclick = ()=>{ const p = curProblem(); if(p) prStart(false, isOutProb(p) ? p.solution : p.solution.replace(/\s*$/,'\n') + '\n# example\n' + p.demo); };
 $('#pr-reset').onclick = ()=>{ const p = curProblem(); if(!p) return; pr.code.py = p.starter; store.set(draftKey(p.id), p.starter); pr.results = null; renderPractice(); };
 $('#pr-blank').onclick = ()=>{ prOpenCode('', 'Blank editor', {kind:'blank', id:null}, true); closeLibIfNarrow(); $('#pr-code').focus(); };
 
@@ -279,7 +304,7 @@ function setMode(m){
   if(m==='home'){ stopAnims(); renderHome(); return; }
   if(m==='auth'){ stopAnims(); return; }
   if(m==='practice'){ stopAnims(); renderPractice(); loadSkulpt().catch(()=>{}); }
-  else if(!ALL_LESSONS[lang].includes(lessonId)) openLesson(firstLesson(lang));
+  else if(!lessonOpened || !ALL_LESSONS[lang].includes(lessonId)) openLesson(pickLesson(lang));
   else if(lessonId==='alias') render(false); else renderTL();
 }
 document.querySelectorAll('.modes .tab').forEach(t=> t.onclick = ()=>setMode(t.dataset.mode));

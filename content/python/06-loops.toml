@@ -26,7 +26,7 @@ pseudo = [
 [lesson.lines.2]
 t = "Take the next item"
 b = "for moves the name p to the next item of the list. When there are no items left, the loop ends and Python jumps past the indented block."
-look = "p in the global frame changes each time."
+look = "p in the Main program box changes each time."
 
 [lesson.lines.3]
 t = "Run the body"

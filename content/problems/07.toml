@@ -1,5 +1,67 @@
 topic = "07"
 
+# Beginner problems: change the program so it prints the right output.
+[[problem]]
+id = "phone_book"
+title = "Look it up"
+level = "Easy"
+kind = "output"
+story = "Print Bo's phone number. This program stops with an error."
+hint = "Dictionary keys must match exactly, capital letters included."
+starter = '''
+book = {"Ann": "555-1234", "Bo": "555-9876"}
+print(book["bo"])
+'''
+solution = '''
+book = {"Ann": "555-1234", "Bo": "555-9876"}
+print(book["Bo"])
+'''
+[[problem.tests]]
+output = '''
+555-9876
+'''
+
+[[problem]]
+id = "add_age"
+title = "Add a key"
+level = "Easy"
+kind = "output"
+story = "Add Bo, who is 13, to the dictionary before it is printed."
+hint = "ages[\"Bo\"] = 13 adds a new key and value."
+starter = '''
+ages = {"Ann": 12}
+print(ages)
+'''
+solution = '''
+ages = {"Ann": 12}
+ages["Bo"] = 13
+print(ages)
+'''
+[[problem.tests]]
+output = '''
+{'Ann': 12, 'Bo': 13}
+'''
+
+[[problem]]
+id = "different_words"
+title = "Different words"
+level = "Easy"
+kind = "output"
+story = "Print how many different words are in the list. The answer is 3."
+hint = "set(words) keeps one copy of each word. Then use len."
+starter = '''
+words = ["a", "b", "a", "c", "b"]
+print(len(words))
+'''
+solution = '''
+words = ["a", "b", "a", "c", "b"]
+print(len(set(words)))
+'''
+[[problem.tests]]
+output = '''
+3
+'''
+
 [[problem]]
 id = "wc"
 title = "Count each word"

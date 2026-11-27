@@ -1,5 +1,85 @@
 topic = "04"
 
+# Beginner problems: change the program so it prints the right output.
+[[problem]]
+id = "pass_mark"
+title = "Pass or fail"
+level = "Easy"
+kind = "output"
+story = "A mark of 50 or more is a pass. Fix the condition so a mark of 72 prints pass."
+hint = "Which comparison means \"50 or more\"? It is >=."
+starter = '''
+mark = 72
+if mark > 90:
+    print("pass")
+else:
+    print("fail")
+'''
+solution = '''
+mark = 72
+if mark >= 50:
+    print("pass")
+else:
+    print("fail")
+'''
+[[problem.tests]]
+output = '''
+pass
+'''
+
+[[problem]]
+id = "even_odd"
+title = "Even or odd"
+level = "Easy"
+kind = "output"
+story = "Print even if n is even and odd if it is not. For n = 7 the answer is odd."
+hint = "n % 2 is 0 for even numbers. Use if and else."
+starter = '''
+n = 7
+print("even")
+'''
+solution = '''
+n = 7
+if n % 2 == 0:
+    print("even")
+else:
+    print("odd")
+'''
+[[problem.tests]]
+output = '''
+odd
+'''
+
+[[problem]]
+id = "grade_order"
+title = "Grade order"
+level = "Easy"
+kind = "output"
+story = "A score of 90 or more is an A, 80 or more is a B, anything else is a C. This program gives 95 a B. Fix it."
+hint = "Python checks the branches from the top and stops at the first one that is true. Check the highest grade first."
+starter = '''
+score = 95
+if score >= 80:
+    print("B")
+elif score >= 90:
+    print("A")
+else:
+    print("C")
+'''
+solution = '''
+score = 95
+if score >= 90:
+    print("A")
+elif score >= 80:
+    print("B")
+else:
+    print("C")
+'''
+[[problem.tests]]
+output = '''
+A
+'''
+
 [[problem]]
 id = "grade"
 title = "Letter grade"

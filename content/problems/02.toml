@@ -1,5 +1,74 @@
 topic = "02"
 
+# Beginner problems: change the program so it prints the right output.
+[[problem]]
+id = "average_three"
+title = "Average of three"
+level = "Easy"
+kind = "output"
+story = "The average of 4, 8 and 9 is 7.0, but this program prints something else. Fix it."
+hint = "Python divides before it adds. Use brackets to add first."
+starter = '''
+a = 4
+b = 8
+c = 9
+print(a + b + c / 3)
+'''
+solution = '''
+a = 4
+b = 8
+c = 9
+print((a + b + c) / 3)
+'''
+[[problem.tests]]
+output = '''
+7.0
+'''
+
+[[problem]]
+id = "share_pizza"
+title = "Share the pizza"
+level = "Easy"
+kind = "output"
+story = "17 slices are shared by 5 people. Print how many whole slices each person gets, then how many are left over, on two lines."
+hint = "// gives the whole part of a division. % gives what is left over."
+starter = '''
+slices = 17
+people = 5
+print(slices / people)
+'''
+solution = '''
+slices = 17
+people = 5
+print(slices // people)
+print(slices % people)
+'''
+[[problem.tests]]
+output = '''
+3
+2
+'''
+
+[[problem]]
+id = "hours_minutes"
+title = "Hours and minutes"
+level = "Easy"
+kind = "output"
+story = "Turn 135 minutes into hours and minutes, so the program prints 2 hours 15 minutes."
+hint = "total // 60 gives the hours. total % 60 gives the minutes left over."
+starter = '''
+total = 135
+print(total, "minutes")
+'''
+solution = '''
+total = 135
+print(total // 60, "hours", total % 60, "minutes")
+'''
+[[problem.tests]]
+output = '''
+2 hours 15 minutes
+'''
+
 [[problem]]
 id = "hm"
 title = "Minutes to hours and minutes"

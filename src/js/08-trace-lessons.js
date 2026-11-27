@@ -92,7 +92,7 @@ function renderTL(){
   let h = `<div class="meta"><span>Step ${k+1} of ${tlTotal()}</span><span class="phase">${tl.variant ? 'Input: '+esc(L0.variants[tl.variant].label) : 'Python · '+esc(L0.topic||'Lists')}</span></div>`;
   if(k===0){
     h += `<h2 class="step-title">Read the program</h2><div class="body"><p>${esc(L0.title)} Run this program one line at a time and watch each name and object change.</p></div>`;
-    h += `<div class="watch"><b>Watch</b><span>The code on the lower right. The canvas fills in as each line runs.</span></div>`;
+    h += `<div class="watch"><b>Watch</b><span>The code panel, with line numbers. The canvas fills in as each line runs.</span></div>`;
   } else if(isRecap){
     h += `<h2 class="step-title">What you learned</h2><div class="body"><p>${esc(L0.recap)}</p></div>`;
     const C = L0.check, a = tl.answers['check'];
@@ -143,7 +143,7 @@ function renderTL(){
 function tlNextLabel(){
   const T = tl.trace; if(!T) return 'Next';
   const n = T.steps.length, k = tl.k;
-  if(k === n) return 'Finish lesson';
+  if(k === n) return finishLabel(tl.id);
   const nxt = T.steps[k];
   if(nxt.done || nxt.error) return 'See what you learned';
   return 'Run line ' + nxt.line;
@@ -151,7 +151,7 @@ function tlNextLabel(){
 function tlGo(i){ if(!tl.trace) return; tl.k = Math.max(0, Math.min(tlTotal()-1, i)); renderTL(); }
 function tlNext(){
   if(!tlCanAdvance()) return;
-  if(tl.k === tl.trace.steps.length){ finishLesson(tl.id); return; }
+  if(tl.k === tl.trace.steps.length) return finishLesson(tl.id);  // resolves once the next lesson has loaded
   tlGo(tl.k+1);
 }
 function tlPseudo(L0){

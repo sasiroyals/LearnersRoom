@@ -1,5 +1,67 @@
 topic = "05"
 
+# Beginner problems: change the program so it prints the right output.
+[[problem]]
+id = "last_color"
+title = "The last item"
+level = "Easy"
+kind = "output"
+story = "Print the last color in the list. This program stops with an error."
+hint = "A list of 3 items has positions 0, 1 and 2. Position -1 is always the last one."
+starter = '''
+colors = ["red", "green", "blue"]
+print(colors[3])
+'''
+solution = '''
+colors = ["red", "green", "blue"]
+print(colors[-1])
+'''
+[[problem.tests]]
+output = '''
+blue
+'''
+
+[[problem]]
+id = "add_bread"
+title = "Add to the list"
+level = "Easy"
+kind = "output"
+story = "Add \"bread\" to the end of the shopping list before it is printed."
+hint = "shopping.append(\"bread\") adds one item to the end."
+starter = '''
+shopping = ["milk", "eggs"]
+print(shopping)
+'''
+solution = '''
+shopping = ["milk", "eggs"]
+shopping.append("bread")
+print(shopping)
+'''
+[[problem.tests]]
+output = '''
+['milk', 'eggs', 'bread']
+'''
+
+[[problem]]
+id = "count_items"
+title = "How many?"
+level = "Easy"
+kind = "output"
+story = "Print how many numbers are in the list."
+hint = "len(nums) gives the number of items."
+starter = '''
+nums = [4, 8, 15, 16, 23, 42]
+print(nums[-1])
+'''
+solution = '''
+nums = [4, 8, 15, 16, 23, 42]
+print(len(nums))
+'''
+[[problem.tests]]
+output = '''
+6
+'''
+
 [[problem]]
 id = "largest"
 title = "Find the largest"

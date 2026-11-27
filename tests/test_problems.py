@@ -44,6 +44,20 @@ def run_tests(code: str, tests: list[dict]) -> list[bool]:
     return results
 
 
+def run_output(code: str, tests: list[dict]) -> list[bool]:
+    """Output problems: run the whole program and compare what it prints."""
+    norm = lambda t: "\n".join(line.rstrip() for line in t.strip("\n").split("\n"))
+    results = []
+    for t in tests:
+        try:
+            with contextlib.redirect_stdout(io.StringIO()) as out:
+                exec(t.get("before", "") + code, {"__name__": "__main__"})
+            results.append(norm(out.getvalue()) == norm(t["output"]))
+        except Exception:
+            results.append(False)
+    return results
+
+
 def test_every_topic_has_problems():
     assert {t for t, _ in PROBLEMS} == TOPICS
 
@@ -55,8 +69,14 @@ def test_ids_unique():
 @pytest.mark.parametrize("topic,p", PROBLEMS, ids=IDS)
 def test_problem(topic, p, tmp_path, monkeypatch):
     monkeypatch.chdir(tmp_path)  # file problems write real files under CPython
-    for key in ("id", "title", "level", "story", "hint", "starter", "solution", "demo", "tests"):
+    output = p.get("kind") == "output"
+    keys = ("id", "title", "level", "story", "hint", "starter", "solution", "tests") + (() if output else ("demo",))
+    for key in keys:
         assert p.get(key), f"missing {key}"
+    if output:
+        assert all(run_output(p["solution"], p["tests"])), "solution does not print the expected output"
+        assert not all(run_output(p["starter"], p["tests"])), "starter already prints the expected output"
+        return
     assert p["level"] in {"Easy", "Medium", "Hard"}
     assert topic in TOPICS
     assert all(run_tests(p["solution"], p["tests"])), "solution fails its own tests"

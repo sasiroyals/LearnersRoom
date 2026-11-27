@@ -1,5 +1,70 @@
 topic = "03"
 
+# Beginner problems: change the program so it prints the right output.
+[[problem]]
+id = "shout_word"
+title = "Shout it"
+level = "Easy"
+kind = "output"
+story = "Make the program print the word in capital letters with an exclamation mark: HELLO!"
+hint = "word.upper() gives the capital-letter version. + joins two pieces of text."
+starter = '''
+word = "hello"
+print(word)
+'''
+solution = '''
+word = "hello"
+print(word.upper() + "!")
+'''
+[[problem.tests]]
+output = '''
+HELLO!
+'''
+
+[[problem]]
+id = "first_letters"
+title = "First letters"
+level = "Easy"
+kind = "output"
+story = "Print the first letter of each name, joined together: GH"
+hint = "first[0] is the first letter of first."
+starter = '''
+first = "Grace"
+last = "Hopper"
+print(first, last)
+'''
+solution = '''
+first = "Grace"
+last = "Hopper"
+print(first[0] + last[0])
+'''
+[[problem.tests]]
+output = '''
+GH
+'''
+
+[[problem]]
+id = "name_card"
+title = "Name card"
+level = "Easy"
+kind = "output"
+story = "Use an f-string so the program prints Lin is 14 years old."
+hint = "Put f before the quotes, and the names inside curly brackets: f\"{name} is ...\"."
+starter = '''
+name = "Lin"
+age = 14
+print("name is age years old")
+'''
+solution = '''
+name = "Lin"
+age = 14
+print(f"{name} is {age} years old")
+'''
+[[problem.tests]]
+output = '''
+Lin is 14 years old
+'''
+
 [[problem]]
 id = "pal"
 title = "Palindrome check"

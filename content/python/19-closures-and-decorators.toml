@@ -32,7 +32,7 @@ pseudo = [
 
 [lesson.lines.3]
 t = "Use the captured k"
-b = "When double runs, k is found in the enclosing scope that was captured, not in the global frame."
+b = "When double runs, k is found in the enclosing scope that was captured, not in the Main program box."
 look = "The times() frame has only x."
 
 [lesson.lines.4]
@@ -173,7 +173,7 @@ pseudo = [
 [lesson.lines.6]
 t = "@ is shorthand"
 b = "@shout above def greet means: define greet, then run greet = shout(greet). The name greet now refers to wrapper."
-look = "greet in the global frame."
+look = "greet in the Main program box."
 
 [lesson.lines.10]
 t = "Call the decorated name"

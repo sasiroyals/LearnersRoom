@@ -1,0 +1,200 @@
+# Python 00: Start here
+# For students who have never written code. One [[lesson]] block per lesson, in order.
+# Line numbers in lines, predict.line and pline count from 1.
+
+topic = "00"
+
+[[lesson]]
+id = "start_print"
+topic = "Start here"
+title = "What does a program do?"
+recap = "A program is a list of instructions. Python reads them one line at a time, from the top. print(...) shows something in the output box. Text goes in quotes and is shown exactly as written. Without quotes, Python works the answer out first."
+dec = "There are no choices here. Every line runs once, top to bottom."
+code = '''
+print("Hello!")
+print(2 + 3)
+print("2 + 3")
+'''
+pseudo = [
+  "Show the text Hello!",
+  "Work out 2 + 3, then show the answer.",
+  "Show the text 2 + 3, exactly as written.",
+]
+
+[lesson.lines.1]
+t = "Your first instruction"
+b = "print means \"show this\". The text inside the quotes appears in the output box at the bottom. The quotes themselves are not shown: they only tell Python where the text starts and ends."
+look = "Hello! appears in the output box."
+
+[lesson.lines.2]
+t = "Python can do sums"
+b = "There are no quotes this time, so Python treats 2 + 3 as maths. It works out 5 first, then shows 5."
+look = "The output box gets a new line: 5."
+
+[lesson.lines.3]
+t = "Quotes make text"
+b = "Inside quotes, 2 + 3 is just text, like a sentence. Python shows it exactly as written and does no maths."
+look = "The output box."
+
+[lesson.predict]
+line = 3
+q = "What will print(\"2 + 3\") show?"
+target = { out = true }
+opts = ["2 + 3", "5", "An error"]
+
+[lesson.predict.fb]
+5 = "Not quite. The quotes turn 2 + 3 into text, so Python shows it exactly as written."
+"An error" = "Not quite. Text in quotes can hold anything, even a sum. Python just shows it."
+
+[[lesson.variants]]
+label = "\"2 + 3\""
+
+[[lesson.variants]]
+label = "\"10 - 4\""
+from = "print(\"2 + 3\")"
+to = "print(\"10 - 4\")"
+q = "What will print(\"10 - 4\") show?"
+opts = ["10 - 4", "6", "An error"]
+
+[lesson.check]
+code = '''
+print(4 * 2)
+print("4 * 2")'''
+q = "What does the second line show?"
+opts = ["4 * 2", "8"]
+right = 0
+fb = [
+  "Right. In quotes it is text, shown exactly as written.",
+  "Not quite. That is what the first line shows. The second line has quotes, so it shows 4 * 2.",
+]
+
+[[lesson]]
+id = "start_names"
+topic = "Start here"
+title = "Can a program remember things?"
+recap = "name = \"Sam\" makes Python remember the text Sam under the name name. Later lines can use it. Without quotes, name means \"the value I remembered\". With quotes, \"name\" is just the four letters n, a, m, e."
+dec = "There are no choices here. Every line runs once, top to bottom."
+code = '''
+print("one")
+name = "Sam"
+print("Hi", name)
+print("name")
+'''
+pseudo = [
+  "Show the text one.",
+  "Remember the text Sam, and call it name.",
+  "Show Hi, then the value that name refers to.",
+  "Show the text name, exactly as written.",
+]
+
+[lesson.lines.1]
+t = "Top to bottom"
+b = "Python always starts at line 1 and goes down. This line shows one."
+look = "The output box."
+
+[lesson.lines.2]
+t = "Remember a value"
+b = "= tells Python to remember something. The text Sam is stored, and the label name now points at it. Nothing is shown yet: remembering is silent."
+look = "name appears on the canvas, pointing at Sam."
+
+[lesson.lines.3]
+t = "Use what you remembered"
+b = "name has no quotes, so Python looks it up and finds Sam. A comma inside print shows both things with a space between them."
+look = "Hi Sam appears in the output box."
+
+[lesson.lines.4]
+t = "Quotes again"
+b = "This time name is inside quotes, so it is just text. Python does not look anything up."
+look = "The output box."
+
+[lesson.predict]
+line = 4
+q = "What will print(\"name\") show?"
+target = { out = true }
+opts = ["name", "Sam", "Hi Sam"]
+
+[lesson.predict.fb]
+Sam = "Not quite. With quotes, name is only text. Python looks a name up only when it has no quotes."
+"Hi Sam" = "Not quite. That was line 3. Each print shows only what is inside its own brackets."
+
+[[lesson.variants]]
+label = "name = \"Sam\""
+
+[[lesson.variants]]
+label = "name = \"Ava\""
+from = "name = \"Sam\""
+to = "name = \"Ava\""
+
+[lesson.check]
+code = '''
+city = "Rome"
+print(city)
+print("city")'''
+q = "What does the last line show?"
+opts = ["city", "Rome"]
+right = 0
+fb = [
+  "Right. In quotes, city is just the four letters.",
+  "Not quite. print(city) without quotes shows Rome. The last line has quotes, so it shows city.",
+]
+
+[[lesson]]
+id = "start_errors"
+topic = "Start here"
+title = "What happens when Python finds a mistake?"
+recap = "When Python cannot do a line, it stops and shows an error with the line number. The lines after it never run. Errors are normal: read the message, fix the line, and run again. Capital letters matter, so Score and score are different names."
+dec = "There are no choices here, but the program stops early at the mistake."
+code = '''
+score = 5
+print("start")
+print(Score)
+print("end")
+'''
+pseudo = [
+  "Remember 5 and call it score.",
+  "Show the text start.",
+  "Show the value of Score (capital S).",
+  "Show the text end.",
+]
+
+[lesson.lines.1]
+t = "Remember a number"
+b = "score, with a small s, now refers to 5."
+look = "score appears on the canvas."
+
+[lesson.lines.2]
+t = "So far so good"
+b = "This line shows start."
+look = "The output box."
+
+[lesson.lines.3]
+t = "A small typo"
+b = "Score with a capital S was never created. Python cannot guess that you meant score, so it stops here with a NameError. Line 4 never runs."
+look = "The red error message."
+
+[lesson.predict]
+line = 3
+q = "What happens on print(Score)?"
+target = { out = true }
+opts = ["An error", "5", "Score"]
+
+[lesson.predict.fb]
+5 = "Not quite. Python treats Score and score as two different names, and Score was never made."
+Score = "Not quite. There are no quotes, so Python looks the name up. It cannot find Score, so it stops with an error."
+
+[[lesson.variants]]
+label = "print(Score)"
+
+[lesson.check]
+code = '''
+x = 1
+print(x)
+print(y)
+print("done")'''
+q = "Does \"done\" get shown?"
+opts = ["No", "Yes"]
+right = 0
+fb = [
+  "Right. print(y) fails because y was never made, so Python stops before the last line.",
+  "Not quite. Python stops at the first error, on print(y). The last line never runs.",
+]

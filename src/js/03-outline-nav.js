@@ -11,9 +11,10 @@ function renderOutline(){
   const C = CURRICULUM[lang], B = BUILT[lang], curT = topicOf(lang, lessonId);
   if(curT) openTopics[lang].add(curT);
   let h = `<h3>${esc(L[lang].name)} course</h3>`, lvl = null;
+  if(lang==='java') h += `<p class="java-soon"><b>Java is coming soon.</b> One preview lesson is ready now. The full Java course, and running Java code, are being built. Python is complete.</p>`;
   C.forEach(t=>{
     if(t.level!==lvl){ lvl = t.level; const nT = C.filter(x=>x.level===lvl); const nb = nT.reduce((c,x)=>c+(B[x.n]||[]).length,0);
-      h += `<div class="level"><span>${esc(lvl.replace(/^Level \d+: /,''))}</span><span class="lvl-n">${nb ? nb+' built' : 'planned'}</span></div>`; }
+      h += `<div class="level"><span>${esc(lvl.replace(/^Level \d+: /,''))}</span><span class="lvl-n">${nb ? nb+(nb===1?' lesson':' lessons') : 'coming soon'}</span></div>`; }
     const built = (B[t.n]||[]).map(id=>({lesson:id, title:lessonTitle(id)}));
     const subs = built.concat(t.subs.slice(built.length));
     const total = subs.length, done = built.filter(s=>hasTrophy(lang, s.lesson)).length;
@@ -21,7 +22,7 @@ function renderOutline(){
     h += `<div class="topic${built.length?'':' later'}"><button class="topic-btn" aria-expanded="${open}" data-topic="${t.n}"><span class="tnum">${t.n}</span><span>${esc(t.t)}</span><span class="tcount" title="${done} of ${total} complete${built.length?'':', not built yet'}">${built.length ? done+'/'+total : '·'}</span></button>`;
     h += `<ul class="subs"${open?'':' hidden'}>` + subs.map(s=> s.lesson
       ? `<li><button class="sub${s.lesson===lessonId?' active':''}${hasTrophy(lang, s.lesson)?' done':''}"${s.lesson===lessonId?' aria-current="page"':''} data-lesson="${s.lesson}">${esc(s.title)}</button></li>`
-      : `<li><button class="sub" disabled>${esc(s)}<span class="soon">planned</span></button></li>`).join('') + `</ul></div>`;
+      : `<li><button class="sub" disabled>${esc(s)}<span class="soon">coming soon</span></button></li>`).join('') + `</ul></div>`;
   });
   $('#outline').innerHTML = h;
   $('#outline').querySelectorAll('.topic-btn').forEach(b=> b.onclick = ()=>{ const ul=b.nextElementSibling; ul.hidden=!ul.hidden; b.setAttribute('aria-expanded', !ul.hidden); openTopics[lang][ul.hidden?'delete':'add'](b.dataset.topic); });
@@ -66,13 +67,20 @@ function finish(){ finishLesson('alias'); }
 function finishLesson(id){
   const had = hasTrophy(lang, id);
   if(!had){ store.set(trophyKey(lang, id),'1'); if(typeof Auth!=='undefined') Auth.save(); }
-  toast(had ? 'Lesson complete. You already have this trophy, so no new one this time.' : 'Trophy earned: ' + lessonTitle(id) + ' (' + L[lang].name + ')');
-  renderOutline();
+  const all = ALL_LESSONS[lang], nxt = all[all.indexOf(id)+1];
+  const stop = t => /[?!.]$/.test(t) ? t : t + '.';
+  toast((had ? 'Lesson complete.' : 'Trophy earned: ' + stop(lessonTitle(id))) + (nxt ? ' Next: ' + lessonTitle(nxt) : ' You finished the whole course!'));
+  if(nxt) return openLesson(nxt);
+  renderOutline(); goHome();
 }
+/* The label for the last button of a lesson: say where it goes. */
+function finishLabel(id){ const all = ALL_LESSONS[lang]; return all[all.indexOf(id)+1] ? 'Next lesson' : 'Finish the course'; }
+let lessonOpened = false;
 function openLesson(id){
+  lessonOpened = true;
   if(!ALL_LESSONS[lang].includes(id)) id = 'alias';
   store.set('cs.last.'+lang, id);
   if(id==='alias'){ lessonId = 'alias'; $('#tl').hidden = true; $('#canvas').hidden = false; $('.lesson-title').textContent = lessonTitle('alias'); renderOutline(); go(0); }
-  else { stopAnims(); renderOutline(); openTL(id).then(renderOutline); }
+  else { stopAnims(); renderOutline(); return openTL(id).then(renderOutline); }
 }
 let tt; function toast(msg){ const t=$('#toast'); t.textContent=msg; t.hidden=false; clearTimeout(tt); tt=setTimeout(()=>t.hidden=true, 3600); }
