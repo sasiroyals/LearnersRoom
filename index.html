@@ -2336,6 +2336,180 @@ Object.assign(PY_TOPIC_LESSONS, {
   '04': ['cond_branch','cond_boundary','cond_and','cond_elif']
 });
 
+/* ---------- Beginner: 06 Loops, 07 Dicts, tuples and sets ---------- */
+Object.assign(TL_LESSONS, {
+  loop_for: {
+    topic:'Loops', title:'How does for take each item?',
+    code:"pets = ['cat', 'dog', 'eel']\nfor p in pets:\n    print(p.upper())\nprint('done')\n",
+    pseudo:['pets is a list of three names.','For each item in pets, call it p:','show p in capitals.','After the loop, show done.'],
+    lines:{
+      2:{t:'Take the next item', b:'for moves the name p to the next item of the list. When there are no items left, the loop ends and Python jumps past the indented block.', look:'p in the global frame changes each time.'},
+      3:{t:'Run the body', b:'The indented block runs once for the current p.', look:'One new line in the output.'},
+      4:{t:'After the loop', b:'The list ran out of items, so Python left the loop.', look:'The output box.'}
+    },
+    predict:{line:4, q:'After the loop, what does p refer to?', target:{v:'p'}, opts:["'eel'","'cat'",'An error'], fb:{}},
+    variants:[{label:'3 pets'}],
+    recap:'for p in pets moved p to each item in turn: cat, then dog, then eel. The body ran once per item. After the last item, p still refers to \'eel\', and the program continued after the loop.',
+    check:{code:"for c in 'hi':\n    print(c)", q:'What is printed?', opts:['h then i','hi','An error'], right:0, fb:['Right. A string gives its characters one at a time.','Not quite. for walks through a string one character at a time.','Not quite. Strings can be looped over.']},
+    dec:'Each time round: is there another item? Yes: move p to it and run the body. No: leave the loop.'
+  },
+  loop_total: {
+    topic:'Loops', title:'How does a running total grow?',
+    code:"prices = [4, 10, 6]\ntotal = 0\nfor x in prices:\n    total = total + x\nprint(total)\n",
+    pseudo:['Three prices.','Start the total at 0.','For each price x:','new total = old total + x.','Show the total.'],
+    lines:{
+      2:{t:'Start at zero', b:'The accumulator must exist before the loop, starting at a value that changes nothing: 0 for adding.', look:'total is 0.'},
+      3:{t:'Next price', b:'x moves to the next price.', look:'x changes.'},
+      4:{t:'Old + value = new', b:'The right side uses the old total, adds x, and then total moves to the new value.', look:'total grows by x.'},
+      5:{t:'Show the result', b:'After the last price, total holds the sum.', look:'The output box.'}
+    },
+    predict:{line:5, q:'What will print(total) show?', target:{out:true}, opts:['20','6','0'],
+      fb:{'6':'Not quite. total kept growing: each pass added to the old total, it did not replace it.','0':'Not quite. The loop body ran three times and changed total.'}},
+    variants:[{label:'[4, 10, 6]'},{label:'[]', from:'[4, 10, 6]', to:'[]', opts:['0','An error','None']},{label:'total inside', from:"total = 0\nfor x in prices:\n", to:"for x in prices:\n    total = 0\n", opts:['6','20','0']}],
+    recap:'A running total needs three parts: start it before the loop, update it inside with old + value, and read it after the loop. Resetting it inside the loop throws away the progress each time.',
+    check:{code:"n = 1\nfor k in [2, 3]:\n    n = n * k", q:'What is n?', opts:['6','5','3'], right:0, fb:['Right. 1 * 2 * 3.','Not quite. The update multiplies.','Not quite. n kept the result from the first pass too.']},
+    dec:'Another price left? Yes: add it to total and ask again. No: print total.'
+  },
+  loop_count: {
+    topic:'Loops', title:'How do I count matches?',
+    code:"words = ['ant', 'bee', 'ape', 'cat']\ncount = 0\nfor w in words:\n    if w.startswith('a'):\n        count = count + 1\nprint(count)\n",
+    pseudo:['Four words.','No matches yet.','For each word w:','does it start with a?','yes: add one to count.','Show count.'],
+    lines:{
+      4:{t:'Check this item', b:'The if runs once per word. Only matching words reach the next line.', look:'Which line runs next.'},
+      5:{t:'Count it', b:'A match: count goes up by one.', look:'count changes.'}
+    },
+    predict:{line:6, q:'What will print(count) show?', target:{out:true}, opts:['2','4','1'],
+      fb:{'4':'Not quite. count only goes up when the if is True.','1':'Not quite. ape starts with a too.'}},
+    variants:[{label:"starts with 'a'"},{label:"contains 'e'", from:"w.startswith('a')", to:"'e' in w", opts:['2','4','1']}],
+    recap:'Counting is a running total that adds 1 only when a condition is True. The if inside the loop decides, item by item, whether to count.',
+    check:{code:"c = 0\nfor n in [3, 8, 5, 10]:\n    if n > 4:\n        c = c + 1", q:'What is c?', opts:['3','2','4'], right:0, fb:['Right. 8, 5 and 10.','Not quite. 5 > 4 is True too.','Not quite. 3 is not more than 4.']},
+    dec:'For each word: starts with a? Yes: count it. No: skip to the next word.'
+  },
+  loop_filter: {
+    topic:'Loops', title:'How do I keep only some items?',
+    code:"nums = [5, -2, 8, -1]\npositives = []\nfor n in nums:\n    if n > 0:\n        positives.append(n)\nprint(positives)\n",
+    pseudo:['Four numbers.','Start an empty result list.','For each n:','is it positive?','yes: add it to the result.','Show the result.'],
+    lines:{
+      2:{t:'An empty result', b:'The filtered items go into a new list. The original list is not changed.', look:'positives is an empty list.'},
+      5:{t:'Keep it', b:'append adds n to the end of positives.', look:'A new cell appears in positives.'}
+    },
+    predict:{line:6, q:'What will print(positives) show?', target:{out:true}, opts:['[5, 8]','[5, -2, 8, -1]','[-2, -1]'],
+      fb:{'[5, -2, 8, -1]':'Not quite. Only items that pass the if are appended.'}},
+    variants:[{label:'n > 0'},{label:'n % 2 == 0', from:'n > 0', to:'n % 2 == 0', opts:['[-2, 8]','[8]','[5, -1]']}],
+    recap:'Filtering builds a new list: start empty, loop over the original, and append only the items that pass the test. nums itself is never changed.',
+    check:{code:"out = []\nfor s in ['a', '', 'b']:\n    if s:\n        out.append(s)", q:'What is out?', opts:["['a', 'b']","['a', '', 'b']","['']"], right:0, fb:['Right. An empty string counts as False.','Not quite. The empty string fails the if.','Not quite. That is the one that was left out.']},
+    dec:'For each number: positive? Yes: append it. No: move on.'
+  },
+  loop_while: {
+    topic:'Loops', title:'When does a while loop stop?',
+    code:"n = 1\nwhile n < 20:\n    n = n * 3\nprint(n)\n",
+    pseudo:['n is 1.','While n is below 20:','triple n.','Show n.'],
+    lines:{
+      2:{t:'Check first', b:'while checks its condition before every pass. True: run the body. False: leave the loop.', look:'Which line runs next.'},
+      3:{t:'Change the condition', b:'The body must move n toward the exit, or the loop never ends.', look:'n grows.'},
+      4:{t:'After the loop', b:'The check was False, so the loop stopped.', look:'The output box.'}
+    },
+    predict:{line:4, q:'What will print(n) show?', target:{out:true}, opts:['27','9','20'],
+      fb:{'9':'Not quite. 9 < 20 is still True, so the body ran once more.','20':'Not quite. n only takes values 1, 3, 9, 27.'}},
+    variants:[{label:'n < 20'},{label:'n < 9', from:'n < 20', to:'n < 9', opts:['9','27','3']},{label:'n = 50', from:'n = 1\n', to:'n = 50\n', opts:['50','150','An error']}],
+    recap:'A while loop checks before each pass, so the value that finally fails the check is the one left behind: 27. If the condition is False at the start, the body never runs at all.',
+    check:{code:"k = 10\nwhile k > 0:\n    k = k - 4", q:'What is k at the end?', opts:['-2','2','0'], right:0, fb:['Right. 10, 6, 2, then -2 fails the check.','Not quite. 2 > 0 is True, so it ran once more.','Not quite. k skips over 0: 2 - 4 is -2.']},
+    dec:'Is n < 20? Yes: triple n and ask again. No: leave the loop and print.'
+  },
+  loop_break: {
+    topic:'Loops', title:'What do break and continue skip?',
+    code:"for n in [1, 2, 3, 4, 5]:\n    if n == 2:\n        continue\n    if n == 4:\n        break\n    print(n)\nprint('end')\n",
+    pseudo:['For each n from 1 to 5:','if n is 2,','skip the rest of this pass.','if n is 4,','leave the loop completely.','show n.','Show end.'],
+    lines:{
+      3:{t:'continue', b:'continue skips the rest of this pass and goes straight back to take the next item.', look:'print(n) is skipped for 2.'},
+      5:{t:'break', b:'break leaves the loop at once. The remaining items are never taken.', look:'The next line is after the loop.'}
+    },
+    predict:{line:7, q:'After the loop, what is n?', target:{v:'n'}, opts:['4','5','2'], fb:{}},
+    variants:[{label:'continue at 2, break at 4'}],
+    recap:'Output was 1, 3, end. continue skipped printing 2 but kept looping. break stopped the loop at 4, so 4 and 5 were never printed, and n was left at 4.',
+    check:{code:"for c in 'abc':\n    if c == 'b':\n        break\n    print(c)", q:'What is printed?', opts:['a','a c','a b'], right:0, fb:['Right. break stops before c.','Not quite. That would be continue.','Not quite. break runs before print(c) for b.']},
+    dec:'For each n: is it 2? Skip to the next n. Is it 4? Leave the loop. Otherwise print it.'
+  },
+
+  dict_lookup: {
+    topic:'Dicts, tuples and sets', title:'How does a dict find a value by key?',
+    code:"ages = {'Ana': 9, 'Ben': 11}\nages['Cy'] = 7\nb = ages['Ben']\nprint(b, len(ages))\n",
+    pseudo:['A dict from names to ages.','Add a new key Cy.','Look up Ben.','Show it and the size.'],
+    lines:{
+      1:{t:'Keys and values', b:'A dict stores pairs. You look things up by key, not by position.', look:'The dict object with two rows.'},
+      2:{t:'Add a pair', b:'Assigning to a new key adds a row. Assigning to an existing key would replace its value.', look:'A new row Cy appears.'},
+      3:{t:'Look up', b:'ages[\'Ben\'] goes straight to the key Ben and gives its value.', look:'b holds 11.'}
+    },
+    predict:{line:3, q:'What will b = ages[\'Ben\'] hold?', target:{v:'b'}, opts:['11','1',"'Ben'"],
+      fb:{'1':'Not quite. Dicts are looked up by key, not by position.'}},
+    variants:[{label:"ages['Ben']"},{label:"ages['Ben'] = 7", from:"ages['Cy'] = 7", to:"ages['Ben'] = 7", q:"After ages['Ben'] = 7, what will b hold?", opts:['7','11','An error']}],
+    recap:'A dict maps keys to values. d[key] = value adds a pair, or replaces the value if the key already exists. Each key appears at most once.',
+    check:{code:"d = {'a': 1}\nd['a'] = 5\nn = len(d)", q:'What is n?', opts:['1','2'], right:0, fb:['Right. a was replaced, not added again.','Not quite. Keys are unique; the value of a was replaced.']}
+  },
+  dict_get: {
+    topic:'Dicts, tuples and sets', title:'What happens with a missing key?',
+    code:"stock = {'apple': 3}\nn = stock.get('pear', 0)\nm = stock['pear']\nprint(n, m)\n",
+    pseudo:['A dict with one key.','Get pear, or 0 if it is missing.','Look up pear directly.','Show both.'],
+    lines:{
+      2:{t:'get with a default', b:'get returns the value if the key exists, and the default you give otherwise. It never raises an error.', look:'n holds 0.'},
+      3:{t:'Square brackets', b:'d[key] insists that the key exists. A missing key raises KeyError.', look:'Watch for an error.'}
+    },
+    predict:{line:3, q:"What happens on m = stock['pear']?", target:{v:'m'}, opts:['An error','0','None'],
+      fb:{'0':'Not quite. Only get uses a default. Square brackets raise KeyError.','None':'Not quite. A missing key with [] is an error, not None.'}},
+    variants:[{label:"'pear'"},{label:"'apple'", from:"stock['pear']", to:"stock['apple']", q:"What will m = stock['apple'] hold?", opts:['3','An error','0']}],
+    recap:'Use d[key] when the key must be there (a missing key is a bug you want to see). Use d.get(key, default) when a missing key is normal.',
+    check:{code:"d = {}\nx = d.get('k')", q:'What is x?', opts:['None','An error','0'], right:0, fb:['Right. Without a default, get returns None.','Not quite. get never raises KeyError.','Not quite. 0 only if you pass it as the default.']}
+  },
+  dict_count: {
+    topic:'Dicts, tuples and sets', title:'How do I count things with a dict?',
+    code:"votes = ['red', 'blue', 'red', 'red']\ncounts = {}\nfor v in votes:\n    counts[v] = counts.get(v, 0) + 1\nprint(counts)\n",
+    pseudo:['Four votes.','An empty tally.','For each vote v:','its count is the old count (or 0) plus one.','Show the tally.'],
+    lines:{
+      2:{t:'An empty tally', b:'The dict will map each colour to how many times it was seen.', look:'counts is empty.'},
+      4:{t:'Update the tally', b:'get(v, 0) gives the old count, or 0 the first time a colour is seen. Then 1 is added and stored back.', look:'One row changes or appears.'}
+    },
+    predict:{line:5, q:'What will print(counts) show?', target:{out:true}, opts:["{'red': 3, 'blue': 1}","{'red': 1, 'blue': 1}","{'red': 4}"],
+      fb:{"{'red': 1, 'blue': 1}":'Not quite. The old count is read each time, so red keeps growing.'}},
+    variants:[{label:'get(v, 0)'},{label:'counts[v]', from:'counts.get(v, 0)', to:'counts[v]', pline:4, q:'What happens the first time counts[v] + 1 runs?', opts:["counts becomes {'red': 1}",'An error']}],
+    recap:'counts[v] = counts.get(v, 0) + 1 is the standard counting pattern. With counts[v] instead of get, the very first vote fails with KeyError because there is no old count yet.',
+    check:{code:"c = {}\nfor ch in 'aba':\n    c[ch] = c.get(ch, 0) + 1", q:"What is c['a']?", opts:['2','1','3'], right:0, fb:['Right. a appears twice.','Not quite. The count is updated, not replaced.','Not quite. There are only two a characters.']},
+    dec:'For each vote: seen before? Add 1 to its count. Not seen? Start it at 0 + 1.'
+  },
+  tup_unpack: {
+    topic:'Dicts, tuples and sets', title:'How does tuple unpacking work?',
+    code:"point = (3, 8)\nx, y = point\nx, y = y, x\nprint(x, y)\n",
+    pseudo:['A pair of numbers.','Give each part its own name.','Swap the two names.','Show them.'],
+    lines:{
+      1:{t:'A tuple', b:'A tuple is an ordered group of values that cannot be changed after it is made.', look:'point refers to a tuple.'},
+      2:{t:'Unpack', b:'The names on the left get the parts on the right, in order. The counts must match.', look:'x is 3 and y is 8.'},
+      3:{t:'Swap', b:'The right side y, x is built first, as a new tuple (8, 3). Then it is unpacked into x and y. No temporary name is needed.', look:'x and y trade values.'}
+    },
+    predict:{line:3, q:'What will x hold after x, y = y, x?', target:{v:'x'}, opts:['8','3','An error'],
+      fb:{'3':'Not quite. The right side (8, 3) is built before anything is assigned.'}},
+    variants:[{label:'(3, 8)'},{label:'(3, 8, 1)', from:'(3, 8)', to:'(3, 8, 1)', pline:2, q:'With point = (3, 8, 1), what happens on x, y = point?', opts:['x is 3, y is 8','An error']}],
+    recap:'Unpacking gives each part of a tuple its own name, and the counts must match: three values into two names raises ValueError. x, y = y, x swaps safely because the right side is finished first.',
+    check:{code:"a, b = 'hi'", q:'What is b?', opts:["'i'","'h'",'An error'], right:0, fb:['Right. Any sequence can be unpacked, even a string.','Not quite. b gets the second item.','Not quite. The string has exactly two characters, so it works.']}
+  },
+  set_dedupe: {
+    topic:'Dicts, tuples and sets', title:'How does a set drop duplicates?',
+    code:"tags = ['py', 'web', 'py', 'ai', 'web']\nunique = set(tags)\nn = len(unique)\nprint(n, 'ai' in unique)\n",
+    pseudo:['Five tags with repeats.','Build a set: each value kept once.','Count them.','Show the count and whether ai is in it.'],
+    lines:{
+      2:{t:'Build a set', b:'A set keeps each value at most once. Adding a value that is already there does nothing. A set has no order and no index.', look:'The set has fewer items than the list.'},
+      4:{t:'Fast membership', b:'in on a set does not walk the items; it jumps straight to where the value would be.', look:'The output box.'}
+    },
+    predict:{line:3, q:'What will n hold?', target:{v:'n'}, opts:['3','5','2'],
+      fb:{'5':'Not quite. The set keeps py and web only once each.'}},
+    variants:[{label:'5 tags'}],
+    recap:'set(tags) kept py, web and ai once each, so its length is 3. Use a set when you need unique values or fast "is it in here?" checks. If you need order or positions, use a list.',
+    check:{code:"s = {1, 2}\ns.add(2)\nk = len(s)", q:'What is k?', opts:['2','3'], right:0, fb:['Right. 2 was already in the set.','Not quite. Adding an existing value does nothing.']}
+  }
+});
+Object.assign(PY_TOPIC_LESSONS, {
+  '06': ['loop_for','loop_total','loop_count','loop_filter','loop_while','loop_break'],
+  '07': ['dict_lookup','dict_get','dict_count','tup_unpack','set_dedupe']
+});
+
 const CURRICULUM = {"py": [{"n": "01", "t": "Values and names", "level": "Level 1: Beginner", "subs": ["What does = do?", "Why did x keep its old value?", "\"7\" vs 7", "Converting with int()"], "book": "Crash Course ch. 2; Lutz Part II"}, {"n": "02", "t": "Numbers and operators", "level": "Level 1: Beginner", "subs": ["7 // 2", "What % keeps", "0.1 + 0.2", "Operator order"], "book": "Crash Course ch. 2; Lutz ch. 5"}, {"n": "03", "t": "Strings", "level": "Level 1: Beginner", "subs": ["Index 0", "Slicing", "Why can't I change a letter?", "find on a miss", "f-strings"], "book": "Crash Course ch. 2; Lutz ch. 7"}, {"n": "04", "t": "Conditions and logic", "level": "Level 1: Beginner", "subs": ["Which branch runs?", "Boundaries with >=", "When and stops early", "elif chains"], "book": "Crash Course ch. 5; Lutz ch. 12"}, {"n": "05", "t": "Lists", "level": "Level 1: Beginner", "subs": ["Index -1", "Slices", "append vs insert", "in", "Out of range", "Why did both lists change?"], "book": "Crash Course ch. 3 and 4"}, {"n": "06", "t": "Loops", "level": "Level 1: Beginner", "subs": ["How for takes each item", "Running total", "Counting matches", "Filtering", "while and its exit", "break and continue"], "book": "Crash Course ch. 4 and 7; Lutz ch. 13"}, {"n": "07", "t": "Dicts, tuples and sets", "level": "Level 1: Beginner", "subs": ["Key lookup", "Missing key: [] vs .get", "Counting with a dict", "Tuple unpacking", "Sets drop duplicates"], "book": "Crash Course ch. 6; Lutz ch. 8 and 9"}, {"n": "08", "t": "Functions: the basics", "level": "Level 1: Beginner", "subs": ["Arguments enter a call frame", "return vs print", "Parameters vs arguments", "No return gives None"], "book": "Crash Course ch. 8; Lutz ch. 16"}, {"n": "09", "t": "Functions in depth", "level": "Level 2: Intermediate", "subs": ["Scope and the LEGB rule", "The shared default list trap", "*args and **kwargs", "Keyword-only arguments", "lambda", "Recursion and the call stack"], "book": "Lutz ch. 17 to 19"}, {"n": "10", "t": "Mutability and copying", "level": "Level 2: Intermediate", "subs": ["Mutable vs immutable", "copy() is shallow", "deepcopy", "Passing a list into a function"], "book": "Ramalho ch. 6"}, {"n": "11", "t": "Comprehensions", "level": "Level 2: Intermediate", "subs": ["A comprehension is a loop", "Filtering inside it", "Dict and set comprehensions"], "book": "Lutz ch. 14 and 20"}, {"n": "12", "t": "Classes and objects", "level": "Level 2: Intermediate", "subs": ["Class vs object", "__init__ and self", "Instance vs class attributes", "Methods change state", "__repr__ and __str__"], "book": "Crash Course ch. 9; Lutz ch. 26 to 28"}, {"n": "13", "t": "Encapsulation", "level": "Level 2: Intermediate", "subs": ["The _private convention", "Name mangling with __", "@property getters and setters with validation"], "book": "Lutz ch. 38; Ramalho ch. 11"}, {"n": "14", "t": "Inheritance", "level": "Level 2: Intermediate", "subs": ["A subclass reuses code", "Overriding a method", "super().__init__", "isinstance and issubclass"], "book": "Crash Course ch. 9; Lutz ch. 29; Ramalho ch. 14"}, {"n": "15", "t": "Polymorphism", "level": "Level 2: Intermediate", "subs": ["One call, different classes", "Duck typing", "Operator overloading with __add__, __eq__, __len__"], "book": "Lutz ch. 30; Ramalho ch. 13 and 16"}, {"n": "16", "t": "Abstraction and composition", "level": "Level 2: Intermediate", "subs": ["Abstract base classes with @abstractmethod", "Composition: has-a vs is-a", "Choosing between them"], "book": "Lutz ch. 31; Ramalho ch. 13"}, {"n": "17", "t": "Exceptions", "level": "Level 2: Intermediate", "subs": ["Reading a traceback", "try / except path", "finally", "Writing your own exception class"], "book": "Crash Course ch. 10; Lutz Part VII"}, {"n": "18", "t": "Modules and files", "level": "Level 2: Intermediate", "subs": ["How import works", "if __name__ == \"__main__\"", "Reading and writing files with with"], "book": "Crash Course ch. 10; Lutz Part V"}, {"n": "19", "t": "Closures and decorators", "level": "Level 3: Professional", "subs": ["A closure keeps a variable alive", "nonlocal", "A decorator wraps a function", "functools.wraps"], "book": "Ramalho ch. 9; Lutz ch. 39"}, {"n": "20", "t": "Iterators and generators", "level": "Level 3: Professional", "subs": ["The iter / next protocol", "A generator pauses at yield", "A used-up generator", "Generator pipelines"], "book": "Ramalho ch. 17; Lutz ch. 20"}, {"n": "21", "t": "Advanced OOP", "level": "Level 3: Professional", "subs": ["@classmethod and @staticmethod", "Multiple inheritance and the MRO", "Mixins", "@dataclass", "How @property works (descriptors)"], "book": "Ramalho ch. 5, 14 and 23; Lutz ch. 32 and 38"}, {"n": "22", "t": "Context managers", "level": "Level 3: Professional", "subs": ["The with protocol: __enter__ and __exit__", "contextlib.contextmanager"], "book": "Ramalho ch. 18"}, {"n": "23", "t": "Typing and testing", "level": "Level 3: Professional", "subs": ["Type hints", "Protocols", "Writing a test with assert"], "book": "Ramalho ch. 8 and 13"}, {"n": "24", "t": "Design", "level": "Level 3: Professional", "subs": ["SOLID in Python", "Strategy pattern", "Factory pattern"], "book": "Ramalho ch. 10"}], "java": [{"n": "01", "t": "Primitives and references", "level": "Level 1: Beginner", "subs": ["Why does int copy but an array share?", "What new creates", "null", "Stack vs heap"], "book": "Head First ch. 3; Core Java ch. 3"}, {"n": "02", "t": "Operators and casting", "level": "Level 1: Beginner", "subs": ["7 / 2 is 3", "% with negatives", "Widening vs narrowing casts", "int overflow"], "book": "Core Java ch. 3"}, {"n": "03", "t": "Strings", "level": "Level 1: Beginner", "subs": ["Why a String is immutable", "== vs .equals", "substring end index", "StringBuilder"], "book": "Head First ch. 10; Core Java ch. 3"}, {"n": "04", "t": "Conditions and loops", "level": "Level 1: Beginner", "subs": ["if / else path", "switch", "for vs enhanced for", "while exit", "Off-by-one in i <= n"], "book": "Head First ch. 5; Core Java ch. 3"}, {"n": "05", "t": "Arrays", "level": "Level 1: Beginner", "subs": ["Fixed length", "Index out of bounds", "Arrays.copyOf", "Two variables, one array"], "book": "Head First ch. 3; Core Java ch. 3"}, {"n": "06", "t": "Methods", "level": "Level 1: Beginner", "subs": ["Arguments are copied into the frame", "Why a method can change my array but not my int", "Return values", "Recursion"], "book": "Head First ch. 4; Core Java ch. 4"}, {"n": "07", "t": "Classes and objects", "level": "Level 2: Intermediate, the OOP core", "subs": ["Fields per object", "Constructors and constructor overloading", "this", "static vs instance members", "toString"], "book": "Head First ch. 2 and 9; Core Java ch. 4"}, {"n": "08", "t": "Encapsulation", "level": "Level 2: Intermediate, the OOP core", "subs": ["Private fields with getters and setters", "Validation in a setter", "Access modifiers: public, protected, package, private"], "book": "Head First ch. 4; Core Java ch. 4"}, {"n": "09", "t": "Inheritance", "level": "Level 2: Intermediate, the OOP core", "subs": ["extends", "super() in constructors", "Overriding with @Override", "final classes and methods"], "book": "Head First ch. 7; Core Java ch. 5"}, {"n": "10", "t": "Polymorphism", "level": "Level 2: Intermediate, the OOP core", "subs": ["Superclass variable, subclass object", "Dynamic dispatch: which method runs?", "Overloading vs overriding", "Casting and instanceof"], "book": "Head First ch. 7 and 8; Core Java ch. 5"}, {"n": "11", "t": "Abstraction", "level": "Level 2: Intermediate, the OOP core", "subs": ["Abstract classes", "Interfaces", "Default methods", "Abstract class or interface?"], "book": "Head First ch. 8; Core Java ch. 6; Effective Java item 20"}, {"n": "12", "t": "The Object contract", "level": "Level 2: Intermediate, the OOP core", "subs": ["equals and hashCode together", "== vs equals on objects", "Comparable and Comparator"], "book": "Core Java ch. 5; Effective Java items 10 to 14"}, {"n": "13", "t": "Collections", "level": "Level 2: Intermediate, the OOP core", "subs": ["Why did both lists change?", "ArrayList growth", "HashMap lookups", "HashSet duplicates", "Removing while looping"], "book": "Head First ch. 11; Core Java ch. 9"}, {"n": "14", "t": "Generics", "level": "Level 2: Intermediate, the OOP core", "subs": ["Why List<Integer> and not List<int>", "Autoboxing", "Generic methods and bounded types"], "book": "Core Java ch. 8; Effective Java ch. 5"}, {"n": "15", "t": "Exceptions", "level": "Level 2: Intermediate, the OOP core", "subs": ["Reading a stack trace", "try / catch / finally", "Checked vs unchecked", "Custom exceptions"], "book": "Head First ch. 13; Core Java ch. 7"}, {"n": "16", "t": "Immutability and records", "level": "Level 3: Professional", "subs": ["final fields", "Defensive copies", "Records"], "book": "Effective Java items 17 and 50"}, {"n": "17", "t": "Enums and nested classes", "level": "Level 3: Professional", "subs": ["Enums with fields and methods", "Inner vs static nested classes", "Anonymous classes"], "book": "Core Java ch. 5 and 6"}, {"n": "18", "t": "Lambdas and streams", "level": "Level 3: Professional", "subs": ["Functional interfaces", "Lambdas", "Method references", "filter / map / collect", "Optional"], "book": "Head First ch. 12; Core Java ch. 6 and Volume II ch. 1"}, {"n": "19", "t": "Composition and design", "level": "Level 3: Professional", "subs": ["Composition over inheritance", "SOLID", "Strategy pattern", "Builder pattern"], "book": "Effective Java items 2 and 18"}, {"n": "20", "t": "Files and concurrency", "level": "Level 3: Professional", "subs": ["try-with-resources", "Reading a file", "Threads and a race on shared state"], "book": "Head First ch. 16 and 17; Core Java ch. 12"}]};
 
 const BUILT = { py: Object.assign({'05': LISTS_ORDER}, PY_TOPIC_LESSONS), java: {'13': ['alias']} };
@@ -2356,7 +2530,8 @@ function tlOrigLine(ln){
 }
 function tlPredIdx(){
   const P = TL_LESSONS[tl.id].predict, T = tl.trace; if(!T) return -1;
-  return T.steps.findIndex(st=>!st.error && !st.done && tlOrigLine(st.line)===P.line);
+  const pl = tlVariant().pline || P.line;
+  return T.steps.findIndex(st=>!st.error && !st.done && tlOrigLine(st.line)===pl);
 }
 function tlActual(){
   const P = TL_LESSONS[tl.id].predict, T = tl.trace, v = tlVariant();
@@ -2501,7 +2676,7 @@ function renderTLCode(ranLine, isRecap){
   }).join('') + `</pre><p class="vnote">Blue: the line that just ran. Outlined: the line that runs next.</p>`;
   $('#v-pseudo').innerHTML = `<ol class="pseudo">` + L0.pseudo.map((t,i)=>`<li class="${ranLine && i+1===tlOrigLine(ranLine)?'active':''}">${esc(t)}</li>`).join('') + `</ol>`;
   const straight = T.steps.every((st,i)=> st.frames.length===1 && (i===0 || st.line>=T.steps[i-1].line || st.done || st.error));
-  const ranSet = new Set(T.steps.map(st=>st.line)); const straightAll = straight && T.src.every((t,i)=> !t.trim() || ranSet.has(i+1) || (T.steps[T.steps.length-1].error));
+  const ranSet = new Set(T.steps.map(st=>st.line)); const straightAll = straight && ranSet.size === T.steps.filter(st=>!st.done && !st.error).length && T.src.every((t,i)=> !t.trim() || ranSet.has(i+1) || (T.steps[T.steps.length-1].error));
   if(straight && straightAll){
   const lines = T.src.map((t,i)=>({t:t.trim(), n:i+1})).filter(x=>x.t);
   const H = 60 + lines.length*56 + 40;
