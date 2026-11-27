@@ -2510,6 +2510,310 @@ Object.assign(PY_TOPIC_LESSONS, {
   '07': ['dict_lookup','dict_get','dict_count','tup_unpack','set_dedupe']
 });
 
+/* ---------- Intermediate: 09, 10, 11, 16 (choosing), 17, 18 ---------- */
+Object.assign(TL_LESSONS, {
+  fd_legb: {
+    topic:'Functions in depth', title:'Where does Python look up a name?',
+    code:"x = 'global'\n\ndef outer():\n    x = 'enclosing'\n    def inner():\n        return x\n    return inner()\n\nr = outer()\nprint(r, x)\n",
+    pseudo:['A global x.','(blank)','Define outer:','it has its own x.','Define inner inside it:','inner returns x (it has no x of its own).','outer returns what inner gives.','(blank)','Call outer.','Show r and the global x.'],
+    lines:{
+      4:{t:'An enclosing name', b:'This x is local to outer. It does not touch the global x.', look:'The outer() frame has its own x.'},
+      6:{t:'Look up x', b:'inner has no x. Python searches outward: Local, then Enclosing (outer), then Global, then Built-in. That order is called LEGB. It finds outer\u2019s x first.', look:'The inner() frame has no names at all.'},
+      10:{t:'The global is untouched', b:'The global x was never changed.', look:'The output box.'}
+    },
+    predict:{line:9, q:'What will r hold?', target:{v:'r'}, opts:["'enclosing'","'global'",'An error'],
+      fb:{"'global'":'Not quite. The enclosing function\u2019s x is found before the global one.'}},
+    variants:[{label:'outer has x'},{label:'outer has no x', from:"    x = 'enclosing'\n", to:"    pass\n", opts:["'global'","'enclosing'",'An error']}],
+    recap:'Python looks a name up in four places, in order: Local, Enclosing function, Global, Built-in (LEGB). The first match wins. Remove outer\u2019s x and the search continues out to the global x.',
+    check:{code:"len = 3\nn = len('abc')", q:'What happens?', opts:['An error','n is 3'], right:0, fb:['Right. The global len (an int) hides the built-in len, so calling it fails.','Not quite. The global name len is found before the built-in, and 3 cannot be called.']},
+    dec:'Looking up x: is it local to inner? No. Is it in outer? Yes: use it. (If not, try global, then built-in.)'
+  },
+  fd_default: {
+    topic:'Functions in depth', title:'Why does my default list remember old calls?',
+    code:"def add(item, bag=[]):\n    bag.append(item)\n    return bag\n\na = add('pen')\nb = add('cup')\nprint(b)\n",
+    pseudo:['Define add, with a default bag made ONCE, when def runs.','Put the item in the bag.','Return the bag.','(blank)','Call without a bag.','Call again without a bag.','Show b.'],
+    lines:{
+      1:{t:'The default is made once', b:'Default values are created when def runs, not on each call. Every call that leaves bag out shares that one list.', look:'The function object is created.'},
+      2:{t:'Change the shared list', b:'append changes the default list itself.', look:'The list grows.'},
+      6:{t:'Second call', b:'bag again refers to the same default list, which already holds pen.', look:'bag points at the same list as a.'}
+    },
+    predict:{line:7, q:'What will print(b) show?', target:{out:true}, opts:["['pen', 'cup']","['cup']","['pen']"],
+      fb:{"['cup']":'Not quite. Both calls used the same default list, created once.'}},
+    variants:[{label:'bag=[]'},{label:'bag=None', from:"def add(item, bag=[]):\n    bag.append(item)\n", to:"def add(item, bag=None):\n    bag = bag or []; bag.append(item)\n", opts:["['cup']","['pen', 'cup']","None"]}],
+    recap:'A mutable default (a list or dict) is shared by every call. The fix is bag=None, then make a new list inside the function when bag is None.',
+    check:{code:"def f(d={}):\n    d['n'] = d.get('n', 0) + 1\n    return d['n']\nf()\nx = f()", q:'What is x?', opts:['2','1'], right:0, fb:['Right. The same dict is reused.','Not quite. The default dict is shared, so n keeps counting.']}
+  },
+  fd_args: {
+    topic:'Functions in depth', title:'What do *args and **kwargs collect?',
+    code:"def report(title, *args, **kwargs):\n    return title, args, kwargs\n\nr = report('Q1', 5, 9, unit='kg', round=True)\nprint(r[1], r[2])\n",
+    pseudo:['Define report: one named parameter, then a catch-all for extra positions and one for extra keywords.','Return all three.','(blank)','Call it with 2 extra values and 2 keywords.','Show what was collected.'],
+    lines:{
+      4:{t:'Collect the extras', b:'title takes \'Q1\'. *args gathers every extra positional value into a tuple. **kwargs gathers every extra keyword into a dict.', look:'The report() frame shows args and kwargs.'}
+    },
+    predict:{line:5, q:'What will print(r[1], r[2]) show?', target:{out:true}, opts:["(5, 9) {'unit': 'kg', 'round': True}","[5, 9] {'unit': 'kg', 'round': True}","5 9"],
+      fb:{"[5, 9] {'unit': 'kg', 'round': True}":'Not quite. *args is always a tuple, not a list.'}},
+    variants:[{label:'2 extras'}],
+    recap:'*args packs extra positional arguments into a tuple; **kwargs packs extra keyword arguments into a dict. The same stars unpack when calling: f(*xs, **opts).',
+    check:{code:"def f(*a):\n    return len(a)\nn = f()", q:'What is n?', opts:['0','An error','None'], right:0, fb:['Right. args is just an empty tuple.','Not quite. *args accepts zero values too.','Not quite. len of an empty tuple is 0.']}
+  },
+  fd_kwonly: {
+    topic:'Functions in depth', title:'What does a bare * in the parameters do?',
+    code:"def area(w, h, *, unit='m'):\n    return str(w * h) + unit\n\na = area(2, 3, unit='cm')\nb = area(2, 3, 'cm')\n",
+    pseudo:['Define area: w and h by position; unit only by name.','Return the area with its unit.','(blank)','Call with unit by name.','Try to pass unit by position.'],
+    lines:{
+      1:{t:'Keyword-only', b:'Every parameter after a bare * must be passed by name. This stops callers mixing up arguments.', look:'The function is defined.'},
+      5:{t:'Passed by position', b:'Only w and h can be filled by position. A third positional value has nowhere to go.', look:'Watch for an error.'}
+    },
+    predict:{line:5, q:"What happens on b = area(2, 3, 'cm')?", target:{v:'b'}, opts:['An error',"'6cm'","'6m'"],
+      fb:{"'6cm'":'Not quite. unit comes after *, so it can only be passed as unit=...'}},
+    variants:[{label:'with *'},{label:'without *', from:'w, h, *, unit', to:'w, h, unit', opts:["'6cm'",'An error',"'6m'"]}],
+    recap:'Parameters after a bare * are keyword-only. area(2, 3, unit=\'cm\') works; area(2, 3, \'cm\') raises TypeError. Use it for options that would be confusing as a bare value.',
+    check:{code:"def f(a, *, b):\n    return a + b\nx = f(1, b=2)", q:'What is x?', opts:['3','An error'], right:0, fb:['Right. b is passed by name.','Not quite. Passing b by name is exactly what is required.']}
+  },
+  fd_lambda: {
+    topic:'Functions in depth', title:'What is a lambda?',
+    code:"words = ['kiwi', 'fig', 'banana']\nby_len = sorted(words, key=lambda w: len(w))\nprint(by_len)\n",
+    pseudo:['Three words.','Sort them, using each word\u2019s length as its sort key.','Show the sorted list.'],
+    lines:{
+      2:{t:'A small function', b:'lambda w: len(w) is a function with no name. sorted calls it on each word and sorts by what it returns.', look:'by_len is a new list.'}
+    },
+    predict:{line:2, q:'What will by_len hold?', target:{v:'by_len'}, opts:["['fig', 'kiwi', 'banana']","['banana', 'fig', 'kiwi']","['kiwi', 'fig', 'banana']"],
+      fb:{"['banana', 'fig', 'kiwi']":'Not quite. That is alphabetical order. The key sorts by length.'}},
+    variants:[{label:'key=len'},{label:'last letter', from:'len(w)', to:'w[-1]', opts:["['banana', 'fig', 'kiwi']","['kiwi', 'fig', 'banana']","['fig', 'kiwi', 'banana']"]}],
+    recap:'A lambda is a one-expression function written inline. It is handy for small keys and callbacks. For anything longer, a def with a name is clearer.',
+    check:{code:"f = lambda a, b: a * b\nx = f(3, 4)", q:'What is x?', opts:['12','7'], right:0, fb:['Right. The expression after the colon is returned.','Not quite. The body multiplies.']}
+  },
+  fd_recursion: {
+    topic:'Functions in depth', title:'How does recursion use the call stack?',
+    code:"def fact(n):\n    if n == 1:\n        return 1\n    return n * fact(n - 1)\n\nx = fact(3)\nprint(x)\n",
+    pseudo:['Define fact(n):','if n is 1,','the answer is 1 (the base case).','otherwise n times fact of n - 1.','(blank)','Call fact(3).','Show it.'],
+    lines:{
+      2:{t:'Base case?', b:'Every recursive function needs a case that stops without calling itself.', look:'The frame stack on the left.'},
+      4:{t:'Call itself', b:'fact(3) cannot finish yet: it needs fact(2) first. A new frame is pushed for every call, each with its own n.', look:'Frames stack up.'},
+      3:{t:'Bottom reached', b:'fact(1) returns 1 directly. Now the waiting frames finish, one by one, in reverse order.', look:'Frames start to disappear.'}
+    },
+    predict:{line:6, q:'What will x hold?', target:{v:'x'}, opts:['6','3','1'],
+      fb:{'1':'Not quite. 1 is only what the deepest call returns. Each waiting call multiplies it on the way back.'}},
+    variants:[{label:'fact(3)'},{label:'fact(0)', from:'fact(3)', to:'fact(0)', opts:['An error','0','1']}],
+    recap:'fact(3) waited on fact(2), which waited on fact(1). The base case returned 1, and the answers multiplied on the way back: 1, 2, 6. Without a reachable base case (try fact(0)), the calls never stop: standard Python raises RecursionError after about 1000 frames, and this site stops it after 600 steps.',
+    check:{code:"def s(n):\n    if n == 0:\n        return 0\n    return n + s(n - 1)\nx = s(3)", q:'What is x?', opts:['6','3','0'], right:0, fb:['Right. 3 + 2 + 1 + 0.','Not quite. The calls add up on the way back.','Not quite. 0 is only the base case.']},
+    dec:'Is n == 1? Yes: return 1. No: call fact(n - 1) and wait, then multiply.'
+  },
+
+  mut_immut: {
+    topic:'Mutability and copying', title:'Why does += change a list but not a string?',
+    code:"s = 'ab'\nt = s\ns += 'c'\nxs = [1]\nys = xs\nxs += [2]\nprint(t, ys)\n",
+    pseudo:['s is a string.','t names the same string.','"Add" to s.','xs is a list.','ys names the same list.','"Add" to xs.','Show t and ys.'],
+    lines:{
+      3:{t:'Strings are immutable', b:'A string cannot change, so s += \'c\' builds a new string and moves s to it. t still refers to the old one.', look:'s and t now point at different strings.'},
+      6:{t:'Lists are mutable', b:'For a list, += extends the same list in place. ys refers to that list too, so it sees the change.', look:'xs and ys still share one list.'}
+    },
+    predict:{line:7, q:'What will print(t, ys) show?', target:{out:true}, opts:['ab [1, 2]','abc [1, 2]','ab [1]'],
+      fb:{'abc [1, 2]':'Not quite. Strings cannot change. s moved to a new string; t kept the old one.','ab [1]':'Not quite. += on a list changes that same list, which ys also refers to.'}},
+    variants:[{label:'+='},{label:'xs = xs + [2]', from:'xs += [2]', to:'xs = xs + [2]', opts:['ab [1]','ab [1, 2]','abc [1]']}],
+    recap:'Immutable values (int, str, tuple) never change; operations make new ones. Mutable ones (list, dict, set) can change in place, and every name that refers to them sees it. xs = xs + [2] makes a new list, so ys keeps the old one.',
+    check:{code:"a = (1, 2)\nb = a\na += (3,)", q:'What is b?', opts:['(1, 2)','(1, 2, 3)'], right:0, fb:['Right. Tuples are immutable, so a moved to a new tuple.','Not quite. A tuple cannot be extended in place.']}
+  },
+  mut_shallow: {
+    topic:'Mutability and copying', title:'Why is copy() only one level deep?',
+    code:"grid = [[1, 2], [3, 4]]\ncopy1 = grid.copy()\ncopy1[0].append(9)\ncopy1.append([5])\nprint(grid)\n",
+    pseudo:['A list of two inner lists.','Copy the outer list only.','Change an inner list through the copy.','Add a new row to the copy.','Show the original.'],
+    lines:{
+      2:{t:'A shallow copy', b:'copy() makes a new outer list, but its slots point at the same inner lists.', look:'Two outer lists, sharing the inner ones.'},
+      3:{t:'Change a shared inner list', b:'copy1[0] is the same list object as grid[0].', look:'The inner list changes for both.'},
+      4:{t:'Change the outer copy', b:'Appending to copy1 only changes the new outer list.', look:'grid does not get the new row.'}
+    },
+    predict:{line:5, q:'What will print(grid) show?', target:{out:true}, opts:['[[1, 2, 9], [3, 4]]','[[1, 2], [3, 4]]','[[1, 2, 9], [3, 4], [5]]'],
+      fb:{'[[1, 2], [3, 4]]':'Not quite. The inner lists are shared, so the 9 shows in grid too.','[[1, 2, 9], [3, 4], [5]]':'Not quite. The outer lists are separate, so the new row only went into copy1.'}},
+    variants:[{label:'copy()'}],
+    recap:'A shallow copy duplicates only the outer container. Inner objects are shared, so changing them through either name changes both. Adding or removing items in the outer list does not.',
+    check:{code:"a = [[0]]\nb = a[:]\nb[0][0] = 7", q:'What is a?', opts:['[[7]]','[[0]]'], right:0, fb:['Right. a[:] is a shallow copy; the inner list is shared.','Not quite. Slicing copies only the outer list.']}
+  },
+  mut_deep: {
+    topic:'Mutability and copying', title:'When do I need deepcopy?',
+    code:"import copy\ngrid = [[1, 2], [3, 4]]\nsafe = copy.deepcopy(grid)\nsafe[0].append(9)\nprint(grid, safe)\n",
+    pseudo:['Load the copy module.','A nested list.','Copy every level.','Change an inner list of the copy.','Show both.'],
+    lines:{
+      3:{t:'A deep copy', b:'deepcopy copies the outer list and, recursively, everything inside it. Nothing is shared.', look:'Two separate sets of inner lists.'},
+      4:{t:'Change the copy', b:'safe[0] is its own list now.', look:'Only safe changes.'}
+    },
+    predict:{line:5, q:'What will print(grid, safe) show?', target:{out:true}, opts:['[[1, 2], [3, 4]] [[1, 2, 9], [3, 4]]','[[1, 2, 9], [3, 4]] [[1, 2, 9], [3, 4]]'],
+      fb:{'[[1, 2, 9], [3, 4]] [[1, 2, 9], [3, 4]]':'Not quite. That is what a shallow copy would do. deepcopy shares nothing.'}},
+    variants:[{label:'deepcopy'},{label:'copy.copy', from:'copy.deepcopy(grid)', to:'copy.copy(grid)', opts:['[[1, 2], [3, 4]] [[1, 2, 9], [3, 4]]','[[1, 2, 9], [3, 4]] [[1, 2, 9], [3, 4]]']}],
+    recap:'Use deepcopy when the data is nested and the copy must be fully independent. copy.copy (like list.copy() and slicing) is shallow.',
+    check:{code:"import copy\na = {'k': [1]}\nb = copy.deepcopy(a)\nb['k'].append(2)", q:"What is a['k']?", opts:['[1]','[1, 2]'], right:0, fb:['Right. The inner list was copied too.','Not quite. deepcopy made a new inner list.']}
+  },
+  mut_param: {
+    topic:'Mutability and copying', title:'Can a function change the list I pass in?',
+    code:"def add_bonus(scores):\n    scores.append(10)\n    scores = [0]\n\nmine = [5]\nadd_bonus(mine)\nprint(mine)\n",
+    pseudo:['Define add_bonus(scores):','add 10 to the list it was given,','then point the local name at a new list.','(blank)','My list.','Pass it in.','Show my list.'],
+    lines:{
+      6:{t:'Pass the list', b:'The parameter scores refers to the same list object as mine. Nothing is copied.', look:'Both names point at one list.'},
+      2:{t:'Change the shared list', b:'append changes the object itself, so mine sees it.', look:'The list grows.'},
+      3:{t:'Rebind the local name', b:'= only moves the local name scores. mine is not affected.', look:'scores now points at a different list.'}
+    },
+    predict:{line:7, q:'What will print(mine) show?', target:{out:true}, opts:['[5, 10]','[0]','[5]'],
+      fb:{'[0]':'Not quite. scores = [0] only moved the local name.','[5]':'Not quite. append changed the shared list.'}},
+    variants:[{label:'append then rebind'}],
+    recap:'Arguments are passed by sharing a reference. Changing the object (append, item assignment) is visible to the caller. Assigning the parameter name to something new is not.',
+    check:{code:"def f(n):\n    n = n + 1\nx = 1\nf(x)", q:'What is x?', opts:['1','2'], right:0, fb:['Right. n = n + 1 only rebinds the local name.','Not quite. ints cannot change in place.']}
+  },
+
+  comp_loop: {
+    topic:'Comprehensions', title:'How is a comprehension like a loop?',
+    code:"nums = [1, 2, 3]\nsquares = [n * n for n in nums]\nprint(squares)\n",
+    pseudo:['Three numbers.','Make a new list: n * n for each n in nums.','Show it.'],
+    lines:{
+      2:{t:'A loop in one line', b:'Read it as: for each n in nums, put n * n into a new list. It does the same work as an empty list plus a for loop with append.', look:'squares is a new list.'}
+    },
+    predict:{line:2, q:'What will squares hold?', target:{v:'squares'}, opts:['[1, 4, 9]','[1, 2, 3]','14'],
+      fb:{'14':'Not quite. A list comprehension builds a list, not a sum.'}},
+    variants:[{label:'n * n'},{label:'n + 10', from:'n * n', to:'n + 10', opts:['[11, 12, 13]','[1, 2, 3]','36']}],
+    recap:'[expression for item in iterable] builds a new list by running the expression once per item. It is shorter than the loop-and-append version and does exactly the same thing.',
+    check:{code:"xs = [c.upper() for c in 'hi']", q:'What is xs?', opts:["['H', 'I']","'HI'"], right:0, fb:['Right. One item per character.','Not quite. Square brackets make a list.']}
+  },
+  comp_filter: {
+    topic:'Comprehensions', title:'How does if filter inside a comprehension?',
+    code:"temps = [18, 25, 31, 12]\nwarm = [t for t in temps if t > 20]\nprint(warm)\n",
+    pseudo:['Four temperatures.','Keep each t only if it is above 20.','Show them.'],
+    lines:{
+      2:{t:'Filter', b:'The if at the end decides which items go into the new list. Items that fail are skipped.', look:'warm has fewer items.'}
+    },
+    predict:{line:2, q:'What will warm hold?', target:{v:'warm'}, opts:['[25, 31]','[18, 25, 31, 12]','[True, True]'],
+      fb:{'[True, True]':'Not quite. The if filters; the items themselves are kept.'}},
+    variants:[{label:'t > 20'},{label:'t % 2 == 0', from:'t > 20', to:'t % 2 == 0', opts:['[18, 12]','[25, 31]','[18]']}],
+    recap:'[x for x in items if test] keeps only the items that pass the test. It is the one-line version of the filtering loop.',
+    check:{code:"xs = [n for n in range(6) if n % 3 == 0]", q:'What is xs?', opts:['[0, 3]','[3]','[0, 3, 6]'], right:0, fb:['Right. range(6) is 0 to 5.','Not quite. 0 % 3 is 0 too.','Not quite. range(6) stops before 6.']}
+  },
+  comp_dictset: {
+    topic:'Comprehensions', title:'How do dict and set comprehensions work?',
+    code:"names = ['ana', 'ben', 'ana']\nlengths = {n: len(n) for n in names}\nfirsts = {n[0] for n in names}\nprint(lengths, len(firsts))\n",
+    pseudo:['Three names, one repeated.','Build a dict: name to length.','Build a set of first letters.','Show both.'],
+    lines:{
+      2:{t:'Dict comprehension', b:'{key: value for ...} builds a dict. A repeated key just overwrites itself.', look:'lengths has 2 keys.'},
+      3:{t:'Set comprehension', b:'{value for ...} builds a set, so duplicates disappear.', look:'firsts has 2 items.'}
+    },
+    predict:{line:2, q:'What will lengths hold?', target:{v:'lengths'}, opts:["{'ana': 3, 'ben': 3}","{'ana': 3, 'ben': 3, 'ana': 3}","[3, 3, 3]"],
+      fb:{"{'ana': 3, 'ben': 3, 'ana': 3}":'Not quite. A dict cannot hold the same key twice.'}},
+    variants:[{label:'3 names'}],
+    recap:'Curly braces with key: value make a dict comprehension; curly braces with just a value make a set comprehension. Both drop duplicates by key or value.',
+    check:{code:"d = {k: k * 2 for k in [1, 2]}", q:'What is d?', opts:['{1: 2, 2: 4}','[2, 4]'], right:0, fb:['Right.','Not quite. key: value inside braces makes a dict.']}
+  },
+
+  abs_choose: {
+    topic:'Abstraction and composition', title:'Should this be inheritance or composition?',
+    code:"class Engine:\n    def start(self):\n        return 'vroom'\n\nclass Radio:\n    def play(self):\n        return 'music'\n\nclass Car:\n    def __init__(self):\n        self.engine = Engine()\n        self.radio = Radio()\n\n    def drive(self):\n        return self.engine.start()\n\ncar = Car()\nprint(car.drive(), car.radio.play())\n",
+    pseudo:['An Engine can start.','(body)','(body)','(blank)','A Radio can play.','(body)','(body)','(blank)','A Car HAS an engine and a radio:','when built,','make an engine,','make a radio.','(blank)','Driving asks the engine to start.','(body)','(blank)','Build a car.','Drive it and play the radio.'],
+    lines:{
+      11:{t:'Has-a', b:'A car is not an engine and is not a radio. It has them. So it holds them as attributes instead of inheriting from them.', look:'The car object points at two part objects.'},
+      15:{t:'Delegate', b:'Car does not know how to start; it asks its engine. This is called delegation.', look:'The call goes into Engine.start.'}
+    },
+    predict:{line:18, q:'What will print(car.drive(), car.radio.play()) show?', target:{out:true}, opts:['vroom music','An error','None None'], fb:{}},
+    variants:[{label:'composition'}],
+    recap:'Ask "is a" or "has a". A Dog is an Animal: inheritance fits. A Car has an Engine: composition fits. Composition keeps classes small, lets you swap parts (an ElectricEngine), and avoids deep, fragile class trees.',
+    check:{code:"# A Stack needs push and pop.\n# Should Stack inherit from list?", q:'Which is safer?', opts:['Hold a list inside (has-a)','Inherit from list (is-a)'], right:0, fb:['Right. Inheriting would also expose insert, sort and every other list method, which a stack should not allow.','Not quite. A stack is not a list; it only uses one.']},
+    dec:'Is the new class a kind of the other one, everywhere it is used? Yes: inherit. No, it only uses it: hold it as an attribute.'
+  },
+
+  exc_trace: {
+    topic:'Exceptions', title:'How do I read a traceback?',
+    code:"def average(xs):\n    return sum(xs) / len(xs)\n\ndef report(xs):\n    return 'avg ' + str(average(xs))\n\nprint(report([4, 6]))\nprint(report([]))\n",
+    pseudo:['Define average: total divided by count.','(body)','(blank)','Define report: wraps average in text.','(body)','(blank)','Report on two numbers.','Report on an empty list.'],
+    lines:{
+      7:{t:'A normal call', b:'report calls average; both return normally.', look:'The frames appear and disappear.'},
+      8:{t:'The failing call', b:'This time len(xs) is 0, and dividing by zero raises ZeroDivisionError deep inside average.', look:'Watch the frame stack when it fails.'},
+      2:{t:'Inside average', b:'This is the line that actually fails. A traceback lists every frame from the outside in, and the last line names the error and where it happened.', look:'The red line in the code.'}
+    },
+    predict:{line:8, q:'What happens on print(report([]))?', target:{out:true}, opts:['An error','Print avg 0','Print avg None'],
+      fb:{'Print avg 0':'Not quite. Nothing checks for an empty list, so len(xs) is 0 and the division fails.'}},
+    variants:[{label:'report([])'}],
+    recap:'Read a traceback from the bottom: the last line is the error type and message (ZeroDivisionError), and the line above it is where it happened (inside average). The lines above that show how you got there: line 8 called report, which called average.',
+    check:{code:"d = {}\nx = d['k']", q:'What does the last line of the traceback name?', opts:['KeyError','NameError'], right:0, fb:['Right.','Not quite. d exists; the key k does not.']}
+  },
+  exc_try: {
+    topic:'Exceptions', title:'Which path does try / except take?',
+    code:"def parse(text):\n    try:\n        n = int(text)\n        status = 'ok'\n    except ValueError:\n        n = 0\n        status = 'bad'\n    return n, status\n\nprint(parse('12'))\nprint(parse('x'))\n",
+    pseudo:['Define parse:','try the risky part:','convert the text,','note success.','if conversion failed with ValueError:','use 0,','note failure.','return both.','(blank)','Parse good text.','Parse bad text.'],
+    lines:{
+      3:{t:'The risky line', b:'If int() fails here, the rest of the try block is skipped and Python jumps to the matching except.', look:'Which line runs next.'},
+      6:{t:'Handled', b:'The except block runs instead of crashing the program.', look:'n gets a fallback value.'}
+    },
+    predict:{line:11, q:"What will print(parse('x')) show?", target:{out:true}, opts:["(0, 'bad')",'An error',"(0, 'ok')"],
+      fb:{"(0, 'ok')":'Not quite. status = \'ok\' was skipped when int() failed.','An error':'Not quite. except ValueError catches it.'}},
+    variants:[{label:'except ValueError'},{label:'except KeyError', from:'except ValueError', to:'except KeyError'}],
+    recap:'When a line in try raises, Python skips the rest of the try block and looks for a matching except. If none matches (KeyError does not match ValueError), the error keeps travelling up and the program stops.',
+    check:{code:"try:\n    x = 1 / 0\nexcept ZeroDivisionError:\n    x = -1", q:'What is x?', opts:['-1','An error'], right:0, fb:['Right. The except caught it.','Not quite. The error matched the except.']},
+    dec:'Did int(text) raise? No: finish the try block. Yes, a ValueError: run the except block. Some other error: it is not caught.'
+  },
+  exc_finally: {
+    topic:'Exceptions', title:'When does finally run?',
+    code:"log = []\ndef job(x):\n    try:\n        log.append('start')\n        return 10 / x\n    finally:\n        log.append('cleanup')\n\nr = job(2)\nprint(r, log)\n",
+    pseudo:['An empty log.','Define job:','try:','record start,','return 10 / x.','no matter what happens:','record cleanup.','(blank)','Run the job.','Show the result and the log.'],
+    lines:{
+      5:{t:'Return... but first', b:'return is about to leave the function, but a finally block must run first.', look:'Which line runs next.'},
+      7:{t:'Always runs', b:'finally runs whether the try block returned, finished, or raised. That makes it the place for cleanup.', look:'cleanup is added.'}
+    },
+    predict:{line:10, q:'What will print(r, log) show?', target:{out:true}, opts:["5.0 ['start', 'cleanup']","5.0 ['start']",'An error'],
+      fb:{"5.0 ['start']":'Not quite. finally runs even when try returns.'}},
+    variants:[{label:'job(2)'},{label:'job(0)', from:'job(2)', to:'job(0)', pline:9, q:'What happens on r = job(0)?', opts:['An error',"r is None"]}],
+    recap:'finally always runs on the way out of a try: after a return, after an error, or after normal completion. With job(0) the division fails, cleanup still runs, and then the error continues.',
+    check:{code:"def f():\n    try:\n        return 'a'\n    finally:\n        print('b')\nx = f()", q:'What is printed?', opts:['b','a','nothing'], right:0, fb:['Right. finally prints b; a is returned, not printed.','Not quite. return does not print.','Not quite. finally always runs.']}
+  },
+  exc_custom: {
+    topic:'Exceptions', title:'How do I write my own exception?',
+    code:"class OutOfStock(Exception):\n    pass\n\ndef buy(stock, n):\n    if n > stock:\n        raise OutOfStock('only ' + str(stock) + ' left')\n    return stock - n\n\ntry:\n    left = buy(3, 5)\nexcept OutOfStock as e:\n    left = 'sorry: ' + str(e)\nprint(left)\n",
+    pseudo:['A new kind of error, built on Exception.','(body)','(blank)','Define buy:','not enough?','raise our own error with a message.','otherwise return what is left.','(blank)','try:','buy 5 of 3.','if OutOfStock was raised, keep it as e:','build a polite message.','Show the result.'],
+    lines:{
+      1:{t:'A custom exception', b:'Subclassing Exception creates a named error type. Callers can catch exactly this one.', look:'A new class appears.'},
+      6:{t:'raise', b:'raise stops buy immediately and sends the error up to the caller.', look:'The buy() frame disappears.'},
+      12:{t:'Caught by type', b:'except OutOfStock matches because the raised object is an OutOfStock. e is the error object, and str(e) is its message.', look:'left gets the message.'}
+    },
+    predict:{line:13, q:'What will print(left) show?', target:{out:true}, opts:['sorry: only 3 left','-2','An error'],
+      fb:{'-2':'Not quite. raise stopped buy before the subtraction.'}},
+    variants:[{label:'buy(3, 5)'},{label:'buy(3, 2)', from:'buy(3, 5)', to:'buy(3, 2)', opts:['1','sorry: only 3 left','An error']}],
+    recap:'Your own exception class gives a problem a clear name. raise sends it up; except OutOfStock catches only that kind, so unrelated bugs are not hidden.',
+    check:{code:"class E(ValueError):\n    pass\ntry:\n    raise E()\nexcept ValueError:\n    r = 'caught'", q:'Is it caught?', opts:['Yes','No'], right:0, fb:['Right. E is a ValueError, so except ValueError catches it.','Not quite. except matches subclasses too.']},
+    dec:'Is n more than stock? Yes: raise OutOfStock, and the caller\u2019s except handles it. No: return the rest.'
+  },
+
+  mod_import: {
+    topic:'Modules and files', title:'What does import actually do?',
+    code:"import math\nfrom math import sqrt as root\n\nr = math.floor(7.8)\ns = root(49)\nprint(r, s)\n",
+    pseudo:['Load the math module and name it math.','Also take its sqrt function and call it root.','(blank)','Use a function through the module.','Use the imported name directly.','Show both.'],
+    lines:{
+      1:{t:'import', b:'Python runs the module once, creates a module object, and binds the name math to it. Later imports reuse the same object.', look:'(Modules are hidden in the diagram to keep it clear.)'},
+      2:{t:'from ... import ... as', b:'This copies one name out of the module into your namespace, under a new name.', look:'root is a function.'},
+      4:{t:'Module.attribute', b:'math.floor looks floor up inside the module object.', look:'r is 7.'}
+    },
+    predict:{line:5, q:'What will s = root(49) hold?', target:{v:'s'}, opts:['7.0','7','An error'],
+      fb:{'7':'Not quite. sqrt always returns a float.'}},
+    variants:[{label:'as root'},{label:'no alias', from:'sqrt as root', to:'sqrt', opts:['An error','7.0','7']}],
+    recap:'import math gives you the module; from math import sqrt gives you just one name; as renames it. Remove the alias and the name root no longer exists, so using it raises NameError.',
+    check:{code:"import math as m\nx = m.pi > 3", q:'What is x?', opts:['True','An error'], right:0, fb:['Right. m is the math module.','Not quite. as m just renames the module.']}
+  },
+  mod_main: {
+    topic:'Modules and files', title:'What is if __name__ == "__main__" for?',
+    code:"def main():\n    print('running the app')\n\nprint('module name:', __name__)\nif __name__ == '__main__':\n    main()\n",
+    pseudo:['Define main.','(body)','(blank)','Show this module\u2019s name.','Only when run directly, not imported:','call main.'],
+    lines:{
+      4:{t:'__name__', b:'Every module has a __name__. When you run a file directly it is \'__main__\'. When another file imports it, it is the module\u2019s own name.', look:'The output box.'},
+      5:{t:'The guard', b:'This check lets one file be both a runnable program and an importable library. Importing it will not start the app.', look:'Which line runs next.'}
+    },
+    predict:{line:6, q:'Will main() run here?', target:{out:true}, opts:['running the app','Nothing more is printed'], fb:{'Nothing more is printed':'Not quite. This file is being run directly, so __name__ is \'__main__\'.'}},
+    variants:[{label:'run directly'}],
+    recap:'The __main__ guard runs code only when the file is the program being run. When another file does import this one, __name__ is the module name, the condition is False, and main() does not start by accident.',
+    check:{code:"# helper.py is imported by app.py.\n# Inside helper.py, what is __name__?", q:'Pick one:', opts:["'helper'","'__main__'"], right:0, fb:['Right. Only the file you run is __main__.','Not quite. helper.py is imported, not run.']}
+  }
+});
+Object.assign(PY_TOPIC_LESSONS, {
+  '09': ['fd_legb','fd_default','fd_args','fd_kwonly','fd_lambda','fd_recursion'],
+  '10': ['mut_immut','mut_shallow','mut_deep','mut_param'],
+  '11': ['comp_loop','comp_filter','comp_dictset'],
+  '16': ['abs_abc','abs_comp','abs_choose'],
+  '17': ['exc_trace','exc_try','exc_finally','exc_custom'],
+  '18': ['mod_import','mod_main']
+});
+
 const CURRICULUM = {"py": [{"n": "01", "t": "Values and names", "level": "Level 1: Beginner", "subs": ["What does = do?", "Why did x keep its old value?", "\"7\" vs 7", "Converting with int()"], "book": "Crash Course ch. 2; Lutz Part II"}, {"n": "02", "t": "Numbers and operators", "level": "Level 1: Beginner", "subs": ["7 // 2", "What % keeps", "0.1 + 0.2", "Operator order"], "book": "Crash Course ch. 2; Lutz ch. 5"}, {"n": "03", "t": "Strings", "level": "Level 1: Beginner", "subs": ["Index 0", "Slicing", "Why can't I change a letter?", "find on a miss", "f-strings"], "book": "Crash Course ch. 2; Lutz ch. 7"}, {"n": "04", "t": "Conditions and logic", "level": "Level 1: Beginner", "subs": ["Which branch runs?", "Boundaries with >=", "When and stops early", "elif chains"], "book": "Crash Course ch. 5; Lutz ch. 12"}, {"n": "05", "t": "Lists", "level": "Level 1: Beginner", "subs": ["Index -1", "Slices", "append vs insert", "in", "Out of range", "Why did both lists change?"], "book": "Crash Course ch. 3 and 4"}, {"n": "06", "t": "Loops", "level": "Level 1: Beginner", "subs": ["How for takes each item", "Running total", "Counting matches", "Filtering", "while and its exit", "break and continue"], "book": "Crash Course ch. 4 and 7; Lutz ch. 13"}, {"n": "07", "t": "Dicts, tuples and sets", "level": "Level 1: Beginner", "subs": ["Key lookup", "Missing key: [] vs .get", "Counting with a dict", "Tuple unpacking", "Sets drop duplicates"], "book": "Crash Course ch. 6; Lutz ch. 8 and 9"}, {"n": "08", "t": "Functions: the basics", "level": "Level 1: Beginner", "subs": ["Arguments enter a call frame", "return vs print", "Parameters vs arguments", "No return gives None"], "book": "Crash Course ch. 8; Lutz ch. 16"}, {"n": "09", "t": "Functions in depth", "level": "Level 2: Intermediate", "subs": ["Scope and the LEGB rule", "The shared default list trap", "*args and **kwargs", "Keyword-only arguments", "lambda", "Recursion and the call stack"], "book": "Lutz ch. 17 to 19"}, {"n": "10", "t": "Mutability and copying", "level": "Level 2: Intermediate", "subs": ["Mutable vs immutable", "copy() is shallow", "deepcopy", "Passing a list into a function"], "book": "Ramalho ch. 6"}, {"n": "11", "t": "Comprehensions", "level": "Level 2: Intermediate", "subs": ["A comprehension is a loop", "Filtering inside it", "Dict and set comprehensions"], "book": "Lutz ch. 14 and 20"}, {"n": "12", "t": "Classes and objects", "level": "Level 2: Intermediate", "subs": ["Class vs object", "__init__ and self", "Instance vs class attributes", "Methods change state", "__repr__ and __str__"], "book": "Crash Course ch. 9; Lutz ch. 26 to 28"}, {"n": "13", "t": "Encapsulation", "level": "Level 2: Intermediate", "subs": ["The _private convention", "Name mangling with __", "@property getters and setters with validation"], "book": "Lutz ch. 38; Ramalho ch. 11"}, {"n": "14", "t": "Inheritance", "level": "Level 2: Intermediate", "subs": ["A subclass reuses code", "Overriding a method", "super().__init__", "isinstance and issubclass"], "book": "Crash Course ch. 9; Lutz ch. 29; Ramalho ch. 14"}, {"n": "15", "t": "Polymorphism", "level": "Level 2: Intermediate", "subs": ["One call, different classes", "Duck typing", "Operator overloading with __add__, __eq__, __len__"], "book": "Lutz ch. 30; Ramalho ch. 13 and 16"}, {"n": "16", "t": "Abstraction and composition", "level": "Level 2: Intermediate", "subs": ["Abstract base classes with @abstractmethod", "Composition: has-a vs is-a", "Choosing between them"], "book": "Lutz ch. 31; Ramalho ch. 13"}, {"n": "17", "t": "Exceptions", "level": "Level 2: Intermediate", "subs": ["Reading a traceback", "try / except path", "finally", "Writing your own exception class"], "book": "Crash Course ch. 10; Lutz Part VII"}, {"n": "18", "t": "Modules and files", "level": "Level 2: Intermediate", "subs": ["How import works", "if __name__ == \"__main__\"", "Reading and writing files with with"], "book": "Crash Course ch. 10; Lutz Part V"}, {"n": "19", "t": "Closures and decorators", "level": "Level 3: Professional", "subs": ["A closure keeps a variable alive", "nonlocal", "A decorator wraps a function", "functools.wraps"], "book": "Ramalho ch. 9; Lutz ch. 39"}, {"n": "20", "t": "Iterators and generators", "level": "Level 3: Professional", "subs": ["The iter / next protocol", "A generator pauses at yield", "A used-up generator", "Generator pipelines"], "book": "Ramalho ch. 17; Lutz ch. 20"}, {"n": "21", "t": "Advanced OOP", "level": "Level 3: Professional", "subs": ["@classmethod and @staticmethod", "Multiple inheritance and the MRO", "Mixins", "@dataclass", "How @property works (descriptors)"], "book": "Ramalho ch. 5, 14 and 23; Lutz ch. 32 and 38"}, {"n": "22", "t": "Context managers", "level": "Level 3: Professional", "subs": ["The with protocol: __enter__ and __exit__", "contextlib.contextmanager"], "book": "Ramalho ch. 18"}, {"n": "23", "t": "Typing and testing", "level": "Level 3: Professional", "subs": ["Type hints", "Protocols", "Writing a test with assert"], "book": "Ramalho ch. 8 and 13"}, {"n": "24", "t": "Design", "level": "Level 3: Professional", "subs": ["SOLID in Python", "Strategy pattern", "Factory pattern"], "book": "Ramalho ch. 10"}], "java": [{"n": "01", "t": "Primitives and references", "level": "Level 1: Beginner", "subs": ["Why does int copy but an array share?", "What new creates", "null", "Stack vs heap"], "book": "Head First ch. 3; Core Java ch. 3"}, {"n": "02", "t": "Operators and casting", "level": "Level 1: Beginner", "subs": ["7 / 2 is 3", "% with negatives", "Widening vs narrowing casts", "int overflow"], "book": "Core Java ch. 3"}, {"n": "03", "t": "Strings", "level": "Level 1: Beginner", "subs": ["Why a String is immutable", "== vs .equals", "substring end index", "StringBuilder"], "book": "Head First ch. 10; Core Java ch. 3"}, {"n": "04", "t": "Conditions and loops", "level": "Level 1: Beginner", "subs": ["if / else path", "switch", "for vs enhanced for", "while exit", "Off-by-one in i <= n"], "book": "Head First ch. 5; Core Java ch. 3"}, {"n": "05", "t": "Arrays", "level": "Level 1: Beginner", "subs": ["Fixed length", "Index out of bounds", "Arrays.copyOf", "Two variables, one array"], "book": "Head First ch. 3; Core Java ch. 3"}, {"n": "06", "t": "Methods", "level": "Level 1: Beginner", "subs": ["Arguments are copied into the frame", "Why a method can change my array but not my int", "Return values", "Recursion"], "book": "Head First ch. 4; Core Java ch. 4"}, {"n": "07", "t": "Classes and objects", "level": "Level 2: Intermediate, the OOP core", "subs": ["Fields per object", "Constructors and constructor overloading", "this", "static vs instance members", "toString"], "book": "Head First ch. 2 and 9; Core Java ch. 4"}, {"n": "08", "t": "Encapsulation", "level": "Level 2: Intermediate, the OOP core", "subs": ["Private fields with getters and setters", "Validation in a setter", "Access modifiers: public, protected, package, private"], "book": "Head First ch. 4; Core Java ch. 4"}, {"n": "09", "t": "Inheritance", "level": "Level 2: Intermediate, the OOP core", "subs": ["extends", "super() in constructors", "Overriding with @Override", "final classes and methods"], "book": "Head First ch. 7; Core Java ch. 5"}, {"n": "10", "t": "Polymorphism", "level": "Level 2: Intermediate, the OOP core", "subs": ["Superclass variable, subclass object", "Dynamic dispatch: which method runs?", "Overloading vs overriding", "Casting and instanceof"], "book": "Head First ch. 7 and 8; Core Java ch. 5"}, {"n": "11", "t": "Abstraction", "level": "Level 2: Intermediate, the OOP core", "subs": ["Abstract classes", "Interfaces", "Default methods", "Abstract class or interface?"], "book": "Head First ch. 8; Core Java ch. 6; Effective Java item 20"}, {"n": "12", "t": "The Object contract", "level": "Level 2: Intermediate, the OOP core", "subs": ["equals and hashCode together", "== vs equals on objects", "Comparable and Comparator"], "book": "Core Java ch. 5; Effective Java items 10 to 14"}, {"n": "13", "t": "Collections", "level": "Level 2: Intermediate, the OOP core", "subs": ["Why did both lists change?", "ArrayList growth", "HashMap lookups", "HashSet duplicates", "Removing while looping"], "book": "Head First ch. 11; Core Java ch. 9"}, {"n": "14", "t": "Generics", "level": "Level 2: Intermediate, the OOP core", "subs": ["Why List<Integer> and not List<int>", "Autoboxing", "Generic methods and bounded types"], "book": "Core Java ch. 8; Effective Java ch. 5"}, {"n": "15", "t": "Exceptions", "level": "Level 2: Intermediate, the OOP core", "subs": ["Reading a stack trace", "try / catch / finally", "Checked vs unchecked", "Custom exceptions"], "book": "Head First ch. 13; Core Java ch. 7"}, {"n": "16", "t": "Immutability and records", "level": "Level 3: Professional", "subs": ["final fields", "Defensive copies", "Records"], "book": "Effective Java items 17 and 50"}, {"n": "17", "t": "Enums and nested classes", "level": "Level 3: Professional", "subs": ["Enums with fields and methods", "Inner vs static nested classes", "Anonymous classes"], "book": "Core Java ch. 5 and 6"}, {"n": "18", "t": "Lambdas and streams", "level": "Level 3: Professional", "subs": ["Functional interfaces", "Lambdas", "Method references", "filter / map / collect", "Optional"], "book": "Head First ch. 12; Core Java ch. 6 and Volume II ch. 1"}, {"n": "19", "t": "Composition and design", "level": "Level 3: Professional", "subs": ["Composition over inheritance", "SOLID", "Strategy pattern", "Builder pattern"], "book": "Effective Java items 2 and 18"}, {"n": "20", "t": "Files and concurrency", "level": "Level 3: Professional", "subs": ["try-with-resources", "Reading a file", "Threads and a race on shared state"], "book": "Head First ch. 16 and 17; Core Java ch. 12"}]};
 
 const BUILT = { py: Object.assign({'05': LISTS_ORDER}, PY_TOPIC_LESSONS), java: {'13': ['alias']} };
