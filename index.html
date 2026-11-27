@@ -1118,12 +1118,32 @@ function loadSkulpt(){
 
 /* ---------- tracing ---------- */
 const SHIMS = {
+  "src/lib/functools.py": "def wraps(wrapped):\n    def deco(f):\n        f.__name__ = wrapped.__name__\n        f.__doc__ = wrapped.__doc__\n        f.__wrapped__ = wrapped\n        return f\n    return deco\n\ndef reduce(fn, items, *start):\n    it = iter(items)\n    acc = start[0] if start else next(it)\n    for x in it:\n        acc = fn(acc, x)\n    return acc\n",
+  "src/lib/contextlib.py": "class _GeneratorCM:\n    def __init__(self, gen):\n        self.gen = gen\n    def __enter__(self):\n        return next(self.gen)\n    def __exit__(self, t, v, tb):\n        try:\n            next(self.gen)\n        except StopIteration:\n            pass\n        return False\n\ndef contextmanager(fn):\n    def helper(*args, **kwargs):\n        return _GeneratorCM(fn(*args, **kwargs))\n    return helper\n",
+  "src/lib/typing.py": "class Protocol:\n    pass\n\ndef runtime_checkable(cls):\n    return cls\n\nAny = object\n",
+  "src/lib/dataclasses.py": "def _fields_of(cls):\n    found = []\n    for k in list(cls.__dict__.keys()):\n        if k.startswith('_dc_'):\n            found.append(k)\n    found.sort()\n    out = []\n    for k in found:\n        name = k[8:]\n        out.append((name, cls.__dict__[k]))\n        delattr(cls, k)\n    return out\n\ndef dataclass(cls=None, frozen=False):\n    def wrap(cls):\n        fields = _fields_of(cls)\n        names = [n for n, d in fields]\n        defaults = {}\n        for n, d in fields:\n            if d != '__DC_MISSING__':\n                defaults[n] = d\n        def __init__(self, *args, **kwargs):\n            if len(args) > len(names):\n                raise TypeError('__init__() takes ' + str(len(names)) + ' positional arguments but ' + str(len(args)) + ' were given')\n            for i in range(len(names)):\n                n = names[i]\n                if i < len(args):\n                    v = args[i]\n                elif n in kwargs:\n                    v = kwargs[n]\n                elif n in defaults:\n                    v = defaults[n]\n                else:\n                    raise TypeError(\"__init__() missing required argument: '\" + n + \"'\")\n                object.__setattr__(self, n, v)\n        def __repr__(self):\n            return cls.__name__ + '(' + ', '.join([n + '=' + repr(getattr(self, n)) for n in names]) + ')'\n        def __eq__(self, other):\n            if other.__class__ is not self.__class__:\n                return NotImplemented\n            return [getattr(self, n) for n in names] == [getattr(other, n) for n in names]\n        cls.__init__ = __init__\n        cls.__repr__ = __repr__\n        cls.__eq__ = __eq__\n        if frozen:\n            def __setattr__(self, n, v):\n                raise AttributeError(\"cannot assign to field '\" + n + \"'\")\n            cls.__setattr__ = __setattr__\n        return cls\n    if cls is None:\n        return wrap\n    return wrap(cls)\n",
+  "src/lib/memfs.py": "_files = {}\n\nclass TextFile:\n    def __init__(self, name, mode):\n        self.name = name\n        self.mode = mode\n        self.closed = False\n        self._pos = 0\n        if 'w' in mode:\n            _files[name] = ''\n        elif 'a' in mode:\n            _files[name] = _files.get(name, '')\n        elif name not in _files:\n            raise IOError(\"No such file or directory: '\" + name + \"'\")\n    def _check(self):\n        if self.closed:\n            raise ValueError('I/O operation on closed file.')\n    def write(self, s):\n        self._check()\n        _files[self.name] = _files[self.name] + s\n        return len(s)\n    def read(self):\n        self._check()\n        data = _files[self.name][self._pos:]\n        self._pos = len(_files[self.name])\n        return data\n    def readlines(self):\n        return self.read().splitlines(True)\n    def __iter__(self):\n        return iter(self.readlines())\n    def close(self):\n        self.closed = True\n    def __enter__(self):\n        return self\n    def __exit__(self, t, v, tb):\n        self.close()\n        return False\n\ndef open(name, mode='r'):\n    return TextFile(name, mode)\n",
   'src/lib/abc.py': "def abstractmethod(f):\n    f.__isabstractmethod__ = True\n    return f\n\nclass ABC:\n    def __new__(cls, *args, **kwargs):\n        missing = []\n        for k in dir(cls):\n            v = getattr(cls, k, None)\n            if getattr(v, '__isabstractmethod__', False):\n                missing.append(k)\n        if missing:\n            raise TypeError(\"Can't instantiate abstract class \" + cls.__name__ + \" with abstract method \" + ', '.join(sorted(missing)))\n        return object.__new__(cls)\n"
 };
 const PRIM = new Set(['int','float','str','bool','NoneType','complex','lng']);
 function reprOf(v){ try{ const r = Sk.misceval.objectRepr(v); return typeof r==='string' ? r : (r && r.v) || String(r); }catch(e){ return '?'; } }
 function short(s, n=22){ return s.length>n ? s.slice(0,n-1)+'…' : s; }
 
+/* rewrite class-body annotations (x: int = 0) into plain attributes the dataclass shim can read; keeps line numbers */
+function prepCode(code){
+  let n = 0; const stack = []; // [indent, isClass]
+  return code.split('\n').map(l=>{
+    if(!l.trim() || /^\s*#/.test(l)) return l;
+    const ind = l.match(/^\s*/)[0].length;
+    while(stack.length && stack[stack.length-1][0] >= ind) stack.pop();
+    const inClass = stack.length && stack[stack.length-1][1];
+    if(/:\s*(#.*)?$/.test(l)) stack.push([ind, /^\s*class\s/.test(l)]);
+    if(!inClass) return l;
+    const m = l.match(/^(\s+)([A-Za-z_]\w*)\s*:\s*([A-Za-z_][\w\[\], .|]*?)\s*(?:=\s*(.+))?$/);
+    if(!m || /^(else|try|finally|except|elif|if|for|while|with|def|class|return|lambda)$/.test(m[2])) return l;
+    n++; return `${m[1]}_dc_${String(n).padStart(3,'0')}_${m[2]} = ${m[4]!==undefined ? m[4] : "'__DC_MISSING__'"}`;
+  }).join('\n');
+}
 async function tracePy(code, inputs){
   await loadSkulpt();
   const src = code.split('\n');
@@ -1205,9 +1225,19 @@ async function tracePy(code, inputs){
     inputfun: p=>{ const v = inq.length ? inq.shift() : ''; out += (p||'') + v + '\n'; return v; },
     inputfunTakesPrompt: true
   });
+  if(!Sk.__origOpen) Sk.__origOpen = Sk.builtins.open;
+  Sk.builtins.open = Sk.__origOpen;
+  if(/\bopen\(/.test(code)){
+    try{
+      try{ Sk.sysmodules.mp$del_subscript(new Sk.builtin.str('memfs')); }catch(e){}
+      await Sk.misceval.asyncToPromise(()=>Sk.importModule('memfs', false, true), {'Sk.debug': s=>new Promise(r=>r(s.resume()))});
+      const mf = Sk.sysmodules.mp$subscript(new Sk.builtin.str('memfs'));
+      Sk.builtins.open = mf.$d.open;
+    }catch(e){ console.warn('memfs', e); }
+  }
   let lastChain = [], limitHit = false;
   try{
-    await Sk.misceval.asyncToPromise(()=>Sk.importMainWithBody('<stdin>', false, code, true), {
+    await Sk.misceval.asyncToPromise(()=>Sk.importMainWithBody('<stdin>', false, prepCode(code), true), {
       'Sk.debug': s=>{
         const chain = []; let c = s; let foreign = false;
         while(c){ if(c.$lineno!==undefined){ if(c.$filename && !/^<stdin>/.test(c.$filename)) foreign = true; else chain.push(c); } c = c.child; }
@@ -2052,7 +2082,7 @@ Object.assign(TL_LESSONS, {
   abs_comp: {
     topic:'Abstraction and composition', title:'What does a has-a relationship look like?',
     code:"class Engine:\n    def __init__(self, hp):\n        self.hp = hp\n\n    def start(self):\n        return 'Vroom ' + str(self.hp)\n\nclass Car:\n    def __init__(self, hp):\n        self.engine = Engine(hp)\n\n    def start(self):\n        return self.engine.start()\n\ncar = Car(120)\nprint(car.start())\n",
-    pseudo:['Define Engine.','(init)','(store hp)','(blank)','Starting an engine makes a sound with its power.','(build text)','(blank)','Define Car. A car is not an engine; it has one.','When built, build an Engine and keep it.','(blank)','Starting the car asks its engine to start.','(delegate)','(blank)','Build a car with 120 hp.','Start it.'],
+    pseudo:['Define Engine.','(init)','(store hp)','(blank)','Starting an engine makes a sound with its power.','(build text)','(blank)','Define Car. A car is not an engine; it has one.','When built:','build an Engine and keep it.','(blank)','Starting the car asks its engine to start.','(delegate)','(blank)','Build a car with 120 hp.','Start it.'],
     lines:{
       15:{t:'Build a Car', b:'Car.__init__ runs with hp = 120.', look:'The Car.__init__ frame.'},
       10:{t:'A car has an engine', b:'The car stores an Engine object in its engine attribute. That is composition: one object built from others.', look:'An arrow from the car\u2019s engine row to the Engine object.'},
@@ -2814,6 +2844,328 @@ Object.assign(PY_TOPIC_LESSONS, {
   '18': ['mod_import','mod_main']
 });
 
+/* ---------- Professional: 19-24, plus files (18) ---------- */
+Object.assign(TL_LESSONS, {
+  mod_files: {
+    topic:'Modules and files', title:'Why open files with with?',
+    code:"with open('notes.txt', 'w') as f:\n    f.write('milk\\n')\n    f.write('eggs\\n')\n\nwith open('notes.txt') as f:\n    items = f.readlines()\nprint(items, f.closed)\n",
+    pseudo:['Open notes.txt for writing, call it f:','write a line,','write another line.','(the file is closed here, automatically)','Open it again for reading:','read all lines into a list.','Show the lines and whether f is closed.'],
+    lines:{
+      1:{t:'Open for writing', b:'Mode \'w\' creates the file, or empties it if it exists. with promises to close the file when the block ends, even if something fails inside it.', look:'f is a file object.'},
+      2:{t:'Write text', b:'write adds text exactly as given. It does not add a newline for you, which is why each string ends with \\n.', look:'Nothing printed: the text goes to the file.'},
+      6:{t:'Read it back', b:'Mode \'r\' (the default) reads. readlines gives a list with one string per line, newline included.', look:'items is a list of two strings.'},
+      7:{t:'Closed for you', b:'Leaving the with block called f.close().', look:'The output box.'}
+    },
+    predict:{line:7, q:'What will print(items, f.closed) show?', target:{out:true}, opts:["['milk\\n', 'eggs\\n'] True","['milk', 'eggs'] True","['milk\\n', 'eggs\\n'] False"],
+      fb:{"['milk', 'eggs'] True":'Not quite. readlines keeps the \\n at the end of each line.',"['milk\\n', 'eggs\\n'] False":'Not quite. Leaving a with block closes the file.'}},
+    variants:[{label:"'w' then read"},{label:"read a missing file", from:"open('notes.txt')", to:"open('todo.txt')", pline:5, q:"What happens on open('todo.txt')?", opts:['An error','items is empty']}],
+    recap:'with open(...) as f opens a file and guarantees it is closed when the block ends. \'w\' overwrites, \'a\' appends, \'r\' reads. Opening a file that does not exist for reading raises an error (FileNotFoundError in standard Python). On this site, files live in memory only while the program runs.',
+    check:{code:"with open('a.txt', 'w') as f:\n    f.write('x')\nwith open('a.txt', 'w') as f:\n    f.write('y')", q:'What does a.txt contain?', opts:["'y'","'xy'"], right:0, fb:['Right. \'w\' empties the file first.','Not quite. That would need mode \'a\'.']}
+  },
+
+  clo_keep: {
+    topic:'Closures and decorators', title:'How does a closure keep a variable alive?',
+    code:"def make_multiplier(k):\n    def times(x):\n        return x * k\n    return times\n\ndouble = make_multiplier(2)\ntriple = make_multiplier(3)\nprint(double(5), triple(5))\n",
+    pseudo:['Define a factory that takes k:','inside, define times(x), which uses k,','times returns x * k.','hand times back.','(blank)','Make one with k = 2.','Make another with k = 3.','Use both.'],
+    lines:{
+      4:{t:'Return a function', b:'make_multiplier returns the inner function. Its frame ends, but times still needs k, so Python keeps k alive alongside times. That pairing is a closure.', look:'The frame disappears; double now refers to a function.'},
+      3:{t:'Use the captured k', b:'When double runs, k is found in the enclosing scope that was captured, not in the global frame.', look:'The times() frame has only x.'}
+    },
+    predict:{line:8, q:'What will print(double(5), triple(5)) show?', target:{out:true}, opts:['10 15','15 15','10 10'],
+      fb:{'15 15':'Not quite. Each call to make_multiplier captured its own k.'}},
+    variants:[{label:'k = 2 and 3'}],
+    recap:'Each call to make_multiplier created a new k and a new times that remembers it. double keeps k = 2 and triple keeps k = 3, long after make_multiplier has returned.',
+    check:{code:"def greet(word):\n    def say(name):\n        return word + ' ' + name\n    return say\nhi = greet('hi')\nx = hi('Bo')", q:'What is x?', opts:["'hi Bo'",'An error'], right:0, fb:['Right. say remembers word.','Not quite. The closure kept word alive.']}
+  },
+  clo_nonlocal: {
+    topic:'Closures and decorators', title:'Why does count += 1 fail inside a closure?',
+    code:"def counter():\n    count = 0\n    def inc():\n        count += 1\n        return count\n    return inc\n\nc = counter()\nn = c()\n",
+    pseudo:['Define counter:','count starts at 0.','Define inc:','add one to count,','return it.','hand inc back.','(blank)','Make a counter.','Call it.'],
+    lines:{
+      4:{t:'Assignment makes it local', b:'count += 1 assigns to count, so Python treats count as a local name of inc for the whole function. Reading the local count before it has a value fails.', look:'Watch for an error.'}
+    },
+    predict:{line:9, q:'What happens on n = c()?', target:{v:'n'}, opts:['An error','1','0'],
+      fb:{'1':'Not quite. The assignment inside inc makes count local to inc, and that local count has no value yet.'}},
+    variants:[{label:'count += 1'},{label:'list cell', from:"    count = 0\n    def inc():\n        count += 1\n        return count\n", to:"    count = [0]\n    def inc():\n        count[0] += 1\n        return count[0]\n", opts:['An error','1','0']}],
+    recap:'Assigning to a name inside a function makes it local, so count += 1 raised UnboundLocalError. In standard Python, the fix is one line, nonlocal count, which tells Python to rebind the enclosing variable. (This site\u2019s runner cannot run nonlocal yet, so the second input shows the older fix: change an object, count[0], instead of rebinding the name.)',
+    check:{code:"total = 0\ndef add():\n    total = total + 1\nadd()", q:'What happens?', opts:['An error','total becomes 1'], right:0, fb:['Right. The same rule: total is local to add because it is assigned there. Fix with global total.','Not quite. Without global total, the assignment makes total local.']}
+  },
+  clo_decorator: {
+    topic:'Closures and decorators', title:'What does a decorator do to a function?',
+    code:"def shout(fn):\n    def wrapper(name):\n        return fn(name).upper() + '!'\n    return wrapper\n\n@shout\ndef greet(name):\n    return 'hi ' + name\n\nprint(greet('ana'))\n",
+    pseudo:['Define shout: it takes a function,','builds a wrapper around it,','the wrapper calls the original and changes the result,','and returns the wrapper.','(blank)','Decorate the next function with shout:','greet makes a greeting.','(body)','(blank)','Call greet.'],
+    lines:{
+      6:{t:'@ is shorthand', b:'@shout above def greet means: define greet, then run greet = shout(greet). The name greet now refers to wrapper.', look:'greet in the global frame.'},
+      10:{t:'Call the decorated name', b:'greet(\'ana\') actually calls wrapper, which calls the original greet inside.', look:'Two frames appear: wrapper, then greet.'}
+    },
+    predict:{line:10, q:"What will print(greet('ana')) show?", target:{out:true}, opts:['HI ANA!','hi ana','An error'],
+      fb:{'hi ana':'Not quite. The name greet now refers to the wrapper, which changes the result.'}},
+    variants:[{label:'@shout'},{label:'no decorator', from:'@shout\n', to:'\n', opts:['hi ana','HI ANA!','An error']}],
+    recap:'A decorator is a function that takes a function and returns a replacement, usually a wrapper that runs code before or after the original. @shout is exactly greet = shout(greet).',
+    check:{code:"def twice(f):\n    def w():\n        f()\n        f()\n    return w\n@twice\ndef hi():\n    print('hi')\nhi()", q:'How many times is hi printed?', opts:['2','1'], right:0, fb:['Right. The wrapper calls f twice.','Not quite. hi now refers to w, which calls the original twice.']}
+  },
+  clo_wraps: {
+    topic:'Closures and decorators', title:'Why use functools.wraps?',
+    code:"import functools\n\ndef logged(fn):\n    @functools.wraps(fn)\n    def wrapper(*args):\n        return fn(*args)\n    return wrapper\n\n@logged\ndef area(w, h):\n    return w * h\n\nprint(area.__name__, area(2, 3))\n",
+    pseudo:['Load functools.','(blank)','Define a decorator logged:','copy fn\u2019s name and docs onto the wrapper,','the wrapper passes all arguments through,','(body)','return it.','(blank)','Decorate area.','area multiplies.','(body)','(blank)','Show the name and a result.'],
+    lines:{
+      4:{t:'Keep the identity', b:'Without wraps, the decorated function would be called wrapper in error messages, help() and logs. wraps copies the original name and docstring onto the wrapper.', look:'The wrapper is created.'},
+      13:{t:'Check the name', b:'area.__name__ reports the original name.', look:'The output box.'}
+    },
+    predict:{line:13, q:'What will print(area.__name__, area(2, 3)) show?', target:{out:true}, opts:['area 6','wrapper 6','An error'],
+      fb:{'wrapper 6':'Not quite. That is what happens without functools.wraps.'}},
+    variants:[{label:'with wraps'},{label:'without wraps', from:"    @functools.wraps(fn)\n", to:"\n", opts:['wrapper 6','area 6','An error']}],
+    recap:'Every decorator should use @functools.wraps(fn) on its wrapper. The behaviour is the same, but the function keeps its real name and docstring, which makes debugging and documentation honest.',
+    check:{code:"# A decorator without wraps is applied to save().\n# What is save.__name__?", q:'Pick one:', opts:["The wrapper's name","'save'"], right:0, fb:['Right. The name save now refers to the wrapper.','Not quite. Only wraps copies the original name.']}
+  },
+
+  gen_iter: {
+    topic:'Iterators and generators', title:'What do iter and next do?',
+    code:"letters = ['a', 'b']\nit = iter(letters)\nfirst = next(it)\nsecond = next(it)\nthird = next(it)\n",
+    pseudo:['A list of two letters.','Ask the list for an iterator: a bookmark that walks it.','Take the next item.','Take the next item.','Take the next item.'],
+    lines:{
+      2:{t:'An iterator', b:'iter() returns an object that remembers how far it has got. A for loop does exactly this behind the scenes.', look:'it is a new object.'},
+      3:{t:'next', b:'next() returns the current item and moves the bookmark on.', look:'first holds \'a\'.'},
+      5:{t:'Run out', b:'With no items left, next raises StopIteration. A for loop catches this and simply ends.', look:'Watch for an error.'}
+    },
+    predict:{line:5, q:'What happens on third = next(it)?', target:{v:'third'}, opts:['An error',"'a'",'None'],
+      fb:{"'a'":'Not quite. An iterator does not start over. It is used up.','None':'Not quite. next raises StopIteration instead of returning None.'}},
+    variants:[{label:'two items'}],
+    recap:'for x in items is really: it = iter(items), then call next(it) until StopIteration. An iterator moves only forward and cannot be restarted; ask the list for a fresh iterator to go again.',
+    check:{code:"it = iter('xy')\nnext(it)\nr = next(it)", q:'What is r?', opts:["'y'","'x'"], right:0, fb:['Right. The first next took x.','Not quite. The iterator had already moved past x.']}
+  },
+  gen_yield: {
+    topic:'Iterators and generators', title:'How does a generator pause at yield?',
+    code:"def countdown(n):\n    while n > 0:\n        yield n\n        n = n - 1\n    print('liftoff')\n\nfor x in countdown(3):\n    print(x)\n",
+    pseudo:['Define countdown: a generator because it contains yield.','while n is above 0:','hand n out and pause here,','when resumed, decrease n.','after the loop, print liftoff.','(blank)','Take values from countdown(3) one at a time,','and print each.'],
+    lines:{
+      3:{t:'yield pauses', b:'yield hands a value to the for loop and freezes the generator right here, with n remembered.', look:'The countdown frame stays alive between values.'},
+      4:{t:'Resume', b:'The for loop asks for the next value, so the generator continues from just after yield.', look:'n decreases.'},
+      8:{t:'Use the value', b:'The loop body runs with the value that was yielded.', look:'The output box.'}
+    },
+    predict:{line:8, q:'What does the first print(x) show?', target:{out:true, first:true}, opts:['3','1','None'], fb:{'1':'Not quite. The first value yielded is n itself, 3.'}},
+    variants:[{label:'countdown(3)'}],
+    recap:'Calling countdown(3) did not run its body; it made a generator. Each loop step resumed the body until the next yield. When the body finished (after liftoff), the generator raised StopIteration and the for loop ended. Values are produced one at a time, never stored as a full list.',
+    check:{code:"def g():\n    yield 'a'\n    yield 'b'\nx = list(g())", q:'What is x?', opts:["['a', 'b']","'a'"], right:0, fb:['Right. list() runs the generator to the end.','Not quite. list() keeps asking for values until it is used up.']}
+  },
+  gen_usedup: {
+    topic:'Iterators and generators', title:'Why is my generator empty the second time?',
+    code:"squares = (n * n for n in [1, 2, 3])\ntotal = sum(squares)\nagain = list(squares)\nprint(total, again)\n",
+    pseudo:['A generator expression: squares made on demand.','Add them up (this uses every value).','Try to read them again.','Show both.'],
+    lines:{
+      1:{t:'A generator expression', b:'Round brackets make a generator, not a list. No squares are computed yet.', look:'squares is a generator object.'},
+      2:{t:'Consume it', b:'sum pulls every value out of the generator.', look:'total is 14.'},
+      3:{t:'Nothing left', b:'A generator runs once. It is now exhausted, so list() gets no values.', look:'again is empty.'}
+    },
+    predict:{line:3, q:'What will again hold?', target:{v:'again'}, opts:['[]','[1, 4, 9]','An error'],
+      fb:{'[1, 4, 9]':'Not quite. sum already used up every value.'}},
+    variants:[{label:'( ) generator'},{label:'[ ] list', from:'(n * n for n in [1, 2, 3])', to:'[n * n for n in [1, 2, 3]]', opts:['[1, 4, 9]','[]','An error']}],
+    recap:'A generator can be read only once. If you need the values twice, build a list (square brackets) or create a new generator. The trade-off: a list holds everything in memory, a generator holds only one value at a time.',
+    check:{code:"g = (c for c in 'ab')\nn = len(list(g)) + len(list(g))", q:'What is n?', opts:['2','4'], right:0, fb:['Right. The second list() gets nothing.','Not quite. The generator is empty after the first list().']}
+  },
+  gen_pipeline: {
+    topic:'Iterators and generators', title:'How do generators chain into a pipeline?',
+    code:"def read(lines):\n    for line in lines:\n        yield line.strip()\n\ndef non_empty(items):\n    for s in items:\n        if s:\n            yield s\n\nraw = [' a ', '', ' b']\nclean = list(non_empty(read(raw)))\nprint(clean)\n",
+    pseudo:['Stage 1: strip each line,','(body)','(body)','(blank)','Stage 2: drop empty strings,','(body)','(body)','(body)','(blank)','Raw input.','Connect the stages and collect the results.','Show them.'],
+    lines:{
+      11:{t:'Connect the stages', b:'read(raw) and non_empty(...) are generators. Nothing runs until list() asks for values. Then each value flows through both stages, one at a time.', look:'Frames for read and non_empty take turns.'}
+    },
+    predict:{line:11, q:'What will clean hold?', target:{v:'clean'}, opts:["['a', 'b']","[' a ', ' b']","['a', '', 'b']"],
+      fb:{"[' a ', ' b']":'Not quite. read strips each line first.',"['a', '', 'b']":'Not quite. non_empty drops the empty string.'}},
+    variants:[{label:'two stages'}],
+    recap:'Generator stages pass one item at a time: read strips a line, hands it to non_empty, which keeps or drops it, then the next line starts. This works on huge inputs because no stage builds a full list.',
+    check:{code:"def dbl(xs):\n    for x in xs:\n        yield x * 2\nr = sum(dbl(dbl([1, 2])))", q:'What is r?', opts:['12','6'], right:0, fb:['Right. 1 and 2 become 4 and 8.','Not quite. The values pass through dbl twice.']}
+  },
+
+  adv_classmethod: {
+    topic:'Advanced OOP', title:'When do I use @classmethod and @staticmethod?',
+    code:"class Temp:\n    def __init__(self, c):\n        self.c = c\n\n    @classmethod\n    def from_f(cls, f):\n        return cls((f - 32) * 5 / 9)\n\n    @staticmethod\n    def is_valid(c):\n        return c >= -273\n\nt = Temp.from_f(212)\nok = Temp.is_valid(t.c)\nprint(t.c, ok)\n",
+    pseudo:['Define Temp.','Build from Celsius:','store it.','(blank)','A class method: gets the class, not an object.','another way to build a Temp, from Fahrenheit.','(body)','(blank)','A static method: gets neither.','a plain helper that lives in the class.','(body)','(blank)','Build a Temp from 212 \u00b0F.','Check it.','Show both.'],
+    lines:{
+      13:{t:'Call on the class', b:'Temp.from_f(212) passes the class itself as cls. from_f then calls cls(...) to build a new object. This is an alternative constructor.', look:'A from_f frame with cls.'},
+      14:{t:'A static method', b:'is_valid receives no self and no cls. It is an ordinary function kept in the class because it belongs with it.', look:'An is_valid frame with only c.'}
+    },
+    predict:{line:15, q:'What will print(t.c, ok) show?', target:{out:true}, opts:['100.0 True','212 True','An error'], fb:{'212 True':'Not quite. from_f converts: (212 - 32) * 5 / 9 is 100.0.'}},
+    variants:[{label:'212 \u00b0F'}],
+    recap:'Use @classmethod when the method needs the class, usually to build objects in another way (from_f). Use @staticmethod for a helper that needs neither the object nor the class. Plain methods get self, the object.',
+    check:{code:"class A:\n    @classmethod\n    def make(cls):\n        return cls()\nclass B(A):\n    pass\nx = B.make()", q:'What type is x?', opts:['B','A'], right:0, fb:['Right. cls is whichever class the method was called on.','Not quite. B.make() passes B as cls.']}
+  },
+  adv_mro: {
+    topic:'Advanced OOP', title:'Which parent wins in multiple inheritance?',
+    code:"class Base:\n    def hello(self):\n        return 'Base'\n\nclass Left(Base):\n    def hello(self):\n        return 'Left>' + super().hello()\n\nclass Right(Base):\n    def hello(self):\n        return 'Right>' + super().hello()\n\nclass Child(Left, Right):\n    pass\n\nprint(Child().hello())\n",
+    pseudo:['Base says Base.','(body)','(body)','(blank)','Left adds its name, then asks super().','(body)','(body)','(blank)','Right adds its name, then asks super().','(body)','(body)','(blank)','Child inherits from Left, then Right.','(body)','(blank)','Ask a Child to say hello.'],
+    lines:{
+      16:{t:'Method resolution order', b:'Python lines up the classes in one order, the MRO: Child, Left, Right, Base, object. A method is looked up along that line.', look:'Which hello frame appears first.'},
+      7:{t:'super() means next in line', b:'super() in Left does not mean Base. It means the next class in the MRO, which for a Child is Right.', look:'The next frame is Right.hello.'}
+    },
+    predict:{line:16, q:'What will print(Child().hello()) show?', target:{out:true}, opts:['Left>Right>Base','Left>Base','Right>Left>Base'],
+      fb:{'Left>Base':'Not quite. super() follows the MRO of the actual object, Child, so after Left comes Right.'}},
+    variants:[{label:'(Left, Right)'},{label:'(Right, Left)', from:'Child(Left, Right)', to:'Child(Right, Left)', opts:['Right>Left>Base','Left>Right>Base','Right>Base']}],
+    recap:'With several parents, Python builds one ordered list (Child.__mro__) and every super() call moves one step along it. That is how each class gets called exactly once. Change the order of parents and the order of calls changes too.',
+    check:{code:"class A: pass\nclass B(A): pass\nclass C(A): pass\nclass D(B, C): pass\nm = [k.__name__ for k in D.__mro__]", q:'What is m?', opts:["['D', 'B', 'C', 'A', 'object']","['D', 'B', 'A', 'C', 'object']"], right:0, fb:['Right. A shared parent comes after all its children.','Not quite. A comes only after both B and C.']}
+  },
+  adv_mixin: {
+    topic:'Advanced OOP', title:'What is a mixin?',
+    code:"class ReprMixin:\n    def __repr__(self):\n        pairs = [k + '=' + repr(v) for k, v in self.__dict__.items()]\n        return type(self).__name__ + '(' + ', '.join(pairs) + ')'\n\nclass Point(ReprMixin):\n    def __init__(self, x, y):\n        self.x = x\n        self.y = y\n\nprint(Point(1, 2))\n",
+    pseudo:['A small class that only adds one ability:','a readable text form,','built from the object\u2019s attributes,','with the real class name.','(blank)','Point gets that ability by inheriting it.','Build a point:','(body)','(body)','(blank)','Show a point.'],
+    lines:{
+      11:{t:'Borrowed behaviour', b:'Point does not define __repr__. Python finds it in ReprMixin. Inside it, self is the Point, so self.__dict__ holds x and y.', look:'The __repr__ frame belongs to ReprMixin.'}
+    },
+    predict:{line:11, q:'What will print(Point(1, 2)) show?', target:{out:true}, opts:['Point(x=1, y=2)','ReprMixin(x=1, y=2)','<__main__.Point object>'],
+      fb:{'ReprMixin(x=1, y=2)':'Not quite. type(self) is Point, the object\u2019s real class.'}},
+    variants:[{label:'with mixin'}],
+    recap:'A mixin is a small class that adds one focused ability and is meant to be combined with other classes. It does not stand alone and does not represent an "is a" relationship; it is a reusable add-on.',
+    check:{code:"class Loud:\n    def shout(self):\n        return self.name.upper()\nclass Dog(Loud):\n    name = 'rex'\nx = Dog().shout()", q:'What is x?', opts:["'REX'",'An error'], right:0, fb:['Right. self is the Dog, which has name.','Not quite. Loud uses self.name, and the Dog provides it.']}
+  },
+  adv_dataclass: {
+    topic:'Advanced OOP', title:'What does @dataclass write for me?',
+    code:"from dataclasses import dataclass\n\n@dataclass\nclass Item:\n    name: str\n    price: float = 1.0\n\na = Item('pen')\nb = Item('pen', 1.0)\nprint(a, a == b)\n",
+    pseudo:['Load dataclass.','(blank)','Generate the boring methods for the class below.','class Item, listing its fields:','Item has a name,','and a price, 1.0 by default.','(blank)','Build one with the default price.','Build another, same values.','Show one and compare.'],
+    lines:{
+      3:{t:'A class generator', b:'@dataclass reads the fields listed in the class and writes __init__, __repr__ and __eq__ for you.', look:'The Item class is created.'},
+      10:{t:'Value equality', b:'The generated __eq__ compares the fields, so two items with the same values are equal.', look:'The output box.'}
+    },
+    predict:{line:10, q:'What will print(a, a == b) show?', target:{out:true}, opts:["Item(name='pen', price=1.0) True","Item(name='pen', price=1.0) False","<__main__.Item object> False"],
+      fb:{"Item(name='pen', price=1.0) False":'Not quite. Without @dataclass, == would compare identity. The generated __eq__ compares fields.'}},
+    variants:[{label:'Item(\'pen\')'},{label:'Item()', from:"Item('pen')\n", to:"Item()\n", opts:['An error',"Item(name='', price=1.0)"], pline:8, q:'What happens on a = Item()?'}],
+    recap:'@dataclass turns a list of typed fields into a full class: constructor, readable repr, and field-by-field equality. Fields without a default are required, so Item() fails. Add frozen=True to make the objects read-only.',
+    check:{code:"# @dataclass\n# class P:\n#     x: int\n#     y: int\n# P(1, 2) == P(1, 2)", q:'True or False?', opts:['True','False'], right:0, fb:['Right. Same fields, so equal.','Not quite. @dataclass generates __eq__ that compares fields.']}
+  },
+  adv_descriptor: {
+    topic:'Advanced OOP', title:'How does @property actually work?',
+    code:"class Positive:\n    def __init__(self, key):\n        self.key = key\n\n    def __get__(self, obj, objtype=None):\n        return getattr(obj, self.key)\n\n    def __set__(self, obj, value):\n        if value <= 0:\n            raise ValueError('must be positive')\n        setattr(obj, self.key, value)\n\nclass Box:\n    width = Positive('_width')\n\nb = Box()\nb.width = 5\nb.width = -1\n",
+    pseudo:['A descriptor class:','when created, remember where to store the real value,','(body)','(blank)','reading the attribute calls __get__,','(body)','(blank)','writing it calls __set__,','which checks the value,','(body)','then stores it.','(blank)','Box uses it for width:','(body)','(blank)','Build a box.','Set a good width.','Set a bad width.'],
+    lines:{
+      17:{t:'Assignment calls __set__', b:'width is a descriptor object stored on the class. b.width = 5 does not simply store 5; Python calls Positive.__set__(descriptor, b, 5).', look:'A __set__ frame appears.'},
+      18:{t:'Validation', b:'The same check runs on every assignment, for every Box.', look:'Watch for an error.'}
+    },
+    predict:{line:18, q:'What happens on b.width = -1?', target:{v:'b'}, opts:['An error','width becomes -1'],
+      fb:{'width becomes -1':'Not quite. The assignment goes through __set__, which rejects values that are not positive.'}},
+    variants:[{label:'-1'}],
+    recap:'A descriptor is an object on a class with __get__ and/or __set__. Attribute access on instances is routed through it. @property is a ready-made descriptor; writing your own lets you reuse one validation rule across many attributes and classes.',
+    check:{code:"# Which method runs for  print(b.width)  ?", q:'Pick one:', opts:['__get__','__set__'], right:0, fb:['Right. Reading calls __get__.','Not quite. __set__ is for assignment.']}
+  },
+
+  ctx_protocol: {
+    topic:'Context managers', title:'What do __enter__ and __exit__ do?',
+    code:"class Timer:\n    def __enter__(self):\n        print('start')\n        return self\n\n    def __exit__(self, kind, value, tb):\n        print('stop')\n        return False\n\nwith Timer() as t:\n    print('working')\nprint('after')\n",
+    pseudo:['A context manager class:','on entering the with block,','announce start,','hand back the object (this becomes t).','(blank)','on leaving the block, for any reason,','announce stop,','do not hide errors.','(blank)','Enter the block with a Timer,','do the work,','continue after the block.'],
+    lines:{
+      10:{t:'Enter', b:'with calls __enter__. Whatever it returns is bound to the name after as.', look:'An __enter__ frame appears.'},
+      7:{t:'Exit', b:'Leaving the block calls __exit__. If an error happened, its details arrive in kind, value and tb; returning False lets the error continue.', look:'stop is printed.'}
+    },
+    predict:{line:10, q:'What is printed when the with line runs?', target:{out:true}, opts:['start','start and working','Nothing yet'], fb:{'Nothing yet':'Not quite. Entering the with block calls __enter__ right away, which prints start.'}},
+    variants:[{label:'no error'}],
+    recap:'with X() as t: calls X().__enter__(), runs the block, then calls __exit__ no matter how the block ends. That is why files, locks and timers use with: cleanup cannot be forgotten.',
+    check:{code:"with Timer():\n    raise ValueError()", q:'Is stop printed?', opts:['Yes','No'], right:0, fb:['Right. __exit__ runs even when the block raises.','Not quite. __exit__ always runs.']}
+  },
+  ctx_contextmanager: {
+    topic:'Context managers', title:'How does a generator become a context manager?',
+    code:"from contextlib import contextmanager\n\ndef tag(label):\n    print('<' + label + '>')\n    yield label\n    print('</' + label + '>')\n\ntag = contextmanager(tag)\n\nwith tag('b') as t:\n    print('bold text')\n",
+    pseudo:['Load the helper.','(blank)','A generator with one yield:','setup: print the opening tag,','pause here and hand name to the with block,','cleanup: print the closing tag.','(blank)','Wrap it (the same as writing @contextmanager above def).','(blank)','Use it in a with block:','the block runs while the generator is paused.'],
+    lines:{
+      8:{t:'The decorator, written out', b:'@contextmanager above def tag would do exactly this: tag = contextmanager(tag).', look:'tag now refers to a wrapper.'},
+      10:{t:'Run up to yield', b:'Entering the block runs the generator up to yield. The yielded value becomes t.', look:'The opening tag is printed.'},
+      6:{t:'Resume after yield', b:'Leaving the block resumes the generator after yield: the cleanup part.', look:'The closing tag is printed.'}
+    },
+    predict:{line:10, q:'What is printed when the with line runs?', target:{out:true}, opts:['<b>','bold text','</b>'], fb:{'</b>':'Not quite. Entering runs the generator only up to yield.'}},
+    variants:[{label:'tag(\'b\')'}],
+    recap:'contextmanager splits one generator into setup (before yield) and cleanup (after yield). It is the quickest way to write a small context manager. In real code, put yield inside try/finally so the cleanup also runs when the block raises.',
+    check:{code:"# setup ... yield ... cleanup\n# Where does the with block run?", q:'Pick one:', opts:['At the yield','After the cleanup'], right:0, fb:['Right. The generator is paused at yield while the block runs.','Not quite. Cleanup runs after the block.']}
+  },
+
+  typ_hints: {
+    topic:'Typing and testing', title:'Does Python enforce type hints?',
+    code:"def add(a: int, b: int) -> int:\n    return a + b\n\nx = add(2, 3)\ny = add('ab', 'c')\nprint(x, y)\n",
+    pseudo:['Define add: a and b should be ints, and it returns an int.','(body)','(blank)','Call with ints.','Call with strings.','Show both.'],
+    lines:{
+      1:{t:'Hints, not rules', b:'The annotations document what the function expects. Python itself does not check them when it runs.', look:'The function is created.'},
+      5:{t:'Wrong types still run', b:'Strings support + too, so this runs. A type checker such as mypy, run before the program, would flag this line.', look:'y holds a string.'}
+    },
+    predict:{line:5, q:"What happens on y = add('ab', 'c')?", target:{v:'y'}, opts:["'abc'",'An error','None'],
+      fb:{'An error':'Not quite. Type hints are not checked at run time.'}},
+    variants:[{label:'strings'},{label:'int and str', from:"add('ab', 'c')", to:"add(1, 'c')", opts:['An error',"'1c'",'None']}],
+    recap:'Type hints are for people and tools, not for the interpreter. Python ran add(\'ab\', \'c\') happily. add(1, \'c\') failed only because + cannot mix them, not because of the hints. Run a type checker to catch these before the program runs.',
+    check:{code:"def f(n: int) -> str:\n    return n\nx = f(5)", q:'What is x?', opts:['5','An error'], right:0, fb:['Right. The wrong return type is not checked at run time.','Not quite. Nothing enforces -> str while running.']}
+  },
+  typ_protocol: {
+    topic:'Typing and testing', title:'What is a Protocol?',
+    code:"from typing import Protocol\n\nclass Drawable(Protocol):\n    def draw(self) -> str:\n        ...\n\nclass Circle:\n    def draw(self):\n        return 'O'\n\ndef render(item: Drawable) -> str:\n    return '[' + item.draw() + ']'\n\nprint(render(Circle()))\n",
+    pseudo:['Load Protocol.','(blank)','Describe a shape of object: anything with a draw method.','(the method it must have)','(no body: this is only a description)','(blank)','Circle never mentions Drawable,','but it has draw.','(body)','(blank)','render accepts anything Drawable.','(body)','(blank)','Render a circle.'],
+    lines:{
+      3:{t:'A described shape', b:'A Protocol describes which methods an object must have. It is a typed version of duck typing.', look:'A Drawable class appears.'},
+      7:{t:'No inheritance needed', b:'Circle matches Drawable just by having draw. A type checker accepts it; this is called structural typing.', look:'Circle does not inherit from Drawable.'}
+    },
+    predict:{line:14, q:'What will print(render(Circle())) show?', target:{out:true}, opts:['[O]','An error','[None]'],
+      fb:{'An error':'Not quite. Circle does not inherit from Drawable, but it has draw, which is all render needs.'}},
+    variants:[{label:'Circle has draw'}],
+    recap:'A Protocol names a set of methods. Any class with those methods satisfies it, with no inheritance. Abstract base classes (topic 16) require inheritance; Protocols do not. Both are checked by type checkers; at run time, Python just calls the method.',
+    check:{code:"# Square has draw() and does not inherit from anything.\n# Is Square a Drawable to a type checker?", q:'Pick one:', opts:['Yes','No'], right:0, fb:['Right. Matching methods are enough.','Not quite. Protocols match by shape, not by inheritance.']}
+  },
+  typ_assert: {
+    topic:'Typing and testing', title:'How does a test with assert work?',
+    code:"def slugify(title):\n    return title.lower().replace(' ', '-')\n\ndef test_slugify():\n    assert slugify('Hello World') == 'hello-world'\n    assert slugify('A B') == 'a_b', 'spaces should become dashes'\n\ntest_slugify()\n",
+    pseudo:['The code under test.','(body)','(blank)','A test: call the code with known inputs and check the results.','First check.','Second check, with a message for when it fails.','(blank)','Run the test.'],
+    lines:{
+      5:{t:'A passing check', b:'assert does nothing when its condition is True.', look:'No output, no error.'},
+      6:{t:'A failing check', b:'When the condition is False, assert raises AssertionError with the message. Test runners such as pytest find functions named test_... and report each failure.', look:'Watch for an error.'}
+    },
+    predict:{line:8, q:'What happens when test_slugify() runs?', target:{out:true}, opts:['An error','Nothing: both checks pass'],
+      fb:{'Nothing: both checks pass':'Not quite. slugify(\'A B\') returns \'a-b\', not \'a_b\'. The second check is wrong, so it fails.'}},
+    variants:[{label:'wrong expectation'},{label:'fixed test', from:"== 'a_b'", to:"== 'a-b'", opts:['An error','Nothing: both checks pass'], ok:'Nothing: both checks pass'}],
+    recap:'A test calls your code with known inputs and asserts the expected outputs. Here the test itself was wrong (it expected a_b). A failing test means the code and the expectation disagree; read the message to decide which is right.',
+    check:{code:"assert 2 + 2 == 4", q:'What happens?', opts:['Nothing','An error'], right:0, fb:['Right. A true assert is silent.','Not quite. The condition is True.']}
+  },
+
+  des_srp: {
+    topic:'Design', title:'Why give each class one job?',
+    code:"class Report:\n    def __init__(self, rows):\n        self.rows = rows\n\n    def total(self):\n        return sum(self.rows)\n\nclass TextPrinter:\n    def show(self, report):\n        return 'Total: ' + str(report.total())\n\nclass CsvPrinter:\n    def show(self, report):\n        return ','.join([str(r) for r in report.rows])\n\nr = Report([3, 4])\nprint(TextPrinter().show(r))\nprint(CsvPrinter().show(r))\n",
+    pseudo:['Report holds data and does maths: one job.','(body)','(body)','(blank)','its calculation,','(body)','(blank)','TextPrinter only formats as text.','(body)','(body)','(blank)','CsvPrinter only formats as CSV.','(body)','(body)','(blank)','Some data.','Show it one way.','Show it another way.'],
+    lines:{
+      17:{t:'One job each', b:'Report does not know how it will be shown. Adding a new format means adding a new printer class, without touching Report. This is the Single Responsibility Principle, the S in SOLID.', look:'The frames: TextPrinter.show calls Report.total.'}
+    },
+    predict:{line:18, q:'What will the CSV printer show?', target:{out:true}, opts:['3,4','Total: 7','7'], fb:{}},
+    variants:[{label:'two printers'}],
+    recap:'SOLID is five design rules: Single responsibility, Open for extension but closed for modification, Liskov substitution, Interface segregation, Dependency inversion. Here Report has one reason to change (the data), each printer has another (its format), and adding JSON later would not change existing code.',
+    check:{code:"# A User class also sends emails and writes to a database.\n# Which SOLID rule does that break?", q:'Pick one:', opts:['Single responsibility','Liskov substitution'], right:0, fb:['Right. It has three reasons to change.','Not quite. Liskov is about subclasses being usable in place of their parent.']}
+  },
+  des_strategy: {
+    topic:'Design', title:'How does the strategy pattern swap behaviour?',
+    code:"def no_discount(price):\n    return price\n\ndef sale(price):\n    return price * 0.8\n\nclass Checkout:\n    def __init__(self, pricing):\n        self.pricing = pricing\n\n    def pay(self, price):\n        return self.pricing(price)\n\nc = Checkout(sale)\nprint(c.pay(50))\n",
+    pseudo:['Strategy 1: full price.','(body)','(blank)','Strategy 2: 20% off.','(body)','(blank)','Checkout is given a pricing strategy:','keep it.','(body)','(blank)','Paying asks the strategy.','(body)','(blank)','A checkout using the sale strategy.','Pay 50.'],
+    lines:{
+      14:{t:'Inject a strategy', b:'Checkout receives a function and stores it. It does not know or care which one.', look:'pricing points at the sale function.'},
+      12:{t:'Delegate', b:'pay calls whatever strategy it was given.', look:'A sale() frame appears.'}
+    },
+    predict:{line:15, q:'What will print(c.pay(50)) show?', target:{out:true}, opts:['40.0','50','An error'], fb:{}},
+    variants:[{label:'sale'},{label:'no_discount', from:'Checkout(sale)', to:'Checkout(no_discount)', opts:['50','40.0','An error']}],
+    recap:'The strategy pattern puts each variation of an algorithm behind the same interface and lets the caller choose. In Python a strategy is often just a function. Checkout never changes when you add a new pricing rule.',
+    check:{code:"# sort(key=...) takes a function to decide the order.\n# Which pattern is that?", q:'Pick one:', opts:['Strategy','Factory'], right:0, fb:['Right. The ordering rule is a pluggable strategy.','Not quite. A factory creates objects.']}
+  },
+  des_factory: {
+    topic:'Design', title:'What does a factory decide?',
+    code:"class Email:\n    def send(self, msg):\n        return 'email: ' + msg\n\nclass Sms:\n    def send(self, msg):\n        return 'sms: ' + msg\n\ndef make_notifier(kind):\n    kinds = {'email': Email, 'sms': Sms}\n    return kinds[kind]()\n\nn = make_notifier('sms')\nprint(n.send('hi'))\n",
+    pseudo:['One kind of notifier.','(body)','(body)','(blank)','Another kind, same send method.','(body)','(body)','(blank)','A factory: given a name, build the right object.','look the class up by name,','create and return one.','(blank)','Ask the factory for an sms notifier.','Use it.'],
+    lines:{
+      10:{t:'Map names to classes', b:'Classes are objects, so they can sit in a dict like any value.', look:'kinds holds two classes.'},
+      11:{t:'Build the chosen one', b:'kinds[kind] picks the class; () creates an instance. The caller never names Email or Sms directly.', look:'A new Sms object.'}
+    },
+    predict:{line:14, q:"What will print(n.send('hi')) show?", target:{out:true}, opts:['sms: hi','email: hi','An error'], fb:{}},
+    variants:[{label:"'sms'"},{label:"'fax'", from:"make_notifier('sms')", to:"make_notifier('fax')", pline:13, q:"What happens on make_notifier('fax')?", opts:['An error','n is None']}],
+    recap:'A factory hides which class gets created. Callers ask for "sms" and get something with send. Adding a new channel means one new class and one new dict entry. An unknown name raises KeyError, which a real factory would turn into a clear error message.',
+    check:{code:"# Your code says Email() in 40 places.\n# You now need Sms sometimes.\n# What helps most?", q:'Pick one:', opts:['A factory function','Copying the code'], right:0, fb:['Right. One place decides which class to build.','Not quite. That spreads the decision across 40 places.']}
+  }
+});
+Object.assign(PY_TOPIC_LESSONS, {
+  '18': ['mod_import','mod_main','mod_files'],
+  '19': ['clo_keep','clo_nonlocal','clo_decorator','clo_wraps'],
+  '20': ['gen_iter','gen_yield','gen_usedup','gen_pipeline'],
+  '21': ['adv_classmethod','adv_mro','adv_mixin','adv_dataclass','adv_descriptor'],
+  '22': ['ctx_protocol','ctx_contextmanager'],
+  '23': ['typ_hints','typ_protocol','typ_assert'],
+  '24': ['des_srp','des_strategy','des_factory']
+});
+
 const CURRICULUM = {"py": [{"n": "01", "t": "Values and names", "level": "Level 1: Beginner", "subs": ["What does = do?", "Why did x keep its old value?", "\"7\" vs 7", "Converting with int()"], "book": "Crash Course ch. 2; Lutz Part II"}, {"n": "02", "t": "Numbers and operators", "level": "Level 1: Beginner", "subs": ["7 // 2", "What % keeps", "0.1 + 0.2", "Operator order"], "book": "Crash Course ch. 2; Lutz ch. 5"}, {"n": "03", "t": "Strings", "level": "Level 1: Beginner", "subs": ["Index 0", "Slicing", "Why can't I change a letter?", "find on a miss", "f-strings"], "book": "Crash Course ch. 2; Lutz ch. 7"}, {"n": "04", "t": "Conditions and logic", "level": "Level 1: Beginner", "subs": ["Which branch runs?", "Boundaries with >=", "When and stops early", "elif chains"], "book": "Crash Course ch. 5; Lutz ch. 12"}, {"n": "05", "t": "Lists", "level": "Level 1: Beginner", "subs": ["Index -1", "Slices", "append vs insert", "in", "Out of range", "Why did both lists change?"], "book": "Crash Course ch. 3 and 4"}, {"n": "06", "t": "Loops", "level": "Level 1: Beginner", "subs": ["How for takes each item", "Running total", "Counting matches", "Filtering", "while and its exit", "break and continue"], "book": "Crash Course ch. 4 and 7; Lutz ch. 13"}, {"n": "07", "t": "Dicts, tuples and sets", "level": "Level 1: Beginner", "subs": ["Key lookup", "Missing key: [] vs .get", "Counting with a dict", "Tuple unpacking", "Sets drop duplicates"], "book": "Crash Course ch. 6; Lutz ch. 8 and 9"}, {"n": "08", "t": "Functions: the basics", "level": "Level 1: Beginner", "subs": ["Arguments enter a call frame", "return vs print", "Parameters vs arguments", "No return gives None"], "book": "Crash Course ch. 8; Lutz ch. 16"}, {"n": "09", "t": "Functions in depth", "level": "Level 2: Intermediate", "subs": ["Scope and the LEGB rule", "The shared default list trap", "*args and **kwargs", "Keyword-only arguments", "lambda", "Recursion and the call stack"], "book": "Lutz ch. 17 to 19"}, {"n": "10", "t": "Mutability and copying", "level": "Level 2: Intermediate", "subs": ["Mutable vs immutable", "copy() is shallow", "deepcopy", "Passing a list into a function"], "book": "Ramalho ch. 6"}, {"n": "11", "t": "Comprehensions", "level": "Level 2: Intermediate", "subs": ["A comprehension is a loop", "Filtering inside it", "Dict and set comprehensions"], "book": "Lutz ch. 14 and 20"}, {"n": "12", "t": "Classes and objects", "level": "Level 2: Intermediate", "subs": ["Class vs object", "__init__ and self", "Instance vs class attributes", "Methods change state", "__repr__ and __str__"], "book": "Crash Course ch. 9; Lutz ch. 26 to 28"}, {"n": "13", "t": "Encapsulation", "level": "Level 2: Intermediate", "subs": ["The _private convention", "Name mangling with __", "@property getters and setters with validation"], "book": "Lutz ch. 38; Ramalho ch. 11"}, {"n": "14", "t": "Inheritance", "level": "Level 2: Intermediate", "subs": ["A subclass reuses code", "Overriding a method", "super().__init__", "isinstance and issubclass"], "book": "Crash Course ch. 9; Lutz ch. 29; Ramalho ch. 14"}, {"n": "15", "t": "Polymorphism", "level": "Level 2: Intermediate", "subs": ["One call, different classes", "Duck typing", "Operator overloading with __add__, __eq__, __len__"], "book": "Lutz ch. 30; Ramalho ch. 13 and 16"}, {"n": "16", "t": "Abstraction and composition", "level": "Level 2: Intermediate", "subs": ["Abstract base classes with @abstractmethod", "Composition: has-a vs is-a", "Choosing between them"], "book": "Lutz ch. 31; Ramalho ch. 13"}, {"n": "17", "t": "Exceptions", "level": "Level 2: Intermediate", "subs": ["Reading a traceback", "try / except path", "finally", "Writing your own exception class"], "book": "Crash Course ch. 10; Lutz Part VII"}, {"n": "18", "t": "Modules and files", "level": "Level 2: Intermediate", "subs": ["How import works", "if __name__ == \"__main__\"", "Reading and writing files with with"], "book": "Crash Course ch. 10; Lutz Part V"}, {"n": "19", "t": "Closures and decorators", "level": "Level 3: Professional", "subs": ["A closure keeps a variable alive", "nonlocal", "A decorator wraps a function", "functools.wraps"], "book": "Ramalho ch. 9; Lutz ch. 39"}, {"n": "20", "t": "Iterators and generators", "level": "Level 3: Professional", "subs": ["The iter / next protocol", "A generator pauses at yield", "A used-up generator", "Generator pipelines"], "book": "Ramalho ch. 17; Lutz ch. 20"}, {"n": "21", "t": "Advanced OOP", "level": "Level 3: Professional", "subs": ["@classmethod and @staticmethod", "Multiple inheritance and the MRO", "Mixins", "@dataclass", "How @property works (descriptors)"], "book": "Ramalho ch. 5, 14 and 23; Lutz ch. 32 and 38"}, {"n": "22", "t": "Context managers", "level": "Level 3: Professional", "subs": ["The with protocol: __enter__ and __exit__", "contextlib.contextmanager"], "book": "Ramalho ch. 18"}, {"n": "23", "t": "Typing and testing", "level": "Level 3: Professional", "subs": ["Type hints", "Protocols", "Writing a test with assert"], "book": "Ramalho ch. 8 and 13"}, {"n": "24", "t": "Design", "level": "Level 3: Professional", "subs": ["SOLID in Python", "Strategy pattern", "Factory pattern"], "book": "Ramalho ch. 10"}], "java": [{"n": "01", "t": "Primitives and references", "level": "Level 1: Beginner", "subs": ["Why does int copy but an array share?", "What new creates", "null", "Stack vs heap"], "book": "Head First ch. 3; Core Java ch. 3"}, {"n": "02", "t": "Operators and casting", "level": "Level 1: Beginner", "subs": ["7 / 2 is 3", "% with negatives", "Widening vs narrowing casts", "int overflow"], "book": "Core Java ch. 3"}, {"n": "03", "t": "Strings", "level": "Level 1: Beginner", "subs": ["Why a String is immutable", "== vs .equals", "substring end index", "StringBuilder"], "book": "Head First ch. 10; Core Java ch. 3"}, {"n": "04", "t": "Conditions and loops", "level": "Level 1: Beginner", "subs": ["if / else path", "switch", "for vs enhanced for", "while exit", "Off-by-one in i <= n"], "book": "Head First ch. 5; Core Java ch. 3"}, {"n": "05", "t": "Arrays", "level": "Level 1: Beginner", "subs": ["Fixed length", "Index out of bounds", "Arrays.copyOf", "Two variables, one array"], "book": "Head First ch. 3; Core Java ch. 3"}, {"n": "06", "t": "Methods", "level": "Level 1: Beginner", "subs": ["Arguments are copied into the frame", "Why a method can change my array but not my int", "Return values", "Recursion"], "book": "Head First ch. 4; Core Java ch. 4"}, {"n": "07", "t": "Classes and objects", "level": "Level 2: Intermediate, the OOP core", "subs": ["Fields per object", "Constructors and constructor overloading", "this", "static vs instance members", "toString"], "book": "Head First ch. 2 and 9; Core Java ch. 4"}, {"n": "08", "t": "Encapsulation", "level": "Level 2: Intermediate, the OOP core", "subs": ["Private fields with getters and setters", "Validation in a setter", "Access modifiers: public, protected, package, private"], "book": "Head First ch. 4; Core Java ch. 4"}, {"n": "09", "t": "Inheritance", "level": "Level 2: Intermediate, the OOP core", "subs": ["extends", "super() in constructors", "Overriding with @Override", "final classes and methods"], "book": "Head First ch. 7; Core Java ch. 5"}, {"n": "10", "t": "Polymorphism", "level": "Level 2: Intermediate, the OOP core", "subs": ["Superclass variable, subclass object", "Dynamic dispatch: which method runs?", "Overloading vs overriding", "Casting and instanceof"], "book": "Head First ch. 7 and 8; Core Java ch. 5"}, {"n": "11", "t": "Abstraction", "level": "Level 2: Intermediate, the OOP core", "subs": ["Abstract classes", "Interfaces", "Default methods", "Abstract class or interface?"], "book": "Head First ch. 8; Core Java ch. 6; Effective Java item 20"}, {"n": "12", "t": "The Object contract", "level": "Level 2: Intermediate, the OOP core", "subs": ["equals and hashCode together", "== vs equals on objects", "Comparable and Comparator"], "book": "Core Java ch. 5; Effective Java items 10 to 14"}, {"n": "13", "t": "Collections", "level": "Level 2: Intermediate, the OOP core", "subs": ["Why did both lists change?", "ArrayList growth", "HashMap lookups", "HashSet duplicates", "Removing while looping"], "book": "Head First ch. 11; Core Java ch. 9"}, {"n": "14", "t": "Generics", "level": "Level 2: Intermediate, the OOP core", "subs": ["Why List<Integer> and not List<int>", "Autoboxing", "Generic methods and bounded types"], "book": "Core Java ch. 8; Effective Java ch. 5"}, {"n": "15", "t": "Exceptions", "level": "Level 2: Intermediate, the OOP core", "subs": ["Reading a stack trace", "try / catch / finally", "Checked vs unchecked", "Custom exceptions"], "book": "Head First ch. 13; Core Java ch. 7"}, {"n": "16", "t": "Immutability and records", "level": "Level 3: Professional", "subs": ["final fields", "Defensive copies", "Records"], "book": "Effective Java items 17 and 50"}, {"n": "17", "t": "Enums and nested classes", "level": "Level 3: Professional", "subs": ["Enums with fields and methods", "Inner vs static nested classes", "Anonymous classes"], "book": "Core Java ch. 5 and 6"}, {"n": "18", "t": "Lambdas and streams", "level": "Level 3: Professional", "subs": ["Functional interfaces", "Lambdas", "Method references", "filter / map / collect", "Optional"], "book": "Head First ch. 12; Core Java ch. 6 and Volume II ch. 1"}, {"n": "19", "t": "Composition and design", "level": "Level 3: Professional", "subs": ["Composition over inheritance", "SOLID", "Strategy pattern", "Builder pattern"], "book": "Effective Java items 2 and 18"}, {"n": "20", "t": "Files and concurrency", "level": "Level 3: Professional", "subs": ["try-with-resources", "Reading a file", "Threads and a race on shared state"], "book": "Head First ch. 16 and 17; Core Java ch. 12"}]};
 
 const BUILT = { py: Object.assign({'05': LISTS_ORDER}, PY_TOPIC_LESSONS), java: {'13': ['alias']} };
@@ -2847,7 +3199,8 @@ function tlActual(){
   if(after.error) return 'An error';
   const opts = tlOpts(), ok = v.ok || P.ok;
   if(P.target.out){
-    const before = T.steps[j].out, txt = after.out.startsWith(before) ? after.out.slice(before.length).trim() : after.out.trim();
+    let before = T.steps[j].out; let txt = after.out.startsWith(before) ? after.out.slice(before.length).trim() : after.out.trim();
+    if(P.target.first) txt = txt.split('\n')[0];
     const hit = opts.find(o=> o===txt || o==='Print '+txt || o==='It prints '+txt);
     return hit || ok || txt;
   }
@@ -2970,6 +3323,12 @@ function tlNext(){
   if(tl.k === tl.trace.steps.length){ finishLesson(tl.id); return; }
   tlGo(tl.k+1);
 }
+function tlPseudo(L0){
+  const lines = L0.code.replace(/\n$/,'').split('\n');
+  if(L0.pseudo.length === lines.length) return L0.pseudo;
+  const items = L0.pseudo.filter(p=>p!=='(blank)'); let k = 0;
+  return lines.map(l=> l.trim() ? (items[k++] || '') : '(blank)');
+}
 function renderTLCode(ranLine, isRecap){
   const L0 = TL_LESSONS[tl.id], T = tl.trace, k = tl.k;
   const nextLine = !isRecap && k < T.steps.length ? T.steps[k].line : null;
@@ -2978,7 +3337,7 @@ function renderTLCode(ranLine, isRecap){
     const err = active && T.steps[Math.min(k,T.steps.length-1)].error;
     return `<div class="ln${active?(err?' err':' active'):''}${isNext?' upnext':''}"${active?' aria-current="true"':''}><span class="n">${ln}</span><span>${hl(t)||' '}</span><span class="edited">${isNext?'next':''}</span></div>`;
   }).join('') + `</pre><p class="vnote">Blue: the line that just ran. Outlined: the line that runs next.</p>`;
-  $('#v-pseudo').innerHTML = `<ol class="pseudo">` + L0.pseudo.map((t,i)=>`<li class="${ranLine && i+1===tlOrigLine(ranLine)?'active':''}">${esc(t)}</li>`).join('') + `</ol>`;
+  $('#v-pseudo').innerHTML = `<ol class="pseudo">` + tlPseudo(L0).map((t,i)=>`<li class="${ranLine && i+1===tlOrigLine(ranLine)?'active':''}">${esc(t)}</li>`).join('') + `</ol>`;
   const straight = T.steps.every((st,i)=> st.frames.length===1 && (i===0 || st.line>=T.steps[i-1].line || st.done || st.error));
   const ranSet = new Set(T.steps.map(st=>st.line)); const straightAll = straight && ranSet.size === T.steps.filter(st=>!st.done && !st.error).length && T.src.every((t,i)=> !t.trim() || ranSet.has(i+1) || (T.steps[T.steps.length-1].error));
   if(straight && straightAll){
