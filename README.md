@@ -42,7 +42,7 @@ The JavaScript files share one scope and are joined in number order:
 
 ### Design in one paragraph
 
-Lessons are **data, not code**: a lesson file says what program to run, what to explain on which line, and what to ask. One generic **lesson player** turns any lesson file into an animated lesson, by running the code through the **tracer** and handing each snapshot to the **explainer** and the **memory view**. Adding a lesson never means writing JavaScript. Python modules the browser runner lacks (dataclasses, contextlib, file I/O) are provided by small **shims** written in Python.
+Lessons are **data, not code**: a lesson file says what program to run, what to explain on which line, and what to ask. One generic **lesson player** turns any lesson file into an animated lesson, by running the code through the **tracer** and handing each snapshot to the **explainer** and the **memory view**. Adding a lesson never means writing JavaScript. Python modules the browser runner lacks (dataclasses, contextlib, heapq, file I/O) are provided by small **shims** written in Python.
 
 ## Working on it
 

@@ -25,7 +25,7 @@ const BOOKS = {
   py: [['Python Crash Course','Eric Matthes, 3rd ed.','Sets the order of the beginner topics.','#E4572E'],['Learning Python','Mark Lutz','The deep reference used to check each lesson.','#2E86AB'],['Fluent Python','Luciano Ramalho, 2nd ed.','Names, mutability, copying and advanced topics.','#6C4AB6']],
   java: [['Head First Java','Sierra, Bates and Gee, 3rd ed.','Sets the order of the beginner topics.','#F29E4C'],['Core Java, Volume I','Cay Horstmann','The deep reference used to check each lesson.','#1B998B'],['Effective Java','Joshua Bloch, 3rd ed.','The why behind equality, immutability and design.','#C2185B']]
 };
-const LEVEL_SUB = {Beginner:'Values, strings, conditions, loops and your first functions.', Intermediate:'Functions in depth, data structures and files.', 'Intermediate, the OOP core':'Classes, encapsulation, inheritance, polymorphism and abstraction.', Professional:'Closures, generators, decorators, advanced OOP and design.'};
+const LEVEL_SUB = {Beginner:'Values, strings, conditions, loops and your first functions.', Intermediate:'Functions in depth, data structures and files.', 'Intermediate, the OOP core':'Classes, encapsulation, inheritance, polymorphism and abstraction.', Professional:'Closures, generators, decorators, advanced OOP and design.', Senior:'Algorithms and Big-O, data structures, dynamic programming and Python gotchas.'};
 function countUp(el, to){
   if(RM || !('IntersectionObserver' in window)){ el.textContent = to; return; }
   el.textContent = '0';

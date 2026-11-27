@@ -1,0 +1,293 @@
+# Python 27: Data structures
+# One [[lesson]] block per lesson, in the order students see them.
+# Line numbers in lines, predict.line and pline count from 1.
+
+topic = "27"
+
+[[lesson]]
+id = "ds_stack"
+topic = "Data structures"
+title = "How does a stack undo the last thing first?"
+recap = "A stack is last in, first out. With a list, append pushes onto the top and pop takes from the top. Both are O(1). Undo buttons, the browser back button and Python's own call stack all work this way."
+dec = "pop always takes the item that was pushed most recently."
+code = '''
+undo = []
+undo.append('type A')
+undo.append('type B')
+undo.append('bold')
+last = undo.pop()
+print(last, undo)
+'''
+pseudo = [
+  "An empty stack of actions.",
+  "Push: typed A.",
+  "Push: typed B.",
+  "Push: made it bold.",
+  "Pop: take the top action off.",
+  "Show it, and what is left.",
+]
+
+[lesson.lines.2]
+t = "Push"
+b = "append adds to the end of the list. We treat the end as the top of the stack."
+look = "The list grows by one."
+
+[lesson.lines.5]
+t = "Pop"
+b = "pop() removes the last item and gives it back. Nothing has to shift, so it is O(1)."
+look = "The top item leaves the list."
+
+[lesson.predict]
+line = 5
+q = "Which action does pop() take off?"
+target = { v = "last" }
+opts = ["'bold'", "'type A'", "'type B'"]
+
+[lesson.predict.fb]
+"'type A'" = "Not quite. That would be a queue, first in first out. A stack gives back the newest item."
+"'type B'" = "Not quite. bold was pushed after type B, so it is on top."
+
+[[lesson.variants]]
+label = "three pushes"
+
+[lesson.check]
+code = '''
+s = [1, 2]
+s.append(3)
+s.pop()
+s.append(4)
+s.pop()'''
+q = "What does the last pop() give back?"
+opts = ["4", "3", "2"]
+right = 0
+fb = [
+  "Right. 4 was pushed last.",
+  "Not quite. 3 was already popped.",
+  "Not quite. 2 is still underneath.",
+]
+
+[[lesson]]
+id = "ds_linked"
+topic = "Data structures"
+title = "How does a linked list connect its nodes?"
+recap = "A linked list is a chain of nodes. Each node holds a value and a reference to the next node. To reach an item you follow the arrows from the head, so finding the nth item is O(n), but adding at the front is O(1): no items need to move."
+dec = "Follow next from node to node until next is None."
+code = '''
+class Node:
+    def __init__(self, value, next=None):
+        self.value = value
+        self.next = next
+
+head = Node(3)
+head = Node(2, head)
+head = Node(1, head)
+node = head
+total = 0
+while node is not None:
+    total += node.value
+    node = node.next
+print(total)
+'''
+pseudo = [
+  "A node holds:",
+  "a value and a link to the next node.",
+  "(store the value)",
+  "(store the link)",
+  "(blank)",
+  "Make a node holding 3. It is the whole list.",
+  "Make a node holding 2 that links to it. It becomes the head.",
+  "Make a node holding 1 in front of that.",
+  "Start at the head.",
+  "A running total.",
+  "While there is a node,",
+  "add its value,",
+  "and follow the link to the next one.",
+  "Show the total.",
+]
+
+[lesson.lines.7]
+t = "Add at the front"
+b = "The new node's next points at the old head. Then head moves to the new node. Nothing else moves, so this is O(1)."
+look = "A new object with an arrow to the old head."
+
+[lesson.lines.13]
+t = "Follow the arrow"
+b = "node moves to whatever its next refers to. After the last node, next is None and the loop ends."
+look = "node moves along the chain."
+
+[lesson.predict]
+line = 12
+q = "The loop starts at head. Which value is added to total first?"
+target = { v = "total" }
+opts = ["1", "3", "2"]
+
+[lesson.predict.fb]
+3 = "Not quite. 3 was made first, so it ends up at the back. Each new node goes in front."
+2 = "Not quite. Line 8 put a new node holding 1 in front of the 2, so 1 is the head."
+
+[[lesson.variants]]
+label = "1 → 2 → 3"
+
+[lesson.check]
+code = '''
+# a linked list of 1,000 nodes
+# read the value of the 500th node'''
+q = "How many arrows must you follow?"
+opts = ["499", "1", "0"]
+right = 0
+fb = [
+  "Right. There is no index jump: start at the head and follow next 499 times. O(n).",
+  "Not quite. A list can jump to an index. A linked list has to walk node by node.",
+  "Not quite. Only the head is reachable without following arrows.",
+]
+
+[[lesson]]
+id = "ds_bst"
+topic = "Data structures"
+title = "How does a binary search tree decide left or right?"
+recap = "In a binary search tree, everything smaller than a node goes in its left subtree and everything bigger goes in its right subtree. Each comparison skips half of a balanced tree, so search and insert are O(log n). An unbalanced tree can decay into a chain and become O(n)."
+dec = "Is the new value smaller than this node? Go left. Otherwise go right. Stop at an empty spot."
+code = '''
+class Tree:
+    def __init__(self, value):
+        self.value = value
+        self.left = None
+        self.right = None
+
+def insert(node, value):
+    if value < node.value:
+        if node.left is None:
+            node.left = Tree(value)
+        else:
+            insert(node.left, value)
+    else:
+        if node.right is None:
+            node.right = Tree(value)
+        else:
+            insert(node.right, value)
+
+root = Tree(8)
+insert(root, 3)
+insert(root, 10)
+insert(root, 6)
+print(root.left.right.value)
+'''
+pseudo = [
+  "A tree node holds:",
+  "(set up the node)",
+  "its value,",
+  "an empty left branch,",
+  "and an empty right branch.",
+  "(blank)",
+  "To insert a value below a node:",
+  "if it is smaller,",
+  "and the left spot is empty,",
+  "put a new node there,",
+  "otherwise,",
+  "insert into the left subtree.",
+  "If it is not smaller,",
+  "and the right spot is empty,",
+  "put a new node there,",
+  "otherwise,",
+  "insert into the right subtree.",
+  "(blank)",
+  "The root holds 8.",
+  "Insert 3.",
+  "Insert 10.",
+  "Insert 6.",
+  "Show the value at root, then left, then right.",
+]
+
+[lesson.lines.8]
+t = "Compare"
+b = "One comparison decides the whole direction. Everything in the other subtree is never looked at."
+look = "value is compared with node.value."
+
+[lesson.lines.12]
+t = "Go deeper"
+b = "The left spot is taken, so the same function runs again one level down. That is recursion."
+look = "A new insert() frame appears."
+
+[lesson.predict]
+line = 23
+q = "What is root.left.right.value?"
+target = { out = true }
+opts = ["6", "10", "3"]
+
+[lesson.predict.fb]
+10 = "Not quite. 10 is bigger than 8, so it is root.right."
+3 = "Not quite. 3 is root.left. 6 is smaller than 8 (go left) but bigger than 3 (go right)."
+
+[[lesson.variants]]
+label = "insert 3, 10, 6"
+
+[lesson.check]
+code = '''
+# insert 1, 2, 3, 4, 5 in that order into an empty tree'''
+q = "What shape does the tree take?"
+opts = ["A chain going right", "A balanced tree", "A chain going left"]
+right = 0
+fb = [
+  "Right. Each value is bigger than the last, so every insert goes right. Search becomes O(n). Self-balancing trees fix this.",
+  "Not quite. A plain BST does not rebalance itself.",
+  "Not quite. Bigger values go right.",
+]
+
+[[lesson]]
+id = "ds_heap"
+topic = "Data structures"
+title = "How does a heap always know the smallest item?"
+recap = "heapq keeps a list arranged as a heap: the smallest item is always at index 0. heappush and heappop are O(log n), and reading the smallest is O(1). Use a heap for priority queues, schedulers, and \"top k\" problems."
+dec = "heappop always gives back the smallest item left."
+code = '''
+import heapq
+tasks = []
+heapq.heappush(tasks, 5)
+heapq.heappush(tasks, 1)
+heapq.heappush(tasks, 3)
+first = heapq.heappop(tasks)
+print(first, tasks[0])
+'''
+pseudo = [
+  "Use the heapq module.",
+  "An empty heap (a plain list).",
+  "Push priority 5.",
+  "Push priority 1. It moves up to the front.",
+  "Push priority 3.",
+  "Pop the smallest.",
+  "Show it, and the new smallest.",
+]
+
+[lesson.lines.4]
+t = "Sift up"
+b = "1 is smaller than its parent, 5, so they swap. The smallest item is always at index 0."
+look = "tasks[0] becomes 1."
+
+[lesson.lines.6]
+t = "Pop the smallest"
+b = "The front item is removed and the heap is repaired in O(log n) steps."
+look = "first is the smallest."
+
+[lesson.predict]
+line = 7
+q = "What does print(first, tasks[0]) show?"
+target = { out = true }
+opts = ["1 3", "5 1", "1 5"]
+
+[lesson.predict.fb]
+"5 1" = "Not quite. A heap is not first in, first out. It always gives back the smallest."
+"1 5" = "Not quite. After 1 is removed, the smallest left is 3, and it moves to the front."
+
+[[lesson.variants]]
+label = "push 5, 1, 3"
+
+[lesson.check]
+code = '''
+# you need the 3 smallest of 1,000,000 numbers'''
+q = "Which is the better tool?"
+opts = ["heapq.nsmallest(3, nums)", "sorted(nums)[:3]"]
+right = 0
+fb = [
+  "Right. A heap of size 3 is O(n log 3), close to O(n). Sorting everything is O(n log n).",
+  "Not quite. That works, but sorts a million items to keep three.",
+]

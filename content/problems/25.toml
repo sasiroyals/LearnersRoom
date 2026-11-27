@@ -1,0 +1,116 @@
+topic = "25"
+
+[[problem]]
+id = "binary_search"
+title = "Binary search"
+level = "Medium"
+story = "Write binary_search(nums, target) for a sorted list. Return the index of target, or -1 if it is missing. Do not use .index() or in: halve the search window each time."
+hint = "Keep lo and hi. Check mid = (lo + hi) // 2, then move lo or hi past mid."
+starter = '''
+def binary_search(nums, target):
+    pass
+'''
+solution = '''
+def binary_search(nums, target):
+    lo, hi = 0, len(nums) - 1
+    while lo <= hi:
+        mid = (lo + hi) // 2
+        if nums[mid] == target:
+            return mid
+        if nums[mid] < target:
+            lo = mid + 1
+        else:
+            hi = mid - 1
+    return -1
+'''
+demo = '''
+print(binary_search([2, 5, 8, 12, 16], 12))
+'''
+
+[[problem.tests]]
+call = "binary_search([2, 5, 8, 12, 16], 12)"
+expect = "3"
+
+[[problem.tests]]
+call = "binary_search([2, 5, 8, 12, 16], 2)"
+expect = "0"
+
+[[problem.tests]]
+call = "binary_search([2, 5, 8, 12, 16], 7)"
+expect = "-1"
+
+[[problem.tests]]
+call = "binary_search([], 1)"
+expect = "-1"
+
+[[problem]]
+id = "has_duplicates"
+title = "Any duplicates?"
+level = "Easy"
+story = "Write has_duplicates(items) that returns True if any value appears twice. It should run in O(n): one pass with a set, not two nested loops."
+hint = "Keep a set of values seen so far. If the current value is already in it, you found a duplicate."
+starter = '''
+def has_duplicates(items):
+    pass
+'''
+solution = '''
+def has_duplicates(items):
+    seen = set()
+    for x in items:
+        if x in seen:
+            return True
+        seen.add(x)
+    return False
+'''
+demo = '''
+print(has_duplicates([3, 1, 4, 1]))
+'''
+
+[[problem.tests]]
+call = "has_duplicates([3, 1, 4, 1])"
+expect = "True"
+
+[[problem.tests]]
+call = "has_duplicates([3, 1, 4])"
+expect = "False"
+
+[[problem.tests]]
+call = "has_duplicates([])"
+expect = "False"
+
+[[problem]]
+id = "pair_sum"
+title = "Pair that adds up"
+level = "Medium"
+story = "Write pair_sum(nums, target) that returns the indexes (i, j), with i < j, of the first two numbers that add up to target, or None. Aim for O(n) with a dict instead of checking every pair."
+hint = "For each number, the partner you need is target - n. Store each number's index in a dict as you go."
+starter = '''
+def pair_sum(nums, target):
+    pass
+'''
+solution = '''
+def pair_sum(nums, target):
+    where = {}
+    for j, n in enumerate(nums):
+        need = target - n
+        if need in where:
+            return (where[need], j)
+        if n not in where:
+            where[n] = j
+    return None
+'''
+demo = '''
+print(pair_sum([4, 7, 1, 5], 6))
+'''
+
+[[problem.tests]]
+call = "pair_sum([4, 7, 1, 5], 6)"
+expect = "(2, 3)"
+
+[[problem.tests]]
+call = "pair_sum([3, 3], 6)"
+expect = "(0, 1)"
+
+[[problem.tests]]
+call = "pair_sum([1, 2], 9)"
+expect = "None"
