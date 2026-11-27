@@ -1,132 +1,117 @@
 topic = "13"
+# One problem per lesson sub-topic. Generated test answers come from the solution.
 
 [[problem]]
-id = "temp"
-title = "Temperature with a guard"
-level = "Medium"
-story = "Write a class Temperature with a celsius property. Setting celsius below -273 must raise ValueError and keep the old value."
-hint = "Put @property on the getter, then @celsius.setter on a second method with the same name."
-starter = '''
-class Temperature:
-    def __init__(self, celsius):
-        self._celsius = celsius
-
-    # add a celsius property with a getter and a setter
-'''
-solution = '''
-class Temperature:
-    def __init__(self, celsius):
-        self._celsius = celsius
-
-    @property
-    def celsius(self):
-        return self._celsius
-
-    @celsius.setter
-    def celsius(self, value):
-        if value < -273:
-            raise ValueError('too cold')
-        self._celsius = value
-'''
-demo = '''
-t = Temperature(20)
-t.celsius = 25
-print(t.celsius)
-'''
-[[problem.tests]]
-setup = '''
-t = Temperature(20)
-t.celsius = 25
-'''
-call = "t.celsius"
-expect = "25"
-[[problem.tests]]
-setup = '''
-t = Temperature(0)
-try:
-    t.celsius = -300
-    r = 'accepted'
-except ValueError:
-    r = 'rejected'
-'''
-call = "(r, t.celsius)"
-expect = "('rejected', 0)"
-
-[[problem]]
-id = "circle"
-title = "Read-only diameter"
+id = "thermo"
+lesson = "enc_private"
+title = "Internal temperature"
 level = "Easy"
-story = "Write a class Circle(radius) with a diameter property that is worked out from the radius each time it is read."
-hint = "A property looks like an attribute but runs a method when read."
+kind = "function"
+story = "Write a class Thermo made with Thermo(celsius). Keep the value in an internal attribute _celsius and give a method fahrenheit() that returns celsius * 9 / 5 + 32."
+hints = ["A leading underscore tells other programmers the attribute is internal.", "self._celsius = celsius"]
+approach = "The underscore is a convention: code outside the class should use fahrenheit(), not the internal value."
+gfg = "python private variables"
 starter = '''
-class Circle:
-    def __init__(self, radius):
-        self.radius = radius
-
-    # add a diameter property
+class Thermo:
+    # Write your code here
+    pass
 '''
 solution = '''
-class Circle:
-    def __init__(self, radius):
-        self.radius = radius
+class Thermo:
+    def __init__(self, celsius):
+        self._celsius = celsius
 
-    @property
-    def diameter(self):
-        return self.radius * 2
-'''
-demo = '''
-c = Circle(3)
-print(c.diameter)
-c.radius = 5
-print(c.diameter)
+    def fahrenheit(self):
+        return self._celsius * 9 / 5 + 32
 '''
 [[problem.tests]]
-call = "Circle(3).diameter"
-expect = "6"
+call = "Thermo(100).fahrenheit()"
+expect = "212.0"
 [[problem.tests]]
-setup = '''
-c = Circle(1)
-c.radius = 5
-'''
-call = "c.diameter"
-expect = "10"
+call = "Thermo(0).fahrenheit()"
+expect = "32.0"
+[[problem.tests]]
+call = "Thermo(-40).fahrenheit()"
+expect = "-40.0"
 
 [[problem]]
-id = "secret"
-title = "Keep the password hidden"
+id = "wallet"
+lesson = "enc_mangle"
+title = "A hidden balance"
 level = "Medium"
-story = "Write a class Password(text) that stores the text in a name-mangled attribute __text, and a check(guess) method that returns True only for the right guess."
-hint = "Two leading underscores make Python rename the attribute to _Password__text."
+kind = "function"
+story = "Write a class Wallet made with Wallet(amount). Store the money in a double-underscore attribute __money so it is name-mangled, and give a method balance() that returns it."
+hints = ["Inside the class you write self.__money as normal.", "From outside, wallet.__money does not exist: Python renamed it to _Wallet__money."]
+approach = "Two leading underscores make Python rename the attribute, so it is hard to touch from outside by accident."
+gfg = "python name mangling"
 starter = '''
-class Password:
-    def __init__(self, text):
-        pass
+class Wallet:
+    def __init__(self, amount):
+        self.money = amount
 
-    def check(self, guess):
-        pass
+    def balance(self):
+        return self.money
 '''
 solution = '''
-class Password:
-    def __init__(self, text):
-        self.__text = text
+class Wallet:
+    def __init__(self, amount):
+        self.__money = amount
 
-    def check(self, guess):
-        return guess == self.__text
-'''
-demo = '''
-p = Password('abc')
-print(p.check('xyz'))
-print(p.check('abc'))
+    def balance(self):
+        return self.__money
 '''
 [[problem.tests]]
 setup = '''
-p = Password('abc')
+w = Wallet(10)
 '''
-call = "(p.check('abc'), p.check('x'))"
-expect = "(True, False)"
+call = "(w.balance(), hasattr(w, \"money\"), hasattr(w, \"_Wallet__money\"))"
+expect = "(10, False, True)"
+
+[[problem]]
+id = "age_property"
+lesson = "enc_property"
+title = "Reject a bad age"
+level = "Medium"
+kind = "function"
+story = "Write a class Person made with Person(age). age must be a property: reading it gives the age, and setting it to a negative number raises ValueError and keeps the old age."
+hints = ["@property makes a method that reads like an attribute.", "Add @age.setter and raise ValueError when value < 0."]
+approach = "Every assignment to age goes through the setter, so a bad value is rejected before it is stored."
+gfg = "python property decorator"
+starter = '''
+class Person:
+    def __init__(self, age):
+        self.age = age
+'''
+solution = '''
+class Person:
+    def __init__(self, age):
+        self.age = age
+
+    @property
+    def age(self):
+        return self._age
+
+    @age.setter
+    def age(self, value):
+        if value < 0:
+            raise ValueError("age cannot be negative")
+        self._age = value
+'''
 [[problem.tests]]
 setup = '''
-p = Password('abc')
+p = Person(30)
+try:
+    p.age = -1
+    result = "accepted"
+except ValueError:
+    result = "rejected"
 '''
-call = "hasattr(p, '__text')"
-expect = "False"
+call = "(result, p.age)"
+expect = "('rejected', 30)"
+[[problem.tests]]
+setup = '''
+p = Person(5)
+p.age = 6
+'''
+call = "p.age"
+expect = "6"

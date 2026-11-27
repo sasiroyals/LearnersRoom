@@ -1,93 +1,126 @@
 topic = "29"
+# One problem per lesson sub-topic. Generated test answers come from the solution.
 
 [[problem]]
 id = "make_grid"
-title = "A grid with separate rows"
+lesson = "got_grid"
+title = "Independent rows"
 level = "Medium"
-story = "make_grid(n) should return an n × n grid of zeros where each row is its own list. This version has a bug: changing one cell changes a whole column. Fix it."
-hint = "[[0] * n] * n repeats one row. Build a new row for each index with a comprehension."
+kind = "function"
+story = "make_grid(rows, cols) should return a grid of zeros where every row is its own list. Right now changing one cell changes every row. Fix it."
+hints = ["[[0] * cols] * rows repeats one row object.", "Make a new row each time: [[0] * cols for _ in range(rows)]."]
+approach = "The comprehension runs [0] * cols once per row, giving separate lists."
+gfg = "python create 2d list"
 starter = '''
-def make_grid(n):
-    return [[0] * n] * n
+def make_grid(rows, cols):
+    return [[0] * cols] * rows
 '''
 solution = '''
-def make_grid(n):
-    return [[0] * n for _ in range(n)]
+def make_grid(rows, cols):
+    return [[0] * cols for _ in range(rows)]
 '''
-demo = '''
-g = make_grid(3)
-g[0][0] = 1
-print(g)
-'''
-
-[[problem.tests]]
-call = "make_grid(2)"
-expect = "[[0, 0], [0, 0]]"
-
 [[problem.tests]]
 setup = '''
-g = make_grid(3)
+g = make_grid(2, 3)
 g[0][0] = 1
 '''
 call = "g"
-expect = "[[1, 0, 0], [0, 0, 0], [0, 0, 0]]"
+expect = "[[1, 0, 0], [0, 0, 0]]"
+[[problem.tests]]
+setup = '''
+g = make_grid(0, 3)
+'''
+call = "g"
+expect = "[]"
 
 [[problem]]
-id = "value_or"
-title = "A default that keeps zero"
-level = "Medium"
-story = "value_or(value, default) should return default only when value is None. This version also throws away 0, '' and []. Fix it."
-hint = "or treats every falsy value as missing. Test for None directly: value if value is not None else default."
+id = "make_adders"
+lesson = "got_lambda_loop"
+title = "Adders that remember"
+level = "Hard"
+kind = "function"
+story = "make_adders(n) should return n functions where the i-th one adds i to its argument. Right now every function adds n - 1. Fix it."
+hints = ["A lambda looks i up when it is called, after the loop has finished.", "Freeze the current value with a default: lambda x, i=i: x + i."]
+approach = "Default values are worked out when the lambda is made, so each one keeps its own i."
+gfg = "python lambda in loop"
 starter = '''
-def value_or(value, default):
-    return value or default
+def make_adders(n):
+    return [lambda x: x + i for i in range(n)]
 '''
 solution = '''
-def value_or(value, default):
-    return value if value is not None else default
+def make_adders(n):
+    return [lambda x, i=i: x + i for i in range(n)]
 '''
-demo = '''
-print(value_or(0, 10))
-'''
-
 [[problem.tests]]
-call = "value_or(0, 10)"
+call = "[f(10) for f in make_adders(3)]"
+expect = "[10, 11, 12]"
+[[problem.tests]]
+call = "len(make_adders(0))"
 expect = "0"
 
-[[problem.tests]]
-call = "value_or(None, 10)"
-expect = "10"
-
-[[problem.tests]]
-call = "value_or('', 'x')"
-expect = "''"
-
-[[problem.tests]]
-call = "value_or(5, 10)"
-expect = "5"
-
 [[problem]]
-id = "multipliers"
-title = "Functions made in a loop"
-level = "Hard"
-story = "multipliers() should return three functions: the first multiplies by 0, the second by 1, the third by 2. Every one of them multiplies by 2 instead. Fix it."
-hint = "The lambda looks i up when it is called, after the loop has finished. Bind the current i with a default argument: lambda x, i=i: x * i."
+id = "remove_evens"
+lesson = "got_remove_loop"
+title = "Remove while looping"
+level = "Medium"
+kind = "function"
+story = "remove_evens(nums) should remove every even number from the list, changing it in place. Right now it skips some. Fix it."
+hints = ["Removing an item shifts the rest left, so the loop skips the next one.", "Build the kept items first, then nums[:] = kept."]
+approach = "Never change a list's length while looping over it. Replace its contents in one step instead."
+gfg = "python remove items from list while iterating"
 starter = '''
-def multipliers():
-    return [lambda x: x * i for i in range(3)]
+def remove_evens(nums):
+    for n in nums:
+        if n % 2 == 0:
+            nums.remove(n)
 '''
 solution = '''
-def multipliers():
-    return [lambda x, i=i: x * i for i in range(3)]
+def remove_evens(nums):
+    nums[:] = [n for n in nums if n % 2 != 0]
 '''
-demo = '''
-print([f(5) for f in multipliers()])
+[[problem.tests]]
+setup = '''
+a = [2, 4, 6, 1]
+remove_evens(a)
 '''
-
+call = "a"
+expect = "[1]"
 [[problem.tests]]
-call = "[f(5) for f in multipliers()]"
-expect = "[0, 5, 10]"
-
+setup = '''
+a = [1, 2, 3, 4]
+remove_evens(a)
+'''
+call = "a"
+expect = "[1, 3]"
 [[problem.tests]]
-call = "multipliers()[1](7)"
-expect = "7"
+setup = '''
+a = []
+remove_evens(a)
+'''
+call = "a"
+expect = "[]"
+
+[[problem]]
+id = "display_name"
+lesson = "got_and_or"
+title = "Default name with or"
+level = "Easy"
+kind = "function"
+story = "display_name(name) should return the name, or \"Guest\" when the name is empty. The current version uses and, which gives the wrong value. Fix it."
+hints = ["and returns the first falsy value, or the last value.", "or returns the first truthy value: name or \"Guest\"."]
+approach = "An empty string is falsy, so or moves on to \"Guest\"; a real name is truthy and is returned as it is."
+gfg = "python and or operators"
+starter = '''
+def display_name(name):
+    return name and "Guest"
+'''
+solution = '''
+def display_name(name):
+    return name or "Guest"
+'''
+[[problem.tests]]
+call = "display_name(\"Ann\")"
+expect = "'Ann'"
+[[problem.tests]]
+call = "display_name(\"\")"
+expect = "'Guest'"

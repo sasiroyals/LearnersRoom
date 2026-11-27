@@ -1,141 +1,192 @@
 topic = "07"
+# One problem per lesson sub-topic. Generated test answers come from the solution.
 
-# Beginner problems: change the program so it prints the right output.
 [[problem]]
 id = "phone_book"
-title = "Look it up"
+lesson = "dict_lookup"
+title = "Phone book"
 level = "Easy"
 kind = "output"
-story = "Print Bo's phone number. This program stops with an error."
-hint = "Dictionary keys must match exactly, capital letters included."
+story = "book is a dict from names to phone numbers, and name is a name that is in it. Print that person's number."
+hints = ["A dict finds a value by its key.", "book[name]"]
+approach = "Square brackets with a key give the value stored under it."
+gfg = "python dictionary access"
 starter = '''
-book = {"Ann": "555-1234", "Bo": "555-9876"}
-print(book["bo"])
+# The input is already in: book, name
+# Write your code below and print the answer.
 '''
 solution = '''
-book = {"Ann": "555-1234", "Bo": "555-9876"}
-print(book["Bo"])
+print(book[name])
 '''
 [[problem.tests]]
+before = '''
+book = {"ana": "555-1234", "ben": "555-9876"}
+name = "ben"
+'''
 output = '''
 555-9876
 '''
-
-[[problem]]
-id = "add_age"
-title = "Add a key"
-level = "Easy"
-kind = "output"
-story = "Add Bo, who is 13, to the dictionary before it is printed."
-hint = "ages[\"Bo\"] = 13 adds a new key and value."
-starter = '''
-ages = {"Ann": 12}
-print(ages)
-'''
-solution = '''
-ages = {"Ann": 12}
-ages["Bo"] = 13
-print(ages)
-'''
 [[problem.tests]]
+before = '''
+book = {"cy": "555-0000"}
+name = "cy"
+'''
 output = '''
-{'Ann': 12, 'Bo': 13}
+555-0000
 '''
 
 [[problem]]
-id = "different_words"
-title = "Different words"
+id = "price_or_unknown"
+lesson = "dict_get"
+title = "Price or unknown"
 level = "Easy"
 kind = "output"
-story = "Print how many different words are in the list. The answer is 3."
-hint = "set(words) keeps one copy of each word. Then use len."
+story = "prices is a dict from item names to prices, and item is an item name. Print its price, or unknown if it is not in the dict."
+hints = ["prices[item] crashes with KeyError when the key is missing.", "prices.get(item, \"unknown\") gives a fallback instead."]
+approach = "get returns the second argument when the key is missing, so nothing crashes."
+gfg = "python dictionary get method"
 starter = '''
-words = ["a", "b", "a", "c", "b"]
-print(len(words))
+print(prices[item])
 '''
 solution = '''
-words = ["a", "b", "a", "c", "b"]
-print(len(set(words)))
+print(prices.get(item, "unknown"))
 '''
 [[problem.tests]]
+before = '''
+prices = {"tea": 2, "cake": 3}
+item = "tea"
+'''
+output = '''
+2
+'''
+[[problem.tests]]
+before = '''
+prices = {"tea": 2}
+item = "pie"
+'''
+output = '''
+unknown
+'''
+
+[[problem]]
+id = "letter_counts"
+lesson = "dict_count"
+title = "Count each letter"
+level = "Easy"
+kind = "output"
+story = "word is a word. Print a dict that maps each letter to how many times it appears, with letters in the order they first appear."
+hints = ["Start with an empty dict.", "counts[ch] = counts.get(ch, 0) + 1"]
+approach = "get(ch, 0) gives 0 for a new letter, so every letter starts its count correctly."
+gfg = "python count frequency of characters"
+starter = '''
+# The input is already in: word
+# Write your code below and print the answer.
+'''
+solution = '''
+counts = {}
+for ch in word:
+    counts[ch] = counts.get(ch, 0) + 1
+print(counts)
+'''
+[[problem.tests]]
+before = '''
+word = "banana"
+'''
+output = '''
+{'b': 1, 'a': 3, 'n': 2}
+'''
+[[problem.tests]]
+before = '''
+word = "abc"
+'''
+output = '''
+{'a': 1, 'b': 1, 'c': 1}
+'''
+[[problem.tests]]
+before = '''
+word = "aaa"
+'''
+output = '''
+{'a': 3}
+'''
+
+[[problem]]
+id = "order_total"
+lesson = "tup_unpack"
+title = "Order total"
+level = "Easy"
+kind = "output"
+story = "orders is a list of (name, qty, price) tuples. Print the total cost of all orders: qty times price, added up."
+hints = ["You can unpack a tuple right in the loop.", "for name, qty, price in orders:"]
+approach = "Unpacking gives each part of the tuple its own name, which reads better than order[1] * order[2]."
+gfg = "python tuple unpacking"
+starter = '''
+# The input is already in: orders
+# Write your code below and print the answer.
+'''
+solution = '''
+total = 0
+for name, qty, price in orders:
+    total = total + qty * price
+print(total)
+'''
+[[problem.tests]]
+before = '''
+orders = [("pen", 2, 3), ("pad", 1, 5)]
+'''
+output = '''
+11
+'''
+[[problem.tests]]
+before = '''
+orders = []
+'''
+output = '''
+0
+'''
+[[problem.tests]]
+before = '''
+orders = [("cup", 4, 1)]
+'''
+output = '''
+4
+'''
+
+[[problem]]
+id = "count_unique"
+lesson = "set_dedupe"
+title = "Count unique values"
+level = "Easy"
+kind = "output"
+story = "nums is a list. Print how many different values it holds."
+hints = ["A set keeps one copy of each value.", "len(set(nums))"]
+approach = "Turning the list into a set drops the duplicates, and len counts what is left."
+gfg = "python count unique values in list"
+starter = '''
+# The input is already in: nums
+# Write your code below and print the answer.
+'''
+solution = '''
+print(len(set(nums)))
+'''
+[[problem.tests]]
+before = '''
+nums = [1, 2, 2, 3, 3, 3]
+'''
 output = '''
 3
 '''
-
-[[problem]]
-id = "wc"
-title = "Count each word"
-level = "Easy"
-story = "Write word_counts(text) that returns a dict mapping each word to how many times it appears."
-hint = "counts.get(word, 0) gives 0 the first time a word is seen."
-starter = '''
-def word_counts(text):
-    pass
+[[problem.tests]]
+before = '''
+nums = []
 '''
-solution = '''
-def word_counts(text):
-    counts = {}
-    for word in text.split():
-        counts[word] = counts.get(word, 0) + 1
-    return counts
-'''
-demo = '''
-print(word_counts('to be or not to be'))
+output = '''
+0
 '''
 [[problem.tests]]
-call = "word_counts('a b a')"
-expect = "{'a': 2, 'b': 1}"
-[[problem.tests]]
-call = "word_counts('')"
-expect = "{}"
-
-[[problem]]
-id = "uniq"
-title = "Unique and sorted"
-level = "Easy"
-story = "Write unique_sorted(items) that drops duplicates and returns the rest in ascending order."
-hint = "A set drops duplicates. sorted() turns it back into an ordered list."
-starter = '''
-def unique_sorted(items):
-    pass
+before = '''
+nums = [7, 7]
 '''
-solution = '''
-def unique_sorted(items):
-    return sorted(set(items))
+output = '''
+1
 '''
-demo = '''
-print(unique_sorted([3, 1, 3, 2, 1]))
-'''
-[[problem.tests]]
-call = "unique_sorted([3, 1, 3, 2, 1])"
-expect = "[1, 2, 3]"
-[[problem.tests]]
-call = "unique_sorted([])"
-expect = "[]"
-
-[[problem]]
-id = "invert"
-title = "Swap keys and values"
-level = "Medium"
-story = "Write invert(d) that returns a new dict where every value becomes a key and every key becomes its value."
-hint = "Loop with for key, value in d.items() and store result[value] = key."
-starter = '''
-def invert(d):
-    pass
-'''
-solution = '''
-def invert(d):
-    result = {}
-    for key, value in d.items():
-        result[value] = key
-    return result
-'''
-demo = '''
-print(invert({'a': 1, 'b': 2}))
-'''
-[[problem.tests]]
-call = "invert({'a': 1, 'b': 2})"
-expect = "{1: 'a', 2: 'b'}"
-[[problem.tests]]
-call = "invert({})"
-expect = "{}"

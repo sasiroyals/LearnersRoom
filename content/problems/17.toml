@@ -1,104 +1,145 @@
 topic = "17"
+# One problem per lesson sub-topic. Generated test answers come from the solution.
 
 [[problem]]
-id = "safediv"
-title = "Divide safely"
+id = "safe_average"
+lesson = "exc_trace"
+title = "Fix the empty average"
 level = "Easy"
-story = "Write safe_divide(a, b) that returns a // b, or None when b is 0. Use try and except."
-hint = "Catch ZeroDivisionError, not every error."
+kind = "function"
+story = "average(nums) crashes on an empty list. Run it, read the traceback, and fix it so an empty list gives 0.0."
+hints = ["The traceback names ZeroDivisionError: len(nums) is 0.", "Check for an empty list first and return 0.0."]
+approach = "The traceback's last line tells you which error and which line, so you know exactly what to guard."
+gfg = "python zerodivisionerror"
 starter = '''
-def safe_divide(a, b):
+def average(nums):
+    return sum(nums) / len(nums)
+'''
+solution = '''
+def average(nums):
+    if not nums:
+        return 0.0
+    return sum(nums) / len(nums)
+'''
+[[problem.tests]]
+call = "average([2, 4])"
+expect = "3.0"
+[[problem.tests]]
+call = "average([])"
+expect = "0.0"
+[[problem.tests]]
+call = "average([5])"
+expect = "5.0"
+
+[[problem]]
+id = "safe_int"
+lesson = "exc_try"
+title = "Safe number parsing"
+level = "Easy"
+kind = "function"
+story = "Write to_int(text, default=0) that returns int(text), or default if the text is not a whole number."
+hints = ["int(\"abc\") raises ValueError.", "Put the int() call in try and return default in except ValueError."]
+approach = "try runs the risky line; except catches only the error you expect."
+gfg = "python try except"
+starter = '''
+def to_int(text, default=0):
+    # Write your code here
     pass
 '''
 solution = '''
-def safe_divide(a, b):
+def to_int(text, default=0):
     try:
-        return a // b
+        return int(text)
+    except ValueError:
+        return default
+'''
+[[problem.tests]]
+call = "to_int(\"42\")"
+expect = "42"
+[[problem.tests]]
+call = "to_int(\"abc\")"
+expect = "0"
+[[problem.tests]]
+call = "to_int(\"\", -1)"
+expect = "-1"
+
+[[problem]]
+id = "divide_logged"
+lesson = "exc_finally"
+title = "Always log"
+level = "Medium"
+kind = "function"
+story = "Write divide(a, b, log) that returns a / b, or None if b is 0. Whatever happens, it must append \"done\" to the list log before it finishes."
+hints = ["A finally block runs whether or not there was an error, even after return.", "try: return a / b / except ZeroDivisionError: return None / finally: log.append(\"done\")"]
+approach = "finally is the place for clean-up that must always happen."
+gfg = "python finally keyword"
+starter = '''
+def divide(a, b, log):
+    # Write your code here
+    pass
+'''
+solution = '''
+def divide(a, b, log):
+    try:
+        return a / b
     except ZeroDivisionError:
         return None
+    finally:
+        log.append("done")
 '''
-demo = '''
-print(safe_divide(7, 2))
-print(safe_divide(1, 0))
-'''
-[[problem.tests]]
-call = "safe_divide(7, 2)"
-expect = "3"
-[[problem.tests]]
-call = "safe_divide(1, 0)"
-expect = "None"
-
-[[problem]]
-id = "age"
-title = "Validate an age"
-level = "Medium"
-story = "Write parse_age(text) that returns int(text), but raises ValueError('age must be positive') if the number is below 0."
-hint = "raise ValueError('...') stops the function and hands the error to the caller."
-starter = '''
-def parse_age(text):
-    pass
-'''
-solution = '''
-def parse_age(text):
-    age = int(text)
-    if age < 0:
-        raise ValueError('age must be positive')
-    return age
-'''
-demo = '''
-print(parse_age('12'))
-'''
-[[problem.tests]]
-call = "parse_age('12')"
-expect = "12"
 [[problem.tests]]
 setup = '''
-try:
-    parse_age('-1')
-    r = 'ok'
-except ValueError as e:
-    r = str(e)
+log = []
+r = divide(6, 3, log)
 '''
-call = "r"
-expect = "'age must be positive'"
+call = "(r, log)"
+expect = "(2.0, ['done'])"
+[[problem.tests]]
+setup = '''
+log = []
+r = divide(1, 0, log)
+'''
+call = "(r, log)"
+expect = "(None, ['done'])"
 
 [[problem]]
-id = "cart"
+id = "insufficient_funds"
+lesson = "exc_custom"
 title = "Your own exception"
 level = "Medium"
-story = "Write a class EmptyCartError(Exception), and checkout(items) that raises it for an empty list, otherwise returns the number of items."
-hint = "An empty list counts as False, so if not items: catches it."
+kind = "function"
+story = "Write an exception class InsufficientFunds and a function withdraw(balance, amount) that returns the new balance, or raises InsufficientFunds when amount is more than balance."
+hints = ["class InsufficientFunds(Exception): pass", "raise InsufficientFunds() when the amount is too big."]
+approach = "A custom exception lets callers catch exactly this problem and nothing else."
+gfg = "python user defined exceptions"
 starter = '''
-class EmptyCartError(Exception):
-    pass
+# Write class InsufficientFunds here
 
 
-def checkout(items):
+def withdraw(balance, amount):
+    # Write your code here
     pass
 '''
 solution = '''
-class EmptyCartError(Exception):
+class InsufficientFunds(Exception):
     pass
 
 
-def checkout(items):
-    if not items:
-        raise EmptyCartError('cart is empty')
-    return len(items)
-'''
-demo = '''
-print(checkout(['tea', 'jam']))
+def withdraw(balance, amount):
+    if amount > balance:
+        raise InsufficientFunds(f"need {amount}, have {balance}")
+    return balance - amount
 '''
 [[problem.tests]]
-call = "checkout(['tea', 'jam'])"
-expect = "2"
+call = "withdraw(50, 20)"
+expect = "30"
 [[problem.tests]]
 setup = '''
 try:
-    checkout([])
-    r = 'ok'
-except EmptyCartError:
-    r = 'raised'
+    withdraw(10, 30)
+    result = "no error"
+except InsufficientFunds:
+    result = "caught"
 '''
-call = "r"
-expect = "'raised'"
+call = "result"
+expect = "'caught'"

@@ -1,108 +1,148 @@
 topic = "19"
+# One problem per lesson sub-topic. Generated test answers come from the solution.
 
 [[problem]]
-id = "mult"
-title = "A function that makes functions"
-level = "Easy"
-story = "Write make_multiplier(n) that returns a new function. That function multiplies its argument by n."
-hint = "Define a function inside, and return it without calling it. It remembers n."
+id = "multiplier"
+lesson = "clo_keep"
+title = "Make a multiplier"
+level = "Medium"
+kind = "function"
+story = "Write make_multiplier(n) that returns a function. That function takes x and returns x * n."
+hints = ["Define an inner function inside make_multiplier and return it (without calling it).", "The inner function can use n: the closure keeps it alive."]
+approach = "The inner function remembers n from the call that created it, even after that call has finished."
+gfg = "python closures"
 starter = '''
 def make_multiplier(n):
+    # Write your code here
     pass
 '''
 solution = '''
 def make_multiplier(n):
-    def times(x):
+    def multiply(x):
         return x * n
-    return times
-'''
-demo = '''
-triple = make_multiplier(3)
-print(triple(5))
+    return multiply
 '''
 [[problem.tests]]
 call = "make_multiplier(3)(5)"
 expect = "15"
 [[problem.tests]]
-setup = '''
-double = make_multiplier(2)
-'''
-call = "double(10)"
-expect = "20"
+call = "(make_multiplier(2)(10), make_multiplier(0)(10))"
+expect = "(20, 0)"
 
 [[problem]]
-id = "shout"
-title = "A decorator that shouts"
+id = "make_counter"
+lesson = "clo_nonlocal"
+title = "A counter function"
 level = "Medium"
-story = "Write a decorator shout(func) whose wrapper calls func and returns its result in capital letters."
-hint = "The decorator returns a new function, wrapper, that calls the original inside."
+kind = "function"
+story = "Write make_counter() that returns a function. Each call of that function returns the next number: 1, then 2, then 3."
+hints = ["The usual way is nonlocal count, but this site's Python does not support nonlocal yet.", "Keep the count in a one-item list (count = [0]) and change count[0]: changing an item is not assigning to the name."]
+approach = "Assigning to a name inside the inner function would make it local. Changing an item inside a list does not, so the closure keeps working."
+gfg = "python closure counter"
 starter = '''
-def shout(func):
+def make_counter():
+    # Write your code here
     pass
-
-
-@shout
-def hello(name):
-    return 'hello ' + name
 '''
 solution = '''
-def shout(func):
-    def wrapper(*args):
-        result = func(*args)
-        return result.upper()
-    return wrapper
-
-
-@shout
-def hello(name):
-    return 'hello ' + name
-'''
-demo = '''
-print(hello('ana'))
+def make_counter():
+    count = [0]
+    def next_number():
+        count[0] += 1
+        return count[0]
+    return next_number
 '''
 [[problem.tests]]
-call = "hello('ana')"
-expect = "'HELLO ANA'"
+setup = '''
+c = make_counter()
+c()
+c()
+'''
+call = "c()"
+expect = "3"
+[[problem.tests]]
+setup = '''
+a = make_counter()
+b = make_counter()
+a()
+'''
+call = "(a(), b())"
+expect = "(2, 1)"
 
 [[problem]]
-id = "memo"
-title = "Remember earlier answers"
-level = "Hard"
-story = "Write a decorator memo(func) that keeps a dict of answers it has already worked out, so each argument is only computed once."
-hint = "The cache dict lives in memo's frame. The wrapper can change it without nonlocal, because it changes the dict rather than the name."
+id = "shout_decorator"
+lesson = "clo_decorator"
+title = "A shouting decorator"
+level = "Medium"
+kind = "function"
+story = "Write a decorator shout that makes a function's returned text uppercase. greet is already decorated with it."
+hints = ["A decorator takes a function and returns a new function.", "The new function calls the original and returns result.upper()."]
+approach = "@shout replaces greet with wrapper, which calls the real greet and changes its result."
+gfg = "python decorators"
 starter = '''
-def memo(func):
-    pass
+def shout(func):
+    # Write your code here
+    return func
 
 
-@memo
-def fib(n):
-    if n < 2:
-        return n
-    return fib(n - 1) + fib(n - 2)
+@shout
+def greet(name):
+    return f"hello, {name}"
 '''
 solution = '''
-def memo(func):
-    cache = {}
-    def wrapper(n):
-        if n not in cache:
-            cache[n] = func(n)
-        return cache[n]
+def shout(func):
+    def wrapper(*args, **kwargs):
+        return func(*args, **kwargs).upper()
     return wrapper
 
 
-@memo
-def fib(n):
-    if n < 2:
-        return n
-    return fib(n - 1) + fib(n - 2)
-'''
-demo = '''
-print(fib(6))
+@shout
+def greet(name):
+    return f"hello, {name}"
 '''
 [[problem.tests]]
-call = "fib(10)"
-expect = "55"
+call = "greet(\"sam\")"
+expect = "'HELLO, SAM'"
 [[problem.tests]]
-call = "fib(30)"
-expect = "832040"
+call = "greet(\"ava\")"
+expect = "'HELLO, AVA'"
+
+[[problem]]
+id = "logged_wraps"
+lesson = "clo_wraps"
+title = "Keep the function's name"
+level = "Medium"
+kind = "function"
+story = "The decorator logged replaces add with wrapper, so add.__name__ is now \"wrapper\". Use functools.wraps so add keeps its own name, while still working."
+hints = ["from functools import wraps", "Put @wraps(func) on the line above def wrapper."]
+approach = "wraps copies the original name and docstring onto the wrapper, so tools and error messages still show add."
+gfg = "python functools wraps"
+starter = '''
+def logged(func):
+    def wrapper(*args):
+        return func(*args)
+    return wrapper
+
+
+@logged
+def add(a, b):
+    return a + b
+'''
+solution = '''
+from functools import wraps
+
+
+def logged(func):
+    @wraps(func)
+    def wrapper(*args):
+        return func(*args)
+    return wrapper
+
+
+@logged
+def add(a, b):
+    return a + b
+'''
+[[problem.tests]]
+call = "(add.__name__, add(2, 3))"
+expect = "('add', 5)"

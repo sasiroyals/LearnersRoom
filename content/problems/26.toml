@@ -1,64 +1,96 @@
 topic = "26"
+# One problem per lesson sub-topic. Generated test answers come from the solution.
 
 [[problem]]
-id = "insertion_sort"
-title = "Insertion sort"
+id = "bubble_sort"
+lesson = "sort_bubble"
+title = "Bubble sort"
 level = "Medium"
-story = "Write insertion_sort(nums) that returns a new sorted list, smallest first, without using sorted() or .sort(). Leave nums unchanged."
-hint = "Copy the list. For each item from position 1, slide it left past every bigger item."
+kind = "function"
+story = "Write bubble_sort(nums) that returns a new list sorted smallest first, by repeatedly swapping neighbours that are out of order. Do not use sorted() or .sort()."
+hints = ["Work on a copy: out = list(nums).", "Each full pass moves the biggest remaining item to the end. Stop early if a pass makes no swaps."]
+approach = "O(n^2) comparisons in the worst case, but the early stop makes an already-sorted list O(n)."
+gfg = "bubble sort python"
 starter = '''
-def insertion_sort(nums):
+def bubble_sort(nums):
+    # Write your code here
     pass
 '''
 solution = '''
-def insertion_sort(nums):
+def bubble_sort(nums):
     out = list(nums)
-    for i in range(1, len(out)):
-        key = out[i]
-        j = i - 1
-        while j >= 0 and out[j] > key:
-            out[j + 1] = out[j]
-            j -= 1
-        out[j + 1] = key
+    n = len(out)
+    for end in range(n - 1, 0, -1):
+        swapped = False
+        for i in range(end):
+            if out[i] > out[i + 1]:
+                out[i], out[i + 1] = out[i + 1], out[i]
+                swapped = True
+        if not swapped:
+            break
     return out
 '''
-demo = '''
-print(insertion_sort([5, 2, 9, 1]))
-'''
-
 [[problem.tests]]
-call = "insertion_sort([5, 2, 9, 1])"
-expect = "[1, 2, 5, 9]"
-
+call = "bubble_sort([5, 1, 4, 2])"
+expect = "[1, 2, 4, 5]"
 [[problem.tests]]
-call = "insertion_sort([])"
+call = "bubble_sort([])"
 expect = "[]"
-
 [[problem.tests]]
-call = "insertion_sort([3, 3, 1])"
-expect = "[1, 3, 3]"
+call = "bubble_sort([1, 2, 3])"
+expect = "[1, 2, 3]"
 
-[[problem.tests]]
-setup = '''
-nums = [2, 1]
-insertion_sort(nums)
+[[problem]]
+id = "insert_sorted"
+lesson = "sort_insertion"
+title = "Insert into a sorted list"
+level = "Easy"
+kind = "function"
+story = "nums is sorted. Write insert_sorted(nums, x) that returns a new sorted list with x added in the right place. Do not sort the whole list again."
+hints = ["Find the first position where the item is bigger than x.", "Return nums[:i] + [x] + nums[i:]."]
+approach = "This is the inner step of insertion sort: one O(n) slide instead of an O(n log n) sort."
+gfg = "insertion sort python"
+starter = '''
+def insert_sorted(nums, x):
+    # Write your code here
+    pass
 '''
-call = "nums"
-expect = "[2, 1]"
+solution = '''
+def insert_sorted(nums, x):
+    i = 0
+    while i < len(nums) and nums[i] <= x:
+        i += 1
+    return nums[:i] + [x] + nums[i:]
+'''
+[[problem.tests]]
+call = "insert_sorted([1, 3, 5], 4)"
+expect = "[1, 3, 4, 5]"
+[[problem.tests]]
+call = "insert_sorted([], 2)"
+expect = "[2]"
+[[problem.tests]]
+call = "insert_sorted([1, 2], 9)"
+expect = "[1, 2, 9]"
 
 [[problem]]
 id = "merge_sorted"
+lesson = "sort_merge"
 title = "Merge two sorted lists"
 level = "Medium"
-story = "Write merge_sorted(a, b) that merges two sorted lists into one sorted list in O(n). Do not just add them and sort."
-hint = "Compare the front items, take the smaller, and move that pointer on. Add any leftovers at the end."
+kind = "function"
+story = "Write merge(a, b) that merges two sorted lists into one sorted list, walking both lists once."
+hints = ["Keep a position in each list and take the smaller front item each time.", "When one list runs out, add the rest of the other."]
+approach = "Each item is looked at once: O(len(a) + len(b)). This is the merge step of merge sort."
+gfg = "merge two sorted arrays"
 starter = '''
-def merge_sorted(a, b):
-    return a + b
+def merge(a, b):
+    # Write your code here
+    pass
 '''
 solution = '''
-def merge_sorted(a, b):
-    out, i, j = [], 0, 0
+def merge(a, b):
+    i = j = 0
+    out = []
     while i < len(a) and j < len(b):
         if a[i] <= b[j]:
             out.append(a[i])
@@ -68,45 +100,38 @@ def merge_sorted(a, b):
             j += 1
     return out + a[i:] + b[j:]
 '''
-demo = '''
-print(merge_sorted([1, 4, 9], [2, 3, 10]))
-'''
-
 [[problem.tests]]
-call = "merge_sorted([1, 4, 9], [2, 3, 10])"
+call = "merge([1, 4, 9], [2, 3, 10])"
 expect = "[1, 2, 3, 4, 9, 10]"
-
 [[problem.tests]]
-call = "merge_sorted([], [1])"
+call = "merge([], [1])"
 expect = "[1]"
-
 [[problem.tests]]
-call = "merge_sorted([5], [1, 2])"
-expect = "[1, 2, 5]"
+call = "merge([5], [])"
+expect = "[5]"
 
 [[problem]]
-id = "rank_players"
-title = "Rank the players"
+id = "sort_people"
+lesson = "sort_key"
+title = "Sort by two keys"
 level = "Medium"
-story = "Write rank_players(players), where each player is a (name, score) tuple. Return the names, highest score first. Players with the same score go in alphabetical order."
-hint = "sorted with key=lambda p: (-p[1], p[0]) sorts by score descending, then by name."
+kind = "function"
+story = "people is a list of (name, age) tuples. Write sort_people(people) that returns them sorted by age, youngest first, and by name for people of the same age."
+hints = ["key can return a tuple: Python compares the first part, then the second.", "sorted(people, key=lambda p: (p[1], p[0]))"]
+approach = "Tuples compare item by item, so (age, name) sorts by age first and breaks ties by name."
+gfg = "python sort list of tuples"
 starter = '''
-def rank_players(players):
-    return [name for name, score in players]
+def sort_people(people):
+    # Write your code here
+    pass
 '''
 solution = '''
-def rank_players(players):
-    ordered = sorted(players, key=lambda p: (-p[1], p[0]))
-    return [name for name, score in ordered]
+def sort_people(people):
+    return sorted(people, key=lambda p: (p[1], p[0]))
 '''
-demo = '''
-print(rank_players([('Bo', 7), ('Ann', 9), ('Cy', 7)]))
-'''
-
 [[problem.tests]]
-call = "rank_players([('Bo', 7), ('Ann', 9), ('Cy', 7)])"
-expect = "['Ann', 'Bo', 'Cy']"
-
+call = "sort_people([(\"cy\", 30), (\"ann\", 25), (\"bo\", 30)])"
+expect = "[('ann', 25), ('bo', 30), ('cy', 30)]"
 [[problem.tests]]
-call = "rank_players([('Zed', 1), ('Amy', 1)])"
-expect = "['Amy', 'Zed']"
+call = "sort_people([])"
+expect = "[]"

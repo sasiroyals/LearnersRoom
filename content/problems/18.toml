@@ -1,103 +1,100 @@
 topic = "18"
+# One problem per lesson sub-topic. Generated test answers come from the solution.
 
 [[problem]]
-id = "countlines"
+id = "hypotenuse"
+lesson = "mod_import"
+title = "Use the math module"
+level = "Easy"
+kind = "function"
+story = "Write hypotenuse(a, b) that returns the long side of a right triangle: the square root of a*a + b*b. Use math.sqrt."
+hints = ["import math at the top.", "math.sqrt(a * a + b * b)"]
+approach = "import loads the module once; then math.sqrt is a normal function call."
+gfg = "python math module"
+starter = '''
+import math
+
+def hypotenuse(a, b):
+    # Write your code here
+    pass
+'''
+solution = '''
+import math
+
+def hypotenuse(a, b):
+    return math.sqrt(a * a + b * b)
+'''
+[[problem.tests]]
+call = "hypotenuse(3, 4)"
+expect = "5.0"
+[[problem.tests]]
+call = "hypotenuse(5, 12)"
+expect = "13.0"
+
+[[problem]]
+id = "palindrome_main"
+lesson = "mod_main"
+title = "Keep demo code out of imports"
+level = "Easy"
+kind = "function"
+story = "Write is_palindrome(text) that returns True if text reads the same backwards. Any demo prints should sit under if __name__ == \"__main__\":, so importing the file shows nothing."
+hints = ["text[::-1] is the text reversed.", "The demo goes in the if __name__ == \"__main__\": block."]
+approach = "__name__ is \"__main__\" only when the file is run directly, so the demo does not run on import."
+gfg = "python if name main"
+starter = '''
+def is_palindrome(text):
+    # Write your code here
+    pass
+'''
+solution = '''
+def is_palindrome(text):
+    return text == text[::-1]
+
+
+if __name__ == "__main__":
+    print(is_palindrome("level"))
+'''
+[[problem.tests]]
+call = "is_palindrome(\"level\")"
+expect = "True"
+[[problem.tests]]
+call = "is_palindrome(\"hello\")"
+expect = "False"
+[[problem.tests]]
+call = "is_palindrome(\"\")"
+expect = "True"
+
+[[problem]]
+id = "count_lines"
+lesson = "mod_files"
 title = "Count lines in a file"
-level = "Easy"
-story = "Write count_lines(path) that opens the file with with and returns how many lines it has."
-hint = "with open(path) as f: closes the file for you. splitlines() splits the text into lines."
-starter = '''
-def count_lines(path):
-    pass
-'''
-solution = '''
-def count_lines(path):
-    with open(path) as f:
-        text = f.read()
-    return len(text.splitlines())
-'''
-demo = '''
-with open('notes.txt', 'w') as f:
-    f.write('one\ntwo\nthree\n')
-print(count_lines('notes.txt'))
-'''
-[[problem.tests]]
-setup = '''
-with open('a.txt', 'w') as f:
-    f.write('x\ny\n')
-'''
-call = "count_lines('a.txt')"
-expect = "2"
-[[problem.tests]]
-setup = '''
-with open('b.txt', 'w') as f:
-    f.write('')
-'''
-call = "count_lines('b.txt')"
-expect = "0"
-
-[[problem]]
-id = "savescores"
-title = "Write then read back"
 level = "Medium"
-story = "Write save_scores(path, scores) that writes each score on its own line, and load_scores(path) that reads them back as a list of ints."
-hint = "Files hold text. Use str() when writing and int() when reading."
+kind = "function"
+story = "Write count_lines(path) that opens the text file at path and returns how many lines it has. Use with so the file is closed."
+hints = ["with open(path) as f: opens the file and closes it at the end of the block.", "Count the lines with a loop over f, or len(f.readlines())."]
+approach = "with guarantees the file is closed, even if something inside goes wrong."
+gfg = "python count lines in file"
 starter = '''
-def save_scores(path, scores):
-    pass
-
-
-def load_scores(path):
+def count_lines(path):
+    # Write your code here
     pass
 '''
 solution = '''
-def save_scores(path, scores):
-    with open(path, 'w') as f:
-        for s in scores:
-            f.write(str(s) + '\n')
-
-
-def load_scores(path):
+def count_lines(path):
     with open(path) as f:
-        return [int(line) for line in f.read().splitlines()]
-'''
-demo = '''
-save_scores('s.txt', [5, 9])
-print(load_scores('s.txt'))
+        return len(f.readlines())
 '''
 [[problem.tests]]
 setup = '''
-save_scores('s.txt', [5, 9, 2])
+with open("notes.txt", "w") as f:
+    f.write("a\nb\nc\n")
 '''
-call = "load_scores('s.txt')"
-expect = "[5, 9, 2]"
-
-[[problem]]
-id = "alphabet"
-title = "Use a module"
-level = "Easy"
-story = "Import the string module and write letter_position(ch) that returns 1 for 'a', 2 for 'b', and so on, using string.ascii_lowercase."
-hint = "string.ascii_lowercase is 'abcdefghijklmnopqrstuvwxyz'. .index() counts from 0."
-starter = '''
-import string
-
-
-def letter_position(ch):
-    pass
-'''
-solution = '''
-import string
-
-
-def letter_position(ch):
-    return string.ascii_lowercase.index(ch) + 1
-'''
-demo = '''
-print(letter_position('c'))
-'''
+call = "count_lines(\"notes.txt\")"
+expect = "3"
 [[problem.tests]]
-call = "letter_position('a')"
-expect = "1"
-[[problem.tests]]
-call = "letter_position('z')"
-expect = "26"
+setup = '''
+with open("empty.txt", "w") as f:
+    f.write("")
+'''
+call = "count_lines(\"empty.txt\")"
+expect = "0"

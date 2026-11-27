@@ -70,11 +70,22 @@ work, but accounts are kept in the visitor's browser only.
 
 ## Practice problems
 
-`content/problems/NN.toml` holds three original problems per topic. Each
-`[[problem]]` has `id`, `title`, `level` (Easy, Medium or Hard), `story`,
-`hint`, `starter`, `solution` and `demo` (the example run by **Step
-through**), plus `[[problem.tests]]` entries with an optional `setup`, a
-`call` expression and the `expect`ed `repr()` of its result.
+`content/problems/NN.toml` holds one original problem for every lesson
+sub-topic, laid out like a coding-practice site: a problem list, then a page
+with **Description**, **Hints** (opened one at a time) and **Solution** tabs
+next to the editor. **Run** checks the first two tests (shown as examples),
+**Submit** checks them all, and **Step through** runs example 1 in the
+debugger, for the student's code or the solution.
+
+Each `[[problem]]` has `id`, `lesson` (the sub-topic it practises), `title`,
+`level` (Easy, Medium or Hard), `kind`, `story`, `hints` (a list), `approach`
+(the idea behind the solution), `gfg` (search words for similar problems on
+GeeksforGeeks), `starter` and `solution`.
+
+- `kind = "function"`: `[[problem.tests]]` have an optional `setup`, a `call`
+  expression and the `expect`ed `repr()` of its result.
+- `kind = "output"` (topics 00 to 07, before functions are taught): tests have
+  an optional `before` that sets the input names, and the exact `output`.
 
 `tests/test_problems.py` checks every solution in CPython, and
 `tests/e2e/check_problems.cjs` checks them in the browser runner. A solved

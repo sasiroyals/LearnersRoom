@@ -126,13 +126,15 @@ function renderTL(){
     <button class="next" id="b-next" ${can?'':'disabled'}>${esc(tlNextLabel())} <span class="arrow">→</span></button>
   </div>`;
   h += can ? `<div class="keys"><kbd>→</kbd> next · <kbd>←</kbd> back · <kbd>R</kbd> replay</div>` : `<div class="keys">Pick an answer to continue.</div>`;
-  if(isRecap) h += `<button class="btn" id="tl-practice" style="align-self:flex-start">Open this code in Practice →</button>`;
+  if(isRecap && PROB_BY_LESSON[tl.id]) h += `<div class="tl-prac"><span>Practice it: <b>${esc(PROB_BY_LESSON[tl.id].title)}</b></span><button class="btn primary" id="tl-problem">Solve the problem →</button></div>`;
+  if(isRecap) h += `<button class="btn" id="tl-practice" style="align-self:flex-start">Open this code in the editor →</button>`;
   ex.innerHTML = h;
   ex.querySelector('#b-back').onclick = ()=>tlGo(tl.k-1);
   ex.querySelector('#b-replay').onclick = ()=>renderTL();
   ex.querySelector('#b-next').onclick = tlNext;
   ex.querySelectorAll('[data-opt]').forEach(b=> b.onclick = ()=>{ tl.answers[tl.variant] = +b.dataset.opt; renderTL(); const nb = $('#b-next'); nb && nb.focus(); });
   ex.querySelectorAll('[data-copt]').forEach(b=> b.onclick = ()=>{ tl.answers['check'] = +b.dataset.copt; renderTL(); const nb = $('#b-next'); nb && nb.focus(); });
+  const tq = ex.querySelector('#tl-problem'); if(tq) tq.onclick = ()=> openProblem(PROB_BY_LESSON[tl.id].id);
   const tp = ex.querySelector('#tl-practice'); if(tp) tp.onclick = ()=>{ prOpenCode(tlCode(), 'Lesson: ' + TL_LESSONS[tl.id].title, {kind:'lesson', id:tl.id}); };
   // dots
   $('#dots').innerHTML = Array.from({length:tlTotal()},(_,i)=>`<button class="dot${i<k?' seen':''}${i===k?' now':''}" aria-label="Step ${i+1}" data-i="${i}"></button>`).join('');

@@ -1,15 +1,23 @@
 topic = "15"
+# One problem per lesson sub-topic. Generated test answers come from the solution.
 
 [[problem]]
-id = "shapes"
+id = "total_area"
+lesson = "poly_same"
 title = "Total area of mixed shapes"
 level = "Easy"
-story = "Square(side) and Rect(w, h) both need an area() method. Then total_area(shapes) adds up the areas without checking which class each one is."
-hint = "Give both classes a method with the same name. The loop just calls s.area()."
+kind = "function"
+story = "Square and Rect are given; each has area(). Write total_area(shapes) that returns the sum of the areas of all the shapes in the list."
+hints = ["Do not check the type: just call s.area() on each one.", "sum(s.area() for s in shapes)"]
+approach = "One call, s.area(), runs different code depending on the object: that is polymorphism."
+gfg = "python polymorphism"
 starter = '''
 class Square:
     def __init__(self, side):
         self.side = side
+
+    def area(self):
+        return self.side * self.side
 
 
 class Rect:
@@ -17,8 +25,12 @@ class Rect:
         self.w = w
         self.h = h
 
+    def area(self):
+        return self.w * self.h
+
 
 def total_area(shapes):
+    # Write your code here
     pass
 '''
 solution = '''
@@ -40,13 +52,7 @@ class Rect:
 
 
 def total_area(shapes):
-    total = 0
-    for s in shapes:
-        total = total + s.area()
-    return total
-'''
-demo = '''
-print(total_area([Square(2), Rect(2, 3)]))
+    return sum(s.area() for s in shapes)
 '''
 [[problem.tests]]
 call = "total_area([Square(2), Rect(2, 3)])"
@@ -56,72 +62,85 @@ call = "total_area([])"
 expect = "0"
 
 [[problem]]
-id = "vector"
-title = "Add vectors with +"
+id = "all_speak"
+lesson = "poly_duck"
+title = "Anything that speaks"
+level = "Easy"
+kind = "function"
+story = "Write all_speak(things) that returns a list of what each thing says, by calling its speak() method. Duck and Robot are given and share no parent class."
+hints = ["Python does not care about the class, only that the method exists.", "[t.speak() for t in things]"]
+approach = "Duck typing: if it has speak(), you can call it, whatever its class."
+gfg = "python duck typing"
+starter = '''
+class Duck:
+    def speak(self):
+        return "quack"
+
+
+class Robot:
+    def speak(self):
+        return "beep"
+
+
+def all_speak(things):
+    # Write your code here
+    pass
+'''
+solution = '''
+class Duck:
+    def speak(self):
+        return "quack"
+
+
+class Robot:
+    def speak(self):
+        return "beep"
+
+
+def all_speak(things):
+    return [t.speak() for t in things]
+'''
+[[problem.tests]]
+call = "all_speak([Duck(), Robot(), Duck()])"
+expect = "['quack', 'beep', 'quack']"
+[[problem.tests]]
+call = "all_speak([])"
+expect = "[]"
+
+[[problem]]
+id = "vector_add"
+lesson = "poly_ops"
+title = "Add two vectors"
 level = "Medium"
-story = "Write a class Vector(x, y) where v1 + v2 gives a new Vector, and v1 == v2 compares both coordinates."
-hint = "a + b calls a.__add__(b). a == b calls a.__eq__(b)."
+kind = "function"
+story = "Vector(x, y) is given with as_tuple(). Add __add__ so that Vector(1, 2) + Vector(3, 4) gives Vector(4, 6)."
+hints = ["a + b calls a.__add__(b).", "Return a new Vector(self.x + other.x, self.y + other.y)."]
+approach = "Defining __add__ teaches + what to do with your own objects."
+gfg = "python operator overloading"
 starter = '''
 class Vector:
     def __init__(self, x, y):
         self.x = x
         self.y = y
+
+    def as_tuple(self):
+        return (self.x, self.y)
 '''
 solution = '''
 class Vector:
     def __init__(self, x, y):
         self.x = x
         self.y = y
+
+    def as_tuple(self):
+        return (self.x, self.y)
 
     def __add__(self, other):
         return Vector(self.x + other.x, self.y + other.y)
-
-    def __eq__(self, other):
-        return self.x == other.x and self.y == other.y
-'''
-demo = '''
-v = Vector(1, 2) + Vector(3, 4)
-print(v.x, v.y)
 '''
 [[problem.tests]]
-setup = '''
-v = Vector(1, 2) + Vector(3, 4)
-'''
-call = "(v.x, v.y)"
+call = "(Vector(1, 2) + Vector(3, 4)).as_tuple()"
 expect = "(4, 6)"
 [[problem.tests]]
-call = "Vector(1, 2) == Vector(1, 2)"
-expect = "True"
-[[problem.tests]]
-call = "Vector(1, 2) == Vector(2, 1)"
-expect = "False"
-
-[[problem]]
-id = "playlist"
-title = "len() of your own class"
-level = "Easy"
-story = "Write a class Playlist(songs) so that len(playlist) gives the number of songs."
-hint = "len(x) calls x.__len__()."
-starter = '''
-class Playlist:
-    def __init__(self, songs):
-        self.songs = songs
-'''
-solution = '''
-class Playlist:
-    def __init__(self, songs):
-        self.songs = songs
-
-    def __len__(self):
-        return len(self.songs)
-'''
-demo = '''
-p = Playlist(['a', 'b', 'c'])
-print(len(p))
-'''
-[[problem.tests]]
-call = "len(Playlist(['a', 'b']))"
-expect = "2"
-[[problem.tests]]
-call = "len(Playlist([]))"
-expect = "0"
+call = "(Vector(0, 0) + Vector(-1, 5)).as_tuple()"
+expect = "(-1, 5)"

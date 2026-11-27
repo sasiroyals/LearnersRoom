@@ -195,14 +195,15 @@
     </section>
   </div>
 
-  <div class="practice" id="practice" hidden>
-    <nav class="panel lib" id="pr-lib" aria-label="Practice library">
+  <div class="practice view-list" id="practice" hidden>
+    <section class="pset" id="pr-list" aria-label="Problems"></section>
+    <section class="panel desc" id="pr-desc" aria-label="Problem"></section>
+
+    <nav class="panel lib" id="pr-lib" aria-label="Examples and lesson code">
       <div class="lib-head">
-        <div class="seg lib-seg" role="tablist" aria-label="Practice from">
-          <button type="button" role="tab" data-lib="problems" id="lib-problems">Problems</button>
-          <button type="button" role="tab" data-lib="lessons" id="lib-lessons">From lessons</button>
-        </div>
-        <p class="lib-sum" id="lib-sum"></p>
+        <button type="button" class="link-btn" id="lib-problems">← All problems</button>
+        <h2 class="lib-h">Examples and lesson code</h2>
+        <p class="lib-sum" id="lib-sum">Open any lesson's code and change it.</p>
       </div>
       <div class="lib-list" id="lib-list"></div>
     </nav>
@@ -211,10 +212,9 @@
     <section class="panel ed" aria-label="Code editor">
       <div class="ed-head">
         <div class="ed-title-row">
-          <button type="button" class="ghost lib-toggle" id="lib-toggle" aria-controls="pr-lib">☰ <span>Problems</span></button>
+          <button type="button" class="ghost lib-toggle" id="lib-toggle" aria-controls="pr-lib">☰ <span>Examples</span></button>
           <h2 id="pr-title">Practice</h2>
         </div>
-        <div class="prob" id="pr-prob" hidden></div>
       </div>
       <div class="sol-banner" id="pr-solbar" hidden><span>You are watching the solution.</span><button type="button" class="link-btn" id="pr-solback">Back to my code</button></div>
       <div class="ed-body" id="pr-edit">
@@ -222,15 +222,16 @@
         <textarea id="pr-code" spellcheck="false" autocapitalize="off" autocomplete="off" aria-label="Your code"></textarea>
       </div>
       <div class="ed-view" id="pr-view" hidden></div>
+      <div class="console" id="pr-console" hidden aria-live="polite"></div>
       <div class="ed-foot">
-        <button class="btn primary" id="pr-test" hidden>Run tests</button>
-        <button class="btn" id="pr-debug">Step through</button>
+        <button class="btn" id="pr-debug" title="Run your code one line at a time and watch every name and object">Step through</button>
         <button class="btn" id="pr-run">Run</button>
         <button class="btn" id="pr-edit-btn" hidden>Edit code</button>
-        <span class="spacer"></span>
         <button class="btn" id="pr-reset" hidden title="Put the starting code back">Reset</button>
-        <button class="btn" id="pr-sol" hidden>Watch solution</button>
+        <span class="spacer"></span>
         <span class="ed-note" id="pr-status"></span>
+        <button class="btn" id="pr-test" hidden title="Check your code against the examples (Ctrl+Enter)">Run</button>
+        <button class="btn primary" id="pr-submit" hidden title="Check your code against every test, including hidden ones">Submit</button>
       </div>
     </section>
 

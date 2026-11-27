@@ -1,158 +1,173 @@
 topic = "02"
+# One problem per lesson sub-topic. Generated test answers come from the solution.
 
-# Beginner problems: change the program so it prints the right output.
 [[problem]]
-id = "average_three"
+id = "full_weeks"
+lesson = "num_floordiv"
+title = "Full weeks"
+level = "Easy"
+kind = "output"
+story = "days holds a number of days. Print how many full weeks it contains."
+hints = ["A week has 7 days.", "// divides and drops the part after the point."]
+approach = "Floor division // gives the whole number of times 7 fits into days."
+gfg = "python floor division"
+starter = '''
+# The input is already in: days
+# Write your code below and print the answer.
+'''
+solution = '''
+print(days // 7)
+'''
+[[problem.tests]]
+before = '''
+days = 20
+'''
+output = '''
+2
+'''
+[[problem.tests]]
+before = '''
+days = 7
+'''
+output = '''
+1
+'''
+[[problem.tests]]
+before = '''
+days = 6
+'''
+output = '''
+0
+'''
+[[problem.tests]]
+before = '''
+days = 365
+'''
+output = '''
+52
+'''
+
+[[problem]]
+id = "last_digit"
+lesson = "num_mod"
+title = "Last digit"
+level = "Easy"
+kind = "output"
+story = "n is a whole number of 0 or more. Print its last digit."
+hints = ["What is left over after dividing by 10?", "% gives the remainder: 1234 % 10 is 4."]
+approach = "The remainder after dividing by 10 is exactly the last digit."
+gfg = "python modulo operator"
+starter = '''
+# The input is already in: n
+# Write your code below and print the answer.
+'''
+solution = '''
+print(n % 10)
+'''
+[[problem.tests]]
+before = '''
+n = 1234
+'''
+output = '''
+4
+'''
+[[problem.tests]]
+before = '''
+n = 7
+'''
+output = '''
+7
+'''
+[[problem.tests]]
+before = '''
+n = 90
+'''
+output = '''
+0
+'''
+
+[[problem]]
+id = "money_total"
+lesson = "num_float"
+title = "Total to the cent"
+level = "Easy"
+kind = "output"
+story = "price is a price in dollars and qty is how many you buy. Print the total, rounded to 2 decimal places."
+hints = ["Multiply first, then round.", "round(x, 2) keeps 2 digits after the point."]
+approach = "Floats can carry tiny errors, like 0.30000000000000004. round(..., 2) removes them for money."
+gfg = "python round function"
+starter = '''
+# The input is already in: price, qty
+# Write your code below and print the answer.
+'''
+solution = '''
+print(round(price * qty, 2))
+'''
+[[problem.tests]]
+before = '''
+price = 0.1
+qty = 3
+'''
+output = '''
+0.3
+'''
+[[problem.tests]]
+before = '''
+price = 2.5
+qty = 4
+'''
+output = '''
+10.0
+'''
+[[problem.tests]]
+before = '''
+price = 1.1
+qty = 3
+'''
+output = '''
+3.3
+'''
+
+[[problem]]
+id = "average3"
+lesson = "num_order"
 title = "Average of three"
 level = "Easy"
 kind = "output"
-story = "The average of 4, 8 and 9 is 7.0, but this program prints something else. Fix it."
-hint = "Python divides before it adds. Use brackets to add first."
+story = "a, b and c are numbers. Print their average."
+hints = ["Python does / before +, so a + b + c / 3 only divides c.", "Use brackets: (a + b + c) / 3."]
+approach = "Brackets make the addition happen before the division."
+gfg = "python operator precedence"
 starter = '''
-a = 4
-b = 8
-c = 9
 print(a + b + c / 3)
 '''
 solution = '''
-a = 4
-b = 8
-c = 9
 print((a + b + c) / 3)
 '''
 [[problem.tests]]
+before = '''
+a = 1
+b = 2
+c = 3
+'''
 output = '''
-7.0
-'''
-
-[[problem]]
-id = "share_pizza"
-title = "Share the pizza"
-level = "Easy"
-kind = "output"
-story = "17 slices are shared by 5 people. Print how many whole slices each person gets, then how many are left over, on two lines."
-hint = "// gives the whole part of a division. % gives what is left over."
-starter = '''
-slices = 17
-people = 5
-print(slices / people)
-'''
-solution = '''
-slices = 17
-people = 5
-print(slices // people)
-print(slices % people)
+2.0
 '''
 [[problem.tests]]
+before = '''
+a = 10
+b = 0
+c = 5
+'''
 output = '''
-3
-2
-'''
-
-[[problem]]
-id = "hours_minutes"
-title = "Hours and minutes"
-level = "Easy"
-kind = "output"
-story = "Turn 135 minutes into hours and minutes, so the program prints 2 hours 15 minutes."
-hint = "total // 60 gives the hours. total % 60 gives the minutes left over."
-starter = '''
-total = 135
-print(total, "minutes")
-'''
-solution = '''
-total = 135
-print(total // 60, "hours", total % 60, "minutes")
+5.0
 '''
 [[problem.tests]]
+before = '''
+a = 4
+b = 4
+c = 4
+'''
 output = '''
-2 hours 15 minutes
+4.0
 '''
-
-[[problem]]
-id = "hm"
-title = "Minutes to hours and minutes"
-level = "Easy"
-story = "Write hours_and_minutes(total) that turns a number of minutes into a tuple (hours, minutes). 135 minutes is (2, 15)."
-hint = "// gives whole hours, % gives the minutes left over."
-starter = '''
-def hours_and_minutes(total):
-    pass
-'''
-solution = '''
-def hours_and_minutes(total):
-    hours = total // 60
-    minutes = total % 60
-    return (hours, minutes)
-'''
-demo = '''
-print(hours_and_minutes(135))
-'''
-[[problem.tests]]
-call = "hours_and_minutes(135)"
-expect = "(2, 15)"
-[[problem.tests]]
-call = "hours_and_minutes(59)"
-expect = "(0, 59)"
-[[problem.tests]]
-call = "hours_and_minutes(120)"
-expect = "(2, 0)"
-
-[[problem]]
-id = "even"
-title = "Is it even?"
-level = "Easy"
-story = "Write is_even(n) that returns True when n is even and False otherwise."
-hint = "An even number leaves no remainder when divided by 2."
-starter = '''
-def is_even(n):
-    pass
-'''
-solution = '''
-def is_even(n):
-    return n % 2 == 0
-'''
-demo = '''
-print(is_even(4))
-print(is_even(7))
-'''
-[[problem.tests]]
-call = "is_even(4)"
-expect = "True"
-[[problem.tests]]
-call = "is_even(7)"
-expect = "False"
-[[problem.tests]]
-call = "is_even(0)"
-expect = "True"
-
-[[problem]]
-id = "digits"
-title = "Add up the digits"
-level = "Medium"
-story = "Write digit_sum(n) that adds the digits of a positive whole number. digit_sum(472) is 4 + 7 + 2 = 13."
-hint = "n % 10 is the last digit. n // 10 drops the last digit."
-starter = '''
-def digit_sum(n):
-    pass
-'''
-solution = '''
-def digit_sum(n):
-    total = 0
-    while n > 0:
-        total = total + n % 10
-        n = n // 10
-    return total
-'''
-demo = '''
-print(digit_sum(472))
-'''
-[[problem.tests]]
-call = "digit_sum(472)"
-expect = "13"
-[[problem.tests]]
-call = "digit_sum(5)"
-expect = "5"
-[[problem.tests]]
-call = "digit_sum(1000)"
-expect = "1"
