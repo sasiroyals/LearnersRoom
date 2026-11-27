@@ -295,13 +295,12 @@ $('#pr-edit-btn').onclick = ()=>{ setEditing(true); $('#pr-code').focus(); };
 $('#pr-solback').onclick = ()=>{ setEditing(true); $('#pr-code').focus(); };
 $('#pr-sol').onclick = ()=>{ const p = curProblem(); if(p) prStart(false, isOutProb(p) ? p.solution : p.solution.replace(/\s*$/,'\n') + '\n# example\n' + p.demo); };
 $('#pr-reset').onclick = ()=>{ const p = curProblem(); if(!p) return; pr.code.py = p.starter; store.set(draftKey(p.id), p.starter); pr.results = null; renderPractice(); };
-$('#pr-blank').onclick = ()=>{ prOpenCode('', 'Blank editor', {kind:'blank', id:null}, true); closeLibIfNarrow(); $('#pr-code').focus(); };
+$('#pr-blank').onclick = ()=>{ if(mode!=='practice') setMode('practice'); prOpenCode('', 'Blank editor', {kind:'blank', id:null}, true); closeLibIfNarrow(); $('#pr-code').focus(); };
 
 function setMode(m){
   mode = m;
   document.querySelectorAll('.modes .tab').forEach(t=>{ t.setAttribute('aria-selected', t.dataset.mode===m); t.tabIndex = t.dataset.mode===m?0:-1; });
   $('#main').hidden = m!=='lesson'; $('#practice').hidden = m!=='practice'; $('#home').hidden = m!=='home'; $('#auth').hidden = m!=='auth';
-  $('#toggle-outline').hidden = m!=='lesson';
   document.body.dataset.mode = m;
   if(m!=='auth' && /^#\/(login|signup)$/.test(location.hash)) history.replaceState(null,'',location.pathname + location.search);
   if(m==='home'){ stopAnims(); renderHome(); return; }
@@ -310,4 +309,7 @@ function setMode(m){
   else if(!lessonOpened || !ALL_LESSONS[lang].includes(lessonId)) openLesson(pickLesson(lang));
   else if(lessonId==='alias') render(false); else renderTL();
 }
-document.querySelectorAll('.modes .tab').forEach(t=> t.onclick = ()=>setMode(t.dataset.mode));
+document.querySelectorAll('.modes .tab').forEach(t=> t.onclick = ()=>{
+  if(t.dataset.mode==='lesson' && mode==='lesson' && innerWidth<=980) return setOutline($('#main').classList.contains('no-outline'));
+  setMode(t.dataset.mode);
+});

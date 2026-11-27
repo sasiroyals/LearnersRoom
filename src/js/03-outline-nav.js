@@ -31,10 +31,12 @@ function renderOutline(){
   $('#crumbs').textContent = `${L[lang].name} › ${ct ? ct.n+' '+ct.t : ''}`;
   $('#trophy-count').textContent = ['py','java'].reduce((c,lg)=>c + ALL_LESSONS[lg].filter(id=>hasTrophy(lg,id)).length, 0);
 }
-function setOutline(open){ $('#main').classList.toggle('no-outline', !open); $('#toggle-outline').setAttribute('aria-expanded', open); }
-$('#toggle-outline').onclick = ()=> setOutline($('#main').classList.contains('no-outline'));
+/* The lesson list is always shown on wide screens. On narrow screens it slides out:
+   tapping the Lessons tab again opens and closes it. */
+function setOutline(open){ $('#main').classList.toggle('no-outline', !open); }
 $('#scrim').onclick = ()=> setOutline(false);
 if(innerWidth<=980) setOutline(false);
+addEventListener('resize', ()=>{ if(innerWidth>980) setOutline(true); });
 
 /* ---------------- dots ---------------- */
 function renderDots(){
