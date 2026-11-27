@@ -1,0 +1,103 @@
+topic = "18"
+
+[[problem]]
+id = "countlines"
+title = "Count lines in a file"
+level = "Easy"
+story = "Write count_lines(path) that opens the file with with and returns how many lines it has."
+hint = "with open(path) as f: closes the file for you. splitlines() splits the text into lines."
+starter = '''
+def count_lines(path):
+    pass
+'''
+solution = '''
+def count_lines(path):
+    with open(path) as f:
+        text = f.read()
+    return len(text.splitlines())
+'''
+demo = '''
+with open('notes.txt', 'w') as f:
+    f.write('one\ntwo\nthree\n')
+print(count_lines('notes.txt'))
+'''
+[[problem.tests]]
+setup = '''
+with open('a.txt', 'w') as f:
+    f.write('x\ny\n')
+'''
+call = "count_lines('a.txt')"
+expect = "2"
+[[problem.tests]]
+setup = '''
+with open('b.txt', 'w') as f:
+    f.write('')
+'''
+call = "count_lines('b.txt')"
+expect = "0"
+
+[[problem]]
+id = "savescores"
+title = "Write then read back"
+level = "Medium"
+story = "Write save_scores(path, scores) that writes each score on its own line, and load_scores(path) that reads them back as a list of ints."
+hint = "Files hold text. Use str() when writing and int() when reading."
+starter = '''
+def save_scores(path, scores):
+    pass
+
+
+def load_scores(path):
+    pass
+'''
+solution = '''
+def save_scores(path, scores):
+    with open(path, 'w') as f:
+        for s in scores:
+            f.write(str(s) + '\n')
+
+
+def load_scores(path):
+    with open(path) as f:
+        return [int(line) for line in f.read().splitlines()]
+'''
+demo = '''
+save_scores('s.txt', [5, 9])
+print(load_scores('s.txt'))
+'''
+[[problem.tests]]
+setup = '''
+save_scores('s.txt', [5, 9, 2])
+'''
+call = "load_scores('s.txt')"
+expect = "[5, 9, 2]"
+
+[[problem]]
+id = "alphabet"
+title = "Use a module"
+level = "Easy"
+story = "Import the string module and write letter_position(ch) that returns 1 for 'a', 2 for 'b', and so on, using string.ascii_lowercase."
+hint = "string.ascii_lowercase is 'abcdefghijklmnopqrstuvwxyz'. .index() counts from 0."
+starter = '''
+import string
+
+
+def letter_position(ch):
+    pass
+'''
+solution = '''
+import string
+
+
+def letter_position(ch):
+    return string.ascii_lowercase.index(ch) + 1
+'''
+demo = '''
+print(letter_position('c'))
+'''
+[[problem.tests]]
+call = "letter_position('a')"
+expect = "1"
+[[problem.tests]]
+call = "letter_position('z')"
+expect = "26"

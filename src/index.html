@@ -90,7 +90,7 @@
         </article>
         <article class="bcard b-practice">
           <div class="bart art-practice" aria-hidden="true"><code>for i in range(3):</code><code>&nbsp;&nbsp;&nbsp;&nbsp;print(i)</code><span class="cur"></span></div>
-          <h3>Practice right here</h3><p>Write your own code in the built-in editor and step through it with a visual debugger.</p>
+          <h3>Practice right here</h3><p>Three problems for every topic, checked by tests as you go. Step through your answer, or the solution, and watch it run.</p>
         </article>
       </div>
 
@@ -196,20 +196,41 @@
   </div>
 
   <div class="practice" id="practice" hidden>
+    <nav class="panel lib" id="pr-lib" aria-label="Practice library">
+      <div class="lib-head">
+        <div class="seg lib-seg" role="tablist" aria-label="Practice from">
+          <button type="button" role="tab" data-lib="problems" id="lib-problems">Problems</button>
+          <button type="button" role="tab" data-lib="lessons" id="lib-lessons">From lessons</button>
+        </div>
+        <p class="lib-sum" id="lib-sum"></p>
+      </div>
+      <div class="lib-list" id="lib-list"></div>
+      <div class="lib-foot"><button type="button" class="btn wide" id="pr-blank">Blank editor</button></div>
+    </nav>
+    <div class="scrim lib-scrim" id="lib-scrim"></div>
+
     <section class="panel ed" aria-label="Code editor">
       <div class="ed-head">
-        <h2 id="pr-title">Practice</h2>
-        <div class="chips" id="pr-examples" role="group" aria-label="Example programs"></div>
+        <div class="ed-title-row">
+          <button type="button" class="ghost lib-toggle" id="lib-toggle" aria-controls="pr-lib">☰ <span>Problems</span></button>
+          <h2 id="pr-title">Practice</h2>
+        </div>
+        <div class="prob" id="pr-prob" hidden></div>
       </div>
+      <div class="sol-banner" id="pr-solbar" hidden><span>You are watching the solution.</span><button type="button" class="link-btn" id="pr-solback">Back to my code</button></div>
       <div class="ed-body" id="pr-edit">
         <div class="ed-gutter" id="pr-gutter" aria-hidden="true">1</div>
         <textarea id="pr-code" spellcheck="false" autocapitalize="off" autocomplete="off" aria-label="Your code"></textarea>
       </div>
       <div class="ed-view" id="pr-view" hidden></div>
       <div class="ed-foot">
-        <button class="btn primary" id="pr-debug">Step through</button>
+        <button class="btn primary" id="pr-test" hidden>Run tests</button>
+        <button class="btn" id="pr-debug">Step through</button>
         <button class="btn" id="pr-run">Run</button>
         <button class="btn" id="pr-edit-btn" hidden>Edit code</button>
+        <span class="spacer"></span>
+        <button class="btn" id="pr-reset" hidden title="Put the starting code back">Reset</button>
+        <button class="btn" id="pr-sol" hidden>Watch solution</button>
         <span class="ed-note" id="pr-status"></span>
       </div>
     </section>

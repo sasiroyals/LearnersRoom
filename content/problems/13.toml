@@ -1,0 +1,132 @@
+topic = "13"
+
+[[problem]]
+id = "temp"
+title = "Temperature with a guard"
+level = "Medium"
+story = "Write a class Temperature with a celsius property. Setting celsius below -273 must raise ValueError and keep the old value."
+hint = "Put @property on the getter, then @celsius.setter on a second method with the same name."
+starter = '''
+class Temperature:
+    def __init__(self, celsius):
+        self._celsius = celsius
+
+    # add a celsius property with a getter and a setter
+'''
+solution = '''
+class Temperature:
+    def __init__(self, celsius):
+        self._celsius = celsius
+
+    @property
+    def celsius(self):
+        return self._celsius
+
+    @celsius.setter
+    def celsius(self, value):
+        if value < -273:
+            raise ValueError('too cold')
+        self._celsius = value
+'''
+demo = '''
+t = Temperature(20)
+t.celsius = 25
+print(t.celsius)
+'''
+[[problem.tests]]
+setup = '''
+t = Temperature(20)
+t.celsius = 25
+'''
+call = "t.celsius"
+expect = "25"
+[[problem.tests]]
+setup = '''
+t = Temperature(0)
+try:
+    t.celsius = -300
+    r = 'accepted'
+except ValueError:
+    r = 'rejected'
+'''
+call = "(r, t.celsius)"
+expect = "('rejected', 0)"
+
+[[problem]]
+id = "circle"
+title = "Read-only diameter"
+level = "Easy"
+story = "Write a class Circle(radius) with a diameter property that is worked out from the radius each time it is read."
+hint = "A property looks like an attribute but runs a method when read."
+starter = '''
+class Circle:
+    def __init__(self, radius):
+        self.radius = radius
+
+    # add a diameter property
+'''
+solution = '''
+class Circle:
+    def __init__(self, radius):
+        self.radius = radius
+
+    @property
+    def diameter(self):
+        return self.radius * 2
+'''
+demo = '''
+c = Circle(3)
+print(c.diameter)
+c.radius = 5
+print(c.diameter)
+'''
+[[problem.tests]]
+call = "Circle(3).diameter"
+expect = "6"
+[[problem.tests]]
+setup = '''
+c = Circle(1)
+c.radius = 5
+'''
+call = "c.diameter"
+expect = "10"
+
+[[problem]]
+id = "secret"
+title = "Keep the password hidden"
+level = "Medium"
+story = "Write a class Password(text) that stores the text in a name-mangled attribute __text, and a check(guess) method that returns True only for the right guess."
+hint = "Two leading underscores make Python rename the attribute to _Password__text."
+starter = '''
+class Password:
+    def __init__(self, text):
+        pass
+
+    def check(self, guess):
+        pass
+'''
+solution = '''
+class Password:
+    def __init__(self, text):
+        self.__text = text
+
+    def check(self, guess):
+        return guess == self.__text
+'''
+demo = '''
+p = Password('abc')
+print(p.check('xyz'))
+print(p.check('abc'))
+'''
+[[problem.tests]]
+setup = '''
+p = Password('abc')
+'''
+call = "(p.check('abc'), p.check('x'))"
+expect = "(True, False)"
+[[problem.tests]]
+setup = '''
+p = Password('abc')
+'''
+call = "hasattr(p, '__text')"
+expect = "False"

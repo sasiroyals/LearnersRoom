@@ -1,0 +1,104 @@
+topic = "17"
+
+[[problem]]
+id = "safediv"
+title = "Divide safely"
+level = "Easy"
+story = "Write safe_divide(a, b) that returns a // b, or None when b is 0. Use try and except."
+hint = "Catch ZeroDivisionError, not every error."
+starter = '''
+def safe_divide(a, b):
+    pass
+'''
+solution = '''
+def safe_divide(a, b):
+    try:
+        return a // b
+    except ZeroDivisionError:
+        return None
+'''
+demo = '''
+print(safe_divide(7, 2))
+print(safe_divide(1, 0))
+'''
+[[problem.tests]]
+call = "safe_divide(7, 2)"
+expect = "3"
+[[problem.tests]]
+call = "safe_divide(1, 0)"
+expect = "None"
+
+[[problem]]
+id = "age"
+title = "Validate an age"
+level = "Medium"
+story = "Write parse_age(text) that returns int(text), but raises ValueError('age must be positive') if the number is below 0."
+hint = "raise ValueError('...') stops the function and hands the error to the caller."
+starter = '''
+def parse_age(text):
+    pass
+'''
+solution = '''
+def parse_age(text):
+    age = int(text)
+    if age < 0:
+        raise ValueError('age must be positive')
+    return age
+'''
+demo = '''
+print(parse_age('12'))
+'''
+[[problem.tests]]
+call = "parse_age('12')"
+expect = "12"
+[[problem.tests]]
+setup = '''
+try:
+    parse_age('-1')
+    r = 'ok'
+except ValueError as e:
+    r = str(e)
+'''
+call = "r"
+expect = "'age must be positive'"
+
+[[problem]]
+id = "cart"
+title = "Your own exception"
+level = "Medium"
+story = "Write a class EmptyCartError(Exception), and checkout(items) that raises it for an empty list, otherwise returns the number of items."
+hint = "An empty list counts as False, so if not items: catches it."
+starter = '''
+class EmptyCartError(Exception):
+    pass
+
+
+def checkout(items):
+    pass
+'''
+solution = '''
+class EmptyCartError(Exception):
+    pass
+
+
+def checkout(items):
+    if not items:
+        raise EmptyCartError('cart is empty')
+    return len(items)
+'''
+demo = '''
+print(checkout(['tea', 'jam']))
+'''
+[[problem.tests]]
+call = "checkout(['tea', 'jam'])"
+expect = "2"
+[[problem.tests]]
+setup = '''
+try:
+    checkout([])
+    r = 'ok'
+except EmptyCartError:
+    r = 'raised'
+'''
+call = "r"
+expect = "'raised'"

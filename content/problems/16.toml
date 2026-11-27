@@ -1,0 +1,153 @@
+topic = "16"
+
+[[problem]]
+id = "abstract"
+title = "Finish the abstract class"
+level = "Medium"
+story = "Shape is abstract and cannot be created. Write Square(side) that inherits from Shape and implements area()."
+hint = "Square must define area itself, or it stays abstract too."
+starter = '''
+from abc import ABC, abstractmethod
+
+
+class Shape(ABC):
+    @abstractmethod
+    def area(self):
+        pass
+
+
+class Square(Shape):
+    pass
+'''
+solution = '''
+from abc import ABC, abstractmethod
+
+
+class Shape(ABC):
+    @abstractmethod
+    def area(self):
+        pass
+
+
+class Square(Shape):
+    def __init__(self, side):
+        self.side = side
+
+    def area(self):
+        return self.side * self.side
+'''
+demo = '''
+print(Square(3).area())
+'''
+[[problem.tests]]
+call = "Square(3).area()"
+expect = "9"
+[[problem.tests]]
+setup = '''
+try:
+    Shape()
+    r = 'created'
+except TypeError:
+    r = 'blocked'
+'''
+call = "r"
+expect = "'blocked'"
+
+[[problem]]
+id = "car"
+title = "A car has an engine"
+level = "Easy"
+story = "Use composition: Car creates its own Engine in __init__. car.start() should call the engine's start() and return its result."
+hint = "A car is not an engine, it has one. Store it on self.engine."
+starter = '''
+class Engine:
+    def start(self):
+        return 'Engine on'
+
+
+class Car:
+    def __init__(self):
+        pass
+
+    def start(self):
+        pass
+'''
+solution = '''
+class Engine:
+    def start(self):
+        return 'Engine on'
+
+
+class Car:
+    def __init__(self):
+        self.engine = Engine()
+
+    def start(self):
+        return self.engine.start()
+'''
+demo = '''
+car = Car()
+print(car.start())
+'''
+[[problem.tests]]
+call = "Car().start()"
+expect = "'Engine on'"
+[[problem.tests]]
+call = "isinstance(Car().engine, Engine)"
+expect = "True"
+
+[[problem]]
+id = "library"
+title = "A library of books"
+level = "Medium"
+story = "Library holds Book objects. add(book) stores one, and titles() returns the titles in the order they were added."
+hint = "Keep a list on self, and build the titles from it."
+starter = '''
+class Book:
+    def __init__(self, title):
+        self.title = title
+
+
+class Library:
+    def __init__(self):
+        pass
+
+    def add(self, book):
+        pass
+
+    def titles(self):
+        pass
+'''
+solution = '''
+class Book:
+    def __init__(self, title):
+        self.title = title
+
+
+class Library:
+    def __init__(self):
+        self.books = []
+
+    def add(self, book):
+        self.books.append(book)
+
+    def titles(self):
+        return [b.title for b in self.books]
+'''
+demo = '''
+lib = Library()
+lib.add(Book('Dune'))
+lib.add(Book('Emma'))
+print(lib.titles())
+'''
+[[problem.tests]]
+setup = '''
+lib = Library()
+lib.add(Book('Dune'))
+lib.add(Book('Emma'))
+'''
+call = "lib.titles()"
+expect = "['Dune', 'Emma']"
+[[problem.tests]]
+call = "Library().titles()"
+expect = "[]"

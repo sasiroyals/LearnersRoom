@@ -1,0 +1,102 @@
+topic = "10"
+
+[[problem]]
+id = "addsafe"
+title = "Add without changing the original"
+level = "Easy"
+story = "Write with_item(items, x) that returns a new list with x on the end, and leaves items unchanged."
+hint = "items.append changes the caller's list. items + [x] builds a new one."
+starter = '''
+def with_item(items, x):
+    pass
+'''
+solution = '''
+def with_item(items, x):
+    return items + [x]
+'''
+demo = '''
+a = [1, 2]
+b = with_item(a, 3)
+print(a, b)
+'''
+[[problem.tests]]
+setup = '''
+a = [1, 2]
+'''
+call = "(with_item(a, 3), a)"
+expect = "([1, 2, 3], [1, 2])"
+
+[[problem]]
+id = "double"
+title = "Double in place"
+level = "Easy"
+story = "Write double_all(nums) that doubles every number inside the same list. It returns nothing."
+hint = "Assign through the index: nums[i] = ... changes the list the caller holds."
+starter = '''
+def double_all(nums):
+    pass
+'''
+solution = '''
+def double_all(nums):
+    for i in range(len(nums)):
+        nums[i] = nums[i] * 2
+'''
+demo = '''
+n = [1, 2, 3]
+double_all(n)
+print(n)
+'''
+[[problem.tests]]
+setup = '''
+n = [1, 2, 3]
+double_all(n)
+'''
+call = "n"
+expect = "[2, 4, 6]"
+[[problem.tests]]
+setup = '''
+m = []
+double_all(m)
+'''
+call = "m"
+expect = "[]"
+
+[[problem]]
+id = "grid"
+title = "Copy a grid properly"
+level = "Medium"
+story = "Write copy_grid(grid) that returns a copy of a list of lists, so that changing the copy's rows never changes the original."
+hint = "grid[:] only copies the outer list. Each row needs its own copy too."
+starter = '''
+def copy_grid(grid):
+    pass
+'''
+solution = '''
+def copy_grid(grid):
+    result = []
+    for row in grid:
+        result.append(row[:])
+    return result
+'''
+demo = '''
+g = [[1], [2]]
+c = copy_grid(g)
+c[0].append(9)
+print(g, c)
+'''
+[[problem.tests]]
+setup = '''
+g = [[1], [2]]
+c = copy_grid(g)
+c[0].append(9)
+'''
+call = "g"
+expect = "[[1], [2]]"
+[[problem.tests]]
+setup = '''
+g = [[1], [2]]
+c = copy_grid(g)
+c[0].append(9)
+'''
+call = "c"
+expect = "[[1, 9], [2]]"

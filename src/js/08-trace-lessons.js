@@ -133,7 +133,7 @@ function renderTL(){
   ex.querySelector('#b-next').onclick = tlNext;
   ex.querySelectorAll('[data-opt]').forEach(b=> b.onclick = ()=>{ tl.answers[tl.variant] = +b.dataset.opt; renderTL(); const nb = $('#b-next'); nb && nb.focus(); });
   ex.querySelectorAll('[data-copt]').forEach(b=> b.onclick = ()=>{ tl.answers['check'] = +b.dataset.copt; renderTL(); const nb = $('#b-next'); nb && nb.focus(); });
-  const tp = ex.querySelector('#tl-practice'); if(tp) tp.onclick = ()=>{ pr.code.py = tlCode(); pr.ex.py = null; setMode('practice'); };
+  const tp = ex.querySelector('#tl-practice'); if(tp) tp.onclick = ()=>{ prOpenCode(tlCode(), 'Lesson: ' + TL_LESSONS[tl.id].title, {kind:'lesson', id:tl.id}); };
   // dots
   $('#dots').innerHTML = Array.from({length:tlTotal()},(_,i)=>`<button class="dot${i<k?' seen':''}${i===k?' now':''}" aria-label="Step ${i+1}" data-i="${i}"></button>`).join('');
   $('#dots').querySelectorAll('.dot').forEach(d=> d.onclick = ()=> tlGo(+d.dataset.i));

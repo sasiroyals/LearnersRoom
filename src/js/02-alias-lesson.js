@@ -204,7 +204,7 @@ function renderCode(){
   if(st.mode==='both') h += `<p class="vnote">Run 1 used <code>${esc(C.code.alias[1])}</code> on line ${displayLine(1)}. Run 2, shown above, used the copy.</p>`;
   h += `<div class="runlink"><span>Change a value and watch what happens.</span><button class="btn" id="to-practice">Step through this code in Practice →</button></div>`;
   $('#v-code').innerHTML = h;
-  $('#to-practice').onclick = ()=>{ const src = C.wrapBefore.concat(C.code[mode].map(t=>ind+t), C.wrapAfter).join('\n') + '\n'; pr.code[lang] = src; pr.ex[lang] = null; setMode('practice'); };
+  $('#to-practice').onclick = ()=>{ const src = C.wrapBefore.concat(C.code[mode].map(t=>ind+t), C.wrapAfter).join('\n') + '\n'; prOpenCode(src, 'Lesson: Why did both lists change?'); };
 
   const ps = C.pseudo[mode];
   $('#v-pseudo').innerHTML = `<ol class="pseudo">` + ps.map((t,i)=>`<li class="${i===st.pseudo?'active':''}">${esc(t)}</li>`).join('') + `</ol>` +

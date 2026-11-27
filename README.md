@@ -67,3 +67,15 @@ Log in and sign up use Firebase when `src/config/firebase.json` holds the
 project's web config (it is public by design; Firestore rules keep each
 student's `users/{uid}` document private). Without that file the pages still
 work, but accounts are kept in the visitor's browser only.
+
+## Practice problems
+
+`content/problems/NN.toml` holds three original problems per topic. Each
+`[[problem]]` has `id`, `title`, `level` (Easy, Medium or Hard), `story`,
+`hint`, `starter`, `solution` and `demo` (the example run by **Step
+through**), plus `[[problem.tests]]` entries with an optional `setup`, a
+`call` expression and the `expect`ed `repr()` of its result.
+
+`tests/test_problems.py` checks every solution in CPython, and
+`tests/e2e/check_problems.cjs` checks them in the browser runner. A solved
+problem is stored as `cs.solved.py.<id>`; drafts as `cs.draft.py.<id>`.

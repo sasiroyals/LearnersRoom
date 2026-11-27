@@ -1,0 +1,140 @@
+topic = "12"
+
+[[problem]]
+id = "counter"
+title = "A click counter"
+level = "Easy"
+story = "Write a class Counter. Each new counter starts at value 0, and increment() adds 1 to value."
+hint = "Store the number on self in __init__, so each object has its own."
+starter = '''
+class Counter:
+    def __init__(self):
+        pass
+
+    def increment(self):
+        pass
+'''
+solution = '''
+class Counter:
+    def __init__(self):
+        self.value = 0
+
+    def increment(self):
+        self.value = self.value + 1
+'''
+demo = '''
+c = Counter()
+c.increment()
+c.increment()
+print(c.value)
+'''
+[[problem.tests]]
+setup = '''
+c = Counter()
+c.increment()
+c.increment()
+'''
+call = "c.value"
+expect = "2"
+[[problem.tests]]
+setup = '''
+a = Counter()
+b = Counter()
+a.increment()
+'''
+call = "(a.value, b.value)"
+expect = "(1, 0)"
+
+[[problem]]
+id = "rect"
+title = "Rectangle with area"
+level = "Easy"
+story = "Write a class Rectangle(width, height) with an area() method and a __str__ that gives 'Rectangle(3 x 4)'."
+hint = "__str__ must return text. print(r) and str(r) both call it."
+starter = '''
+class Rectangle:
+    def __init__(self, width, height):
+        pass
+
+    def area(self):
+        pass
+
+    def __str__(self):
+        pass
+'''
+solution = '''
+class Rectangle:
+    def __init__(self, width, height):
+        self.width = width
+        self.height = height
+
+    def area(self):
+        return self.width * self.height
+
+    def __str__(self):
+        return 'Rectangle(' + str(self.width) + ' x ' + str(self.height) + ')'
+'''
+demo = '''
+r = Rectangle(3, 4)
+print(r.area())
+print(r)
+'''
+[[problem.tests]]
+call = "Rectangle(3, 4).area()"
+expect = "12"
+[[problem.tests]]
+call = "str(Rectangle(3, 4))"
+expect = "'Rectangle(3 x 4)'"
+
+[[problem]]
+id = "bank"
+title = "Bank account"
+level = "Medium"
+story = "Write a class Account with a balance that starts at 0. deposit(amount) adds money. withdraw(amount) takes money out and returns True, or returns False and changes nothing if there is not enough."
+hint = "Check the balance before you subtract, and return early if it is too small."
+starter = '''
+class Account:
+    def __init__(self):
+        pass
+
+    def deposit(self, amount):
+        pass
+
+    def withdraw(self, amount):
+        pass
+'''
+solution = '''
+class Account:
+    def __init__(self):
+        self.balance = 0
+
+    def deposit(self, amount):
+        self.balance = self.balance + amount
+
+    def withdraw(self, amount):
+        if amount > self.balance:
+            return False
+        self.balance = self.balance - amount
+        return True
+'''
+demo = '''
+acct = Account()
+acct.deposit(50)
+print(acct.withdraw(80))
+print(acct.withdraw(20))
+print(acct.balance)
+'''
+[[problem.tests]]
+setup = '''
+a = Account()
+a.deposit(50)
+'''
+call = "(a.withdraw(80), a.balance)"
+expect = "(False, 50)"
+[[problem.tests]]
+setup = '''
+a = Account()
+a.deposit(50)
+'''
+call = "(a.withdraw(20), a.balance)"
+expect = "(True, 30)"

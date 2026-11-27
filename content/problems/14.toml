@@ -1,0 +1,141 @@
+topic = "14"
+
+[[problem]]
+id = "dog"
+title = "Override a method"
+level = "Easy"
+story = "Animal.speak() returns '... makes a sound'. Write Dog(Animal) whose speak() returns '<name> says woof'."
+hint = "Define speak again inside Dog. Python looks in Dog before Animal."
+starter = '''
+class Animal:
+    def __init__(self, name):
+        self.name = name
+
+    def speak(self):
+        return self.name + ' makes a sound'
+
+
+class Dog(Animal):
+    pass
+'''
+solution = '''
+class Animal:
+    def __init__(self, name):
+        self.name = name
+
+    def speak(self):
+        return self.name + ' makes a sound'
+
+
+class Dog(Animal):
+    def speak(self):
+        return self.name + ' says woof'
+'''
+demo = '''
+print(Animal('Cat').speak())
+print(Dog('Rex').speak())
+'''
+[[problem.tests]]
+call = "Dog('Rex').speak()"
+expect = "'Rex says woof'"
+[[problem.tests]]
+call = "Animal('Cat').speak()"
+expect = "'Cat makes a sound'"
+
+[[problem]]
+id = "emp"
+title = "Call the parent's __init__"
+level = "Medium"
+story = "Employee(name, salary) extends Person(name). Use super().__init__ to set the name, store the salary, and write describe() returning '<name> earns <salary>'."
+hint = "super().__init__(name) runs Person's __init__ on this same object."
+starter = '''
+class Person:
+    def __init__(self, name):
+        self.name = name
+
+
+class Employee(Person):
+    def __init__(self, name, salary):
+        pass
+
+    def describe(self):
+        pass
+'''
+solution = '''
+class Person:
+    def __init__(self, name):
+        self.name = name
+
+
+class Employee(Person):
+    def __init__(self, name, salary):
+        super().__init__(name)
+        self.salary = salary
+
+    def describe(self):
+        return self.name + ' earns ' + str(self.salary)
+'''
+demo = '''
+e = Employee('Ann', 100)
+print(e.describe())
+'''
+[[problem.tests]]
+call = "Employee('Ann', 100).describe()"
+expect = "'Ann earns 100'"
+[[problem.tests]]
+call = "isinstance(Employee('Bo', 5), Person)"
+expect = "True"
+
+[[problem]]
+id = "countdogs"
+title = "Count with isinstance"
+level = "Medium"
+story = "Write count_dogs(animals) that counts how many items in the list are Dogs (including subclasses of Dog)."
+hint = "isinstance(a, Dog) is also True for a Puppy, because Puppy is a Dog."
+starter = '''
+class Animal:
+    pass
+
+class Dog(Animal):
+    pass
+
+class Puppy(Dog):
+    pass
+
+class Cat(Animal):
+    pass
+
+
+def count_dogs(animals):
+    pass
+'''
+solution = '''
+class Animal:
+    pass
+
+class Dog(Animal):
+    pass
+
+class Puppy(Dog):
+    pass
+
+class Cat(Animal):
+    pass
+
+
+def count_dogs(animals):
+    count = 0
+    for a in animals:
+        if isinstance(a, Dog):
+            count = count + 1
+    return count
+'''
+demo = '''
+print(count_dogs([Dog(), Cat(), Puppy()]))
+'''
+[[problem.tests]]
+call = "count_dogs([Dog(), Cat(), Puppy()])"
+expect = "2"
+[[problem.tests]]
+call = "count_dogs([Cat()])"
+expect = "0"

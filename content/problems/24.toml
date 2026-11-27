@@ -1,0 +1,144 @@
+topic = "24"
+
+[[problem]]
+id = "strategy"
+title = "Swap discounts with a strategy"
+level = "Medium"
+story = "apply_discount(price, rule) calls whichever rule function it is given. Write half_price(price) and ten_off(price) (never below 0)."
+hint = "Functions are values: pass half_price itself, without brackets."
+starter = '''
+def half_price(price):
+    pass
+
+
+def ten_off(price):
+    pass
+
+
+def apply_discount(price, rule):
+    return rule(price)
+'''
+solution = '''
+def half_price(price):
+    return price // 2
+
+
+def ten_off(price):
+    return max(price - 10, 0)
+
+
+def apply_discount(price, rule):
+    return rule(price)
+'''
+demo = '''
+print(apply_discount(40, half_price))
+print(apply_discount(40, ten_off))
+'''
+[[problem.tests]]
+call = "apply_discount(40, half_price)"
+expect = "20"
+[[problem.tests]]
+call = "apply_discount(40, ten_off)"
+expect = "30"
+[[problem.tests]]
+call = "apply_discount(4, ten_off)"
+expect = "0"
+
+[[problem]]
+id = "factory"
+title = "A shape factory"
+level = "Medium"
+story = "Write make_shape(kind) that returns a Square for 'square', a Triangle for 'triangle', and raises ValueError for anything else."
+hint = "A dict from names to classes keeps the choice in one place."
+starter = '''
+class Square:
+    sides = 4
+
+
+class Triangle:
+    sides = 3
+
+
+def make_shape(kind):
+    pass
+'''
+solution = '''
+class Square:
+    sides = 4
+
+
+class Triangle:
+    sides = 3
+
+
+def make_shape(kind):
+    shapes = {'square': Square, 'triangle': Triangle}
+    if kind not in shapes:
+        raise ValueError('unknown shape: ' + kind)
+    return shapes[kind]()
+'''
+demo = '''
+print(make_shape('square').sides)
+'''
+[[problem.tests]]
+call = "make_shape('square').sides"
+expect = "4"
+[[problem.tests]]
+call = "make_shape('triangle').sides"
+expect = "3"
+[[problem.tests]]
+setup = '''
+try:
+    make_shape('hexagon')
+    r = 'made'
+except ValueError:
+    r = 'refused'
+'''
+call = "r"
+expect = "'refused'"
+
+[[problem]]
+id = "events"
+title = "An event bus (observer)"
+level = "Hard"
+story = "Write EventBus with subscribe(fn) and emit(value). emit calls every subscribed function with the value and returns their results in order."
+hint = "Store the functions in a list. emit loops over it and calls each one."
+starter = '''
+class EventBus:
+    def __init__(self):
+        pass
+
+    def subscribe(self, fn):
+        pass
+
+    def emit(self, value):
+        pass
+'''
+solution = '''
+class EventBus:
+    def __init__(self):
+        self.listeners = []
+
+    def subscribe(self, fn):
+        self.listeners.append(fn)
+
+    def emit(self, value):
+        return [fn(value) for fn in self.listeners]
+'''
+demo = '''
+bus = EventBus()
+bus.subscribe(lambda x: x + 1)
+bus.subscribe(lambda x: x * 10)
+print(bus.emit(2))
+'''
+[[problem.tests]]
+setup = '''
+bus = EventBus()
+bus.subscribe(lambda x: x + 1)
+bus.subscribe(lambda x: x * 10)
+'''
+call = "bus.emit(2)"
+expect = "[3, 20]"
+[[problem.tests]]
+call = "EventBus().emit(5)"
+expect = "[]"

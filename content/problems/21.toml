@@ -1,0 +1,120 @@
+topic = "21"
+
+[[problem]]
+id = "point"
+title = "Build from text with a classmethod"
+level = "Medium"
+story = "Write Point(x, y) with a classmethod from_string(text) that turns '3,4' into Point(3, 4)."
+hint = "A classmethod gets the class as cls, so it can call cls(...) to build an object."
+starter = '''
+class Point:
+    def __init__(self, x, y):
+        self.x = x
+        self.y = y
+
+    # add a classmethod from_string
+'''
+solution = '''
+class Point:
+    def __init__(self, x, y):
+        self.x = x
+        self.y = y
+
+    @classmethod
+    def from_string(cls, text):
+        parts = text.split(',')
+        return cls(int(parts[0]), int(parts[1]))
+'''
+demo = '''
+p = Point.from_string('3,4')
+print(p.x, p.y)
+'''
+[[problem.tests]]
+setup = '''
+p = Point.from_string('3,4')
+'''
+call = "(p.x, p.y)"
+expect = "(3, 4)"
+[[problem.tests]]
+setup = '''
+p = Point.from_string('10,0')
+'''
+call = "(p.x, p.y)"
+expect = "(10, 0)"
+
+[[problem]]
+id = "static"
+title = "A helper with staticmethod"
+level = "Easy"
+story = "Add a staticmethod is_valid(code) to Coupon that returns True when code has exactly 6 characters, all digits."
+hint = "A staticmethod has no self and no cls. Call it on the class itself."
+starter = '''
+class Coupon:
+    # add a staticmethod is_valid
+    pass
+'''
+solution = '''
+class Coupon:
+    @staticmethod
+    def is_valid(code):
+        return len(code) == 6 and code.isdigit()
+'''
+demo = '''
+print(Coupon.is_valid('123456'))
+print(Coupon.is_valid('12ab56'))
+'''
+[[problem.tests]]
+call = "Coupon.is_valid('123456')"
+expect = "True"
+[[problem.tests]]
+call = "Coupon.is_valid('12ab56')"
+expect = "False"
+[[problem.tests]]
+call = "Coupon.is_valid('123')"
+expect = "False"
+
+[[problem]]
+id = "mro"
+title = "Which method wins?"
+level = "Medium"
+story = "Duck inherits from Flyer and then Swimmer, and both define move(). Write Duck so that duck.move() returns both results joined with ' and ', using the MRO order."
+hint = "Call each parent's method by naming the class: Flyer.move(self)."
+starter = '''
+class Flyer:
+    def move(self):
+        return 'fly'
+
+
+class Swimmer:
+    def move(self):
+        return 'swim'
+
+
+class Duck(Flyer, Swimmer):
+    def move(self):
+        pass
+'''
+solution = '''
+class Flyer:
+    def move(self):
+        return 'fly'
+
+
+class Swimmer:
+    def move(self):
+        return 'swim'
+
+
+class Duck(Flyer, Swimmer):
+    def move(self):
+        return Flyer.move(self) + ' and ' + Swimmer.move(self)
+'''
+demo = '''
+print(Duck().move())
+'''
+[[problem.tests]]
+call = "Duck().move()"
+expect = "'fly and swim'"
+[[problem.tests]]
+call = "[c.__name__ for c in Duck.__mro__]"
+expect = "['Duck', 'Flyer', 'Swimmer', 'object']"

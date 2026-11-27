@@ -1,0 +1,87 @@
+topic = "03"
+
+[[problem]]
+id = "pal"
+title = "Palindrome check"
+level = "Easy"
+story = "Write is_palindrome(word) that returns True when the word reads the same backwards, ignoring capital letters."
+hint = "word[::-1] is the word reversed. Lower-case it first."
+starter = '''
+def is_palindrome(word):
+    pass
+'''
+solution = '''
+def is_palindrome(word):
+    word = word.lower()
+    return word == word[::-1]
+'''
+demo = '''
+print(is_palindrome('Level'))
+'''
+[[problem.tests]]
+call = "is_palindrome('Level')"
+expect = "True"
+[[problem.tests]]
+call = "is_palindrome('python')"
+expect = "False"
+[[problem.tests]]
+call = "is_palindrome('a')"
+expect = "True"
+
+[[problem]]
+id = "vowels"
+title = "Count the vowels"
+level = "Easy"
+story = "Write count_vowels(text) that counts how many of the letters a, e, i, o, u appear, in either case."
+hint = "Loop over text.lower() and test each letter with in 'aeiou'."
+starter = '''
+def count_vowels(text):
+    pass
+'''
+solution = '''
+def count_vowels(text):
+    count = 0
+    for ch in text.lower():
+        if ch in 'aeiou':
+            count = count + 1
+    return count
+'''
+demo = '''
+print(count_vowels('Banana'))
+'''
+[[problem.tests]]
+call = "count_vowels('Banana')"
+expect = "3"
+[[problem.tests]]
+call = "count_vowels('sky')"
+expect = "0"
+[[problem.tests]]
+call = "count_vowels('AEIOU')"
+expect = "5"
+
+[[problem]]
+id = "initials"
+title = "Make initials"
+level = "Medium"
+story = "Write initials(name) that returns the first letter of each word, in capitals, each followed by a dot. 'ada lovelace' becomes 'A.L.'."
+hint = "name.split() gives a list of words. word[0] is the first letter."
+starter = '''
+def initials(name):
+    pass
+'''
+solution = '''
+def initials(name):
+    result = ''
+    for word in name.split():
+        result = result + word[0].upper() + '.'
+    return result
+'''
+demo = '''
+print(initials('ada lovelace'))
+'''
+[[problem.tests]]
+call = "initials('ada lovelace')"
+expect = "'A.L.'"
+[[problem.tests]]
+call = "initials('Guido van Rossum')"
+expect = "'G.V.R.'"
