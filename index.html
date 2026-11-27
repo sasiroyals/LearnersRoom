@@ -1,4 +1,4 @@
-<title>Sasi Code Studio</title>
+<title>Learners Room</title>
 <meta name="claude:viewport-fit-sides" content="cover">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;600;700&family=Space+Grotesk:wght@500;600;700&display=swap">
@@ -42,7 +42,7 @@ button:focus-visible,a:focus-visible,[tabindex]:focus-visible{outline:2px solid 
 
 /* header */
 .top{display:flex;align-items:center;gap:12px;padding-block:10px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));background:var(--surface);border-bottom:1px solid var(--line);flex-wrap:wrap}
-.brand{font-family:var(--f-display);font-weight:700;font-size:17px;letter-spacing:-.01em;display:flex;align-items:center;gap:8px;margin-right:4px}
+.brand{border:0;background:transparent;color:var(--ink);padding:4px 6px 4px 0;border-radius:8px;cursor:pointer;font-family:var(--f-display);font-weight:700;font-size:17px;letter-spacing:-.01em;display:flex;align-items:center;gap:8px;margin-right:4px}
 .brand-mark{width:22px;height:22px;border-radius:6px;background:var(--ref);display:grid;place-items:center;color:var(--on-ref);font:700 12px var(--f-mono)}
 .tabs{display:flex;gap:2px;padding:3px;background:var(--bg);border-radius:9px}
 .tab{border:0;background:transparent;padding:6px 14px;border-radius:7px;font-weight:600;color:var(--muted)}
@@ -378,7 +378,7 @@ button:focus-visible,a:focus-visible,[tabindex]:focus-visible{outline:2px solid 
 
 <div class="app" id="app">
   <header class="top">
-    <div class="brand"><span class="brand-mark">{}</span><span class="brand-name">Sasi Code Studio</span></div>
+    <button type="button" class="brand" id="brand-home" title="Go to the first lesson" aria-label="Learners Room: go to the first lesson"><span class="brand-mark">{}</span><span class="brand-name">Learners Room</span></button>
     <div class="tabs" role="tablist" aria-label="Language">
       <button class="tab" role="tab" id="tab-py" data-lang="py">Python</button>
       <button class="tab" role="tab" id="tab-java" data-lang="java">Java</button>
@@ -3376,6 +3376,15 @@ function renderTLCode(ranLine, isRecap){
     : `<p class="vnote" style="font-size:14px;color:var(--ink)">This lesson has no decisions: each line runs once, top to bottom.</p>${L0.topic ? '' : '<p class="vnote">The question to ask at each line is "which slot?". Read the index, count from 0 (or back from the end for a negative index), and check that the slot exists.</p>'}`;
 }
 
+/* home: the brand goes to the first lesson */
+function firstLesson(lg){ const B = BUILT[lg]; const t = CURRICULUM[lg].find(t=>B[t.n] && B[t.n].length); return t ? B[t.n][0] : 'alias'; }
+$('#brand-home').onclick = ()=>{
+  if(mode!=='lesson') setMode('lesson');
+  openTopics[lang].clear();
+  openLesson(firstLesson(lang));
+  const o = $('#outline'); if(o) o.scrollTop = 0;
+  window.scrollTo(0,0);
+};
 function setLang(lg, animate=true){
   lang = lg; store.set('cs.lang', lg);
   document.querySelectorAll('.tab[data-lang]').forEach(t=>{ t.setAttribute('aria-selected', t.dataset.lang===lg); t.tabIndex = t.dataset.lang===lg?0:-1; });
@@ -3385,10 +3394,10 @@ function setLang(lg, animate=true){
   else render(animate);
 }
 document.querySelectorAll('.tab[data-lang]').forEach(t=> t.onclick = ()=> setLang(t.dataset.lang));
-document.querySelectorAll('[data-pick]').forEach(b=> b.onclick = ()=>{ $('#chooser').hidden = true; setLang(b.dataset.pick); $('#b-next').focus(); });
+document.querySelectorAll('[data-pick]').forEach(b=> b.onclick = ()=>{ $('#chooser').hidden = true; setLang(b.dataset.pick); if(lang==='py') openLesson(firstLesson('py')); const bn = $('#b-next'); bn && bn.focus(); });
 
 if(lang!=='py' && lang!=='java'){ lang='py'; setLang('py', false); $('#chooser').hidden = false; document.querySelector('[data-pick]').focus(); }
-else setLang(lang, true);
+else { setLang(lang, true); if(lang==='py') openLesson(firstLesson('py')); }
 setView(0,false);
 let wasNarrow = matchMedia('(max-width:760px)').matches;
 window.addEventListener('resize', ()=>{ const v=$('#views'); v.scrollLeft = viewIdx*v.clientWidth; const n = matchMedia('(max-width:760px)').matches; if(n!==wasNarrow){ wasNarrow=n; render(false); } });
