@@ -7,12 +7,12 @@ function setLang(lg, animate=true){
   document.querySelectorAll('.tab[data-lang]').forEach(t=>{ t.setAttribute('aria-selected', t.dataset.lang===lg); t.tabIndex = t.dataset.lang===lg?0:-1; });
   renderOutline();
   if(mode==='home'){ renderHome(); return; }
+  if(mode==='auth') return;
   if(typeof mode!=='undefined' && mode==='practice') renderPractice();
   else if(lessonId!=='alias'){ if(lg==='py') renderTL(); else openLesson('alias'); }
   else render(animate);
 }
 document.querySelectorAll('.tab[data-lang]').forEach(t=> t.onclick = ()=> setLang(t.dataset.lang));
-document.querySelectorAll('[data-pick]').forEach(b=> b.onclick = ()=>{ $('#chooser').hidden = true; setLang(b.dataset.pick); if(lang==='py') openLesson(firstLesson('py')); const bn = $('#b-next'); bn && bn.focus(); });
 
 if(lang!=='py' && lang!=='java') lang = 'py';
 setLang(lang, false);

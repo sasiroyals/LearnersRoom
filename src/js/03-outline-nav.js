@@ -19,7 +19,7 @@ function renderOutline(){
     h += `<div class="topic${built.length?'':' later'}"><button class="topic-btn" aria-expanded="${open}" data-topic="${t.n}"><span class="tnum">${t.n}</span><span>${esc(t.t)}</span><span class="tcount" title="${done} of ${total} complete${built.length?'':', not built yet'}">${built.length ? done+'/'+total : '·'}</span></button>`;
     h += `<ul class="subs"${open?'':' hidden'}>` + subs.map(s=> s.lesson
       ? `<li><button class="sub${s.lesson===lessonId?' active':''}${hasTrophy(lang, s.lesson)?' done':''}"${s.lesson===lessonId?' aria-current="page"':''} data-lesson="${s.lesson}">${esc(s.title)}</button></li>`
-      : `<li><button class="sub" disabled>${esc(s)}<span class="soon">planned</span></button></li>`).join('') + `<li class="book">Book: ${esc(t.book)}</li></ul></div>`;
+      : `<li><button class="sub" disabled>${esc(s)}<span class="soon">planned</span></button></li>`).join('') + `</ul></div>`;
   });
   $('#outline').innerHTML = h;
   $('#outline').querySelectorAll('.topic-btn').forEach(b=> b.onclick = ()=>{ const ul=b.nextElementSibling; ul.hidden=!ul.hidden; b.setAttribute('aria-expanded', !ul.hidden); openTopics[lang][ul.hidden?'delete':'add'](b.dataset.topic); });
