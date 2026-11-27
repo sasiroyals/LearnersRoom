@@ -695,3 +695,5 @@ button:focus-visible,a:focus-visible,[tabindex]:focus-visible{outline:2px solid 
 .prob-note code{font:600 12px var(--f-mono)}
 .lib-def{font:700 10px var(--f-mono);color:var(--muted);border:1px solid var(--line);border-radius:5px;padding:0 4px;margin-left:auto}
 .java-soon{margin:0 0 12px;font-size:12.5px;line-height:1.5;color:var(--ink);background:var(--val-bg);border:1px solid var(--val-stroke);border-radius:8px;padding:8px 10px}
+.demo-head{margin:10px 0 2px;padding:4px 10px;font:600 11.5px var(--f-body);color:var(--muted);border-top:1px dashed var(--line)}
+.ln.demo:not(.active):not(.err){opacity:.6}
